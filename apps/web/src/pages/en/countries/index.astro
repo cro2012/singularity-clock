@@ -1,0 +1,19 @@
+---
+import Section from '../../../layouts/Section.astro';
+import { Countries } from '../../../components/Countries.tsx';
+import { MESSAGES } from '@sc/i18n';
+
+const t = MESSAGES['en'];
+const now = Date.now();
+---
+
+<Section
+  locale="en"
+  section="countries"
+  title="Country ranking and race index"
+  description="Seven components of AI leadership with adjustable weights, and a Herfindahl–Hirschman race index."
+  heading={t.nav.countries}
+  lede=undefined
+>
+  <Countries client:load locale="en" now={now} />
+</Section>

@@ -51,6 +51,137 @@ export const ru = {
   controlsSingularity: 'Допущения о скорости',
   controlsRisk: 'Допущения о риске',
 
+  chart: {
+    asChart: 'График',
+    asTable: 'Таблица',
+    year: 'Год',
+    horizon: 'Горизонт',
+    metrPoint: 'Точка METR',
+    minutes: 'мин',
+    today: 'сегодня',
+    by: 'к',
+    horizonTitle: 'Горизонт автономной задачи и его экстраполяция',
+    horizonSubtitle:
+      'Точки — оценки METR (до 2025 приблизительные, методика TH1/TH1.1). Линия закреплена в последней точке и построена по вашему времени удвоения — она не подогнана под историю, поэтому и расходится с ранними точками. Шкала логарифмическая: прямая = экспонента.',
+    horizonSummary:
+      'Опорная точка {anchor}, время удвоения {doubling} дней. Выбранный порог {target} достигается в {date}.',
+    horizonReadout: '{date}: горизонт {horizon}',
+    riskTitle: 'Накопленная вероятность события каждого уровня',
+    riskSubtitle:
+      'P(событие этого уровня или хуже произошло к году t), считая с сегодняшнего дня. Каждая кривая включает всё, что выше по лестнице, поэтому нижняя всегда лежит над верхней. Плато справа — следствие окна уязвимости: пережили переход — риск падает.',
+    riskSummaryPrefix: 'Накопленная вероятность к 2050 и 2100 годам:',
+  },
+  keyboardHint: 'График фокусируется с клавиатуры: стрелки двигают курсор, Shift — шаг в десять лет, Esc убирает.',
+
+  nav: {
+    home: 'Счётчики',
+    singularity: 'Сингулярность',
+    catastrophe: 'Лестница катастроф',
+    triggers: 'Триггеры',
+    countries: 'Страны',
+    model: 'Как это считается',
+  },
+  navLabel: 'Разделы',
+  scenarioKept: 'Сценарий сохраняется при переходе между разделами.',
+
+  items: {
+    functionColumn: 'Вид деятельности',
+    industryColumn: 'Отрасль',
+    progress: 'Прогресс',
+    overtaken: 'Обгон',
+    difficulty: 'Коэффициент сложности',
+    lag: 'Лаг внедрения',
+    years: 'лет',
+    progressValue: 'Полоса',
+    estimateNote:
+      'Оценка: {date}, {relative}. Коэффициент и лаг — экспертное суждение, а не измерение.',
+    inThePast: 'уже позади',
+    inTheFuture: 'ещё впереди',
+    functionsTitle: 'По видам мыслительной деятельности',
+    industriesTitle: 'По отраслям и профессиям',
+    howComputed: 'Как считается дата для каждой строки',
+    formulaNote:
+      'Горизонт METR измерен на задачах программной инженерии. Для остального задан коэффициент сложности относительно этой базы — во сколько раз более длинную цепочку рассуждений требует область, — и лаг внедрения в годах: время на железо, капитал, доверие и регуляторов после того, как способность технически появилась. Коэффициенты — экспертное суждение автора модели. Это самое слабое место всей конструкции, и оно ровно там, где вам, скорее всего, захочется спорить. Так и задумано.',
+  },
+
+  tiers: {
+    median: 'медиана',
+    noMedian: 'P < 50% до конца горизонта',
+    pBy: 'P к',
+    deaths: 'жертвы',
+    damage: 'ущерб',
+    nestedNote:
+      'Каждая ступень — вероятность события этого уровня или хуже, поэтому нижняя всегда выше верхней. 34% локального включают в себя 3% глобального, а не идут вместо них.',
+    formulaTitle: 'Формула интенсивности риска',
+    formulaNote:
+      'cᵢ(t) — способность: логистическая функция от логарифма горизонта относительно порога ступени. d(t) — подключённость, насыщающаяся экспонента. eᵢ — потолок эффективности митигации: 0,80 для локального, 0,60 для регионального, 0,45 для глобального. aᵢ(t) — затухание после насыщения способностей. Итог: P = 1 − exp(−∫λ dt), шаг интегрирования — год.',
+    formulaHonesty:
+      'Обратите внимание, что произведение четырёх множителей, каждый из которых вы задали на глаз, даёт величину с точностью в лучшем случае порядка. Все знаки после запятой в датах — вежливая ложь интерфейса.',
+  },
+
+  triggers: {
+    accelerating: 'Разгоняющие',
+    calming: 'Успокаивающие',
+    intro:
+      'Наблюдаемые события, каждое из которых сдвигает модель. Отмечайте то, что, по-вашему, уже произошло, — и смотрите, как прыгают даты. Это, пожалуй, единственная честная часть конструкции: не прогноз, а список того, за чем осмысленно следить. Автоматически здесь не включается ничего: отметка — ваше суждение.',
+  },
+
+  countries: {
+    intro:
+      'Семь компонентов, каждый нормирован в 0–100. Итог — взвешенная сумма, и веса задаёте вы. Это не украшение: вся содержательная разница между публичными индексами AI-лидерства сводится к весам, и прятать это было бы нечестно.',
+    provisionalTitle: 'Данные не выверены.',
+    provisional:
+      'Баллы в таблице — заготовка под структуру рейтинга, а не измерение. До сверки с AI Index, Tortoise и OECD ни числа, ни порядок мест ничего не значат. Связь с моделью риска по этой причине выключена по умолчанию.',
+    equalWeights: 'Равные веса',
+    tableCaption: 'Рейтинг стран по AI-лидерству',
+    country: 'Страна',
+    score: 'Балл',
+    breakdown: 'Доля от лидера',
+    raceTitle: 'Индекс гонки',
+    raceNote:
+      'Концентрация лидерства по Херфиндалю–Хиршману на топ-5. Единица — пятеро равных, ноль — один доминирующий игрок.',
+    geopoliticsToggle: 'Учитывать геополитику в модели риска',
+    geopoliticsNote:
+      'Допущение автора модели, а не установленный факт: чем ровнее гонка, тем труднее договориться. При включении потолок митигации умножается на (1 − {penalty} · индекс гонки), сейчас это −{effect}.',
+    components: {
+      research: 'Исследования',
+      patents: 'Патенты и ИС',
+      talent: 'Талант',
+      infrastructure: 'Инфраструктура',
+      investment: 'Инвестиции',
+      commercialization: 'Коммерциализация',
+      governance: 'Управление и регулирование',
+    },
+    componentHints: {
+      research: 'Публикации, цитируемость, доля на топ-конференциях.',
+      patents: 'Заявки, выданные патенты, доля в мировом объёме.',
+      talent: 'Численность исследователей, приток и отток.',
+      infrastructure: 'Доступный компьют, дата-центры, доступ к передовым чипам.',
+      investment: 'Частные и государственные вложения, число сделок.',
+      commercialization: 'Компании, выручка, проникновение в экономику.',
+      governance: 'Зрелость регулирования, институты оценки, участие в договорах.',
+    },
+    names: {
+      USA: 'США',
+      CHN: 'Китай',
+      GBR: 'Великобритания',
+      KOR: 'Южная Корея',
+      DEU: 'Германия',
+      FRA: 'Франция',
+      JPN: 'Япония',
+      CAN: 'Канада',
+      ISR: 'Израиль',
+      IND: 'Индия',
+      SGP: 'Сингапур',
+      NLD: 'Нидерланды',
+    } as Record<string, string>,
+  },
+
+  singularityIntro:
+    'Определение здесь операциональное, а не мистическое: сингулярность наступила, когда ИИ выполняет самостоятельно, без человека в цикле, задачу заданной длины в заданной доле видов деятельности. Никакого «пробуждения сознания» — только момент, после которого прогнозировать экономику по человеческому труду становится бессмысленно.',
+  catastropheIntro:
+    '«Апокалипсис» — не событие, а шкала. Три порога, у каждого свой критерий, своя вероятность и свой доминирующий механизм: внизу лестницы правит злой умысел человека, наверху — отказ контроля. Модель считает не дату, а интенсивность риска λ(t), из неё — накопленную вероятность и медианную дату.',
+
   expectedTitle: 'Математическое ожидание к {year} году',
   expectedDeaths:
     'ожидаемое число погибших: сумма по трём уровням, вероятность × геометрическое среднее диапазона',
@@ -167,6 +298,137 @@ export const en: Messages = {
 
   controlsSingularity: 'Assumptions about speed',
   controlsRisk: 'Assumptions about risk',
+
+  chart: {
+    asChart: 'Chart',
+    asTable: 'Table',
+    year: 'Year',
+    horizon: 'Horizon',
+    metrPoint: 'METR point',
+    minutes: 'min',
+    today: 'today',
+    by: 'by',
+    horizonTitle: 'The autonomous task horizon and its extrapolation',
+    horizonSubtitle:
+      'Points are METR estimates (pre-2025 approximate, methodology TH1/TH1.1). The line is anchored at the latest point and drawn from your doubling time — it is not fitted to history, which is why it diverges from the early points. The scale is logarithmic: a straight line is an exponential.',
+    horizonSummary:
+      'Anchor {anchor}, doubling time {doubling} days. The selected threshold of {target} is reached in {date}.',
+    horizonReadout: '{date}: horizon {horizon}',
+    riskTitle: 'Cumulative probability of an event at each level',
+    riskSubtitle:
+      'P(an event at this level or worse has occurred by year t), counting from today. Each curve includes everything above it on the ladder, so the bottom rung always sits above the top one. The plateau on the right follows from the window of vulnerability: survive the transition and risk falls.',
+    riskSummaryPrefix: 'Cumulative probability by 2050 and 2100:',
+  },
+  keyboardHint: 'The chart is keyboard focusable: arrows move the cursor, Shift jumps ten years, Esc clears it.',
+
+  nav: {
+    home: 'Counters',
+    singularity: 'Singularity',
+    catastrophe: 'Ladder of catastrophes',
+    triggers: 'Triggers',
+    countries: 'Countries',
+    model: 'How it is computed',
+  },
+  navLabel: 'Sections',
+  scenarioKept: 'Your scenario is carried across sections.',
+
+  items: {
+    functionColumn: 'Kind of activity',
+    industryColumn: 'Industry',
+    progress: 'Progress',
+    overtaken: 'Overtaken',
+    difficulty: 'Difficulty coefficient',
+    lag: 'Deployment lag',
+    years: 'years',
+    progressValue: 'Bar',
+    estimateNote:
+      'Estimate: {date}, {relative}. The coefficient and the lag are expert judgement, not measurement.',
+    inThePast: 'already behind us',
+    inTheFuture: 'still ahead',
+    functionsTitle: 'By kind of cognitive activity',
+    industriesTitle: 'By industry and profession',
+    howComputed: 'How each row gets its date',
+    formulaNote:
+      "METR's horizon is measured on software engineering tasks. Everything else gets a difficulty coefficient relative to that base — how many times longer a chain of reasoning the domain demands — and a deployment lag in years: the time for hardware, capital, trust and regulators after the capability technically exists. The coefficients are the author's expert judgement. This is the weakest point of the whole construction, and it is exactly where you will most likely want to argue. That is the intent.",
+  },
+
+  tiers: {
+    median: 'median',
+    noMedian: 'P < 50% within the horizon',
+    pBy: 'P by',
+    deaths: 'deaths',
+    damage: 'damage',
+    nestedNote:
+      'Each rung is the probability of an event at that level or worse, so the bottom rung always sits above the top one. 34% local includes the 3% global, it does not replace it.',
+    formulaTitle: 'The risk intensity formula',
+    formulaNote:
+      'cᵢ(t) is capability: a logistic function of the log horizon relative to the rung threshold. d(t) is wiring, a saturating exponential. eᵢ is the mitigation ceiling: 0.80 local, 0.60 regional, 0.45 global. aᵢ(t) is decay after capability saturation. Result: P = 1 − exp(−∫λ dt), integrated in yearly steps.',
+    formulaHonesty:
+      'Note that a product of four multipliers, each of which you set by eye, yields a quantity accurate to an order of magnitude at best. Every decimal place in these dates is a polite lie told by the interface.',
+  },
+
+  triggers: {
+    accelerating: 'Accelerating',
+    calming: 'Calming',
+    intro:
+      'Observable events, each of which moves the model. Tick what you believe has already happened and watch the dates jump. This is arguably the only honest part of the construction: not a forecast, but a list of what is worth watching. Nothing is ever ticked automatically — the mark is your judgement.',
+  },
+
+  countries: {
+    intro:
+      'Seven components, each normalised to 0–100. The total is a weighted sum, and you set the weights. That is not decoration: the entire substantive difference between public AI-leadership indices comes down to weights, and hiding that would be dishonest.',
+    provisionalTitle: 'These figures are not verified.',
+    provisional:
+      'The scores in this table are a placeholder for the structure of the ranking, not a measurement. Until they are reconciled with AI Index, Tortoise and OECD, neither the numbers nor the ordering mean anything. For that reason the link to the risk model is off by default.',
+    equalWeights: 'Equal weights',
+    tableCaption: 'Country ranking by AI leadership',
+    country: 'Country',
+    score: 'Score',
+    breakdown: 'Share of the leader',
+    raceTitle: 'Race index',
+    raceNote:
+      'Herfindahl–Hirschman concentration of leadership across the top five. One means five equals, zero means a single dominant player.',
+    geopoliticsToggle: 'Account for geopolitics in the risk model',
+    geopoliticsNote:
+      "The author's assumption, not an established fact: the tighter the race, the harder it is to agree. When on, the mitigation ceiling is multiplied by (1 − {penalty} × race index), currently −{effect}.",
+    components: {
+      research: 'Research',
+      patents: 'Patents and IP',
+      talent: 'Talent',
+      infrastructure: 'Infrastructure',
+      investment: 'Investment',
+      commercialization: 'Commercialisation',
+      governance: 'Governance and regulation',
+    },
+    componentHints: {
+      research: 'Publications, citations, share at top conferences.',
+      patents: 'Applications, grants, share of the world total.',
+      talent: 'Researcher headcount, inflow and outflow.',
+      infrastructure: 'Available compute, data centres, access to frontier chips.',
+      investment: 'Private and public funding, deal count.',
+      commercialization: 'Companies, revenue, penetration into the economy.',
+      governance: 'Regulatory maturity, evaluation institutions, treaty participation.',
+    },
+    names: {
+      USA: 'United States',
+      CHN: 'China',
+      GBR: 'United Kingdom',
+      KOR: 'South Korea',
+      DEU: 'Germany',
+      FRA: 'France',
+      JPN: 'Japan',
+      CAN: 'Canada',
+      ISR: 'Israel',
+      IND: 'India',
+      SGP: 'Singapore',
+      NLD: 'Netherlands',
+    },
+  },
+
+  singularityIntro:
+    'The definition here is operational, not mystical: singularity has arrived when AI completes, unaided and with no human in the loop, a task of a given length across a given share of activities. No "awakening of consciousness" — only the point past which forecasting the economy in terms of human labour stops making sense.',
+  catastropheIntro:
+    '"Apocalypse" is not an event but a scale. Three thresholds, each with its own criterion, its own probability and its own dominant mechanism: human malice rules the bottom of the ladder, control failure the top. The model computes not a date but a risk intensity, and from it a cumulative probability and a median date.',
 
   expectedTitle: 'Expected value by {year}',
   expectedDeaths:

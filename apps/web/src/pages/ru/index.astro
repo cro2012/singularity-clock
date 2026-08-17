@@ -1,43 +1,19 @@
 ---
-import Base from '../../layouts/Base.astro';
-import { MODEL_CONFIG as config } from '../../model-config.ts';
-import { Screen } from '../../components/Screen.tsx';
-import '@sc/ui/app.css';
+import Section from '../../layouts/Section.astro';
+import { Home } from '../../components/Home.tsx';
+import { MESSAGES } from '@sc/i18n';
 
-// Модель считается на этапе сборки и попадает в HTML готовыми числами;
-// гидратация оживляет ползунки и подставляет настоящее время.
+const t = MESSAGES['ru'];
 const now = Date.now();
-const anchor = new Date(config.anchor.at);
 ---
 
-<Base
+<Section
   locale="ru"
+  section="home"
   title="Часы Сингулярности — обратный отсчёт"
   description="Два обратных отсчёта из одной экстраполяции: до сингулярности и до катастрофы. Дата не результат — результат её чувствительность к допущениям."
+  heading="Часы Сингулярности и Лестница Катастроф"
+  lede={t.lede}
 >
-  <header>
-    <p class="eyebrow">Полушуточный прогнозный аппарат · v{config.version}</p>
-    <h1>Часы Сингулярности и Лестница Катастроф</h1>
-    <p class="lede">
-      Два обратных отсчёта, посчитанных из одной экстраполяции: горизонта автономных задач METR.
-      Всё, что вы видите ниже, — <em>оформленное суждение, а не измерение будущего</em>. Крутите
-      ползунки: если дата легко сдвигается на двадцать лет, значит она никогда и не была прогнозом.
-    </p>
-  </header>
-
-  <Screen client:load locale="ru" now={now} />
-
-  <footer>
-    <p>
-      Опорная точка экстраполяции: 50%-горизонт <b>{config.anchor.horizonMinutes}</b> минут,
-      {config.anchor.model}, {anchor.getUTCFullYear()} (METR, TH1.1). Коэффициенты сложности, лаги
-      внедрения и веса ступеней — экспертное суждение, не измерение.
-    </p>
-    <div class="srcs">
-      <a href="https://metr.org/blog/2026-1-29-time-horizon-1-1/">METR · Time Horizon 1.1</a>
-      <a href="https://metr.org/time-horizons/">METR · Task-Completion Time Horizons</a>
-      <a href="https://hai.stanford.edu/ai-index/2026-ai-index-report">Stanford HAI · AI Index 2026</a>
-      <a href="https://incidentdatabase.ai/">AI Incident Database</a>
-    </div>
-  </footer>
-</Base>
+  <Home client:load locale="ru" now={now} />
+</Section>

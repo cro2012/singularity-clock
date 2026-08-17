@@ -1,0 +1,19 @@
+---
+import Section from '../../../layouts/Section.astro';
+import { Triggers } from '../../../components/Triggers.tsx';
+import { MESSAGES } from '@sc/i18n';
+
+const t = MESSAGES['ru'];
+const now = Date.now();
+---
+
+<Section
+  locale="ru"
+  section="triggers"
+  title="Панель триггеров — за чем следить"
+  description="Наблюдаемые события, каждое из которых сдвигает модель. Разгоняющие и успокаивающие."
+  heading={t.nav.triggers}
+  lede=undefined
+>
+  <Triggers client:load locale="ru" now={now} />
+</Section>

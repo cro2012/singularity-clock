@@ -1,0 +1,19 @@
+---
+import Section from '../../../layouts/Section.astro';
+import { Singularity } from '../../../components/Singularity.tsx';
+import { MESSAGES } from '@sc/i18n';
+
+const t = MESSAGES['en'];
+const now = Date.now();
+---
+
+<Section
+  locale="en"
+  section="singularity"
+  title="Singularity — extrapolating the METR horizon"
+  description="When AI overtakes the median professional: extrapolating the autonomous task horizon across 12 activities and 18 industries."
+  heading={t.nav.singularity}
+  lede={t.singularityIntro}
+>
+  <Singularity client:load locale="en" now={now} />
+</Section>

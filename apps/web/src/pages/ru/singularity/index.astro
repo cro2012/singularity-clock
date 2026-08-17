@@ -1,0 +1,19 @@
+---
+import Section from '../../../layouts/Section.astro';
+import { Singularity } from '../../../components/Singularity.tsx';
+import { MESSAGES } from '@sc/i18n';
+
+const t = MESSAGES['ru'];
+const now = Date.now();
+---
+
+<Section
+  locale="ru"
+  section="singularity"
+  title="Сингулярность — экстраполяция горизонта METR"
+  description="Когда ИИ обгонит медианного профессионала: экстраполяция горизонта автономных задач по 12 видам деятельности и 18 отраслям."
+  heading={t.nav.singularity}
+  lede={t.singularityIntro}
+>
+  <Singularity client:load locale="ru" now={now} />
+</Section>

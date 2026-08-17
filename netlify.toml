@@ -1,4 +1,6 @@
-# Деплой: Netlify. Обоснование и отменённый выбор Cloudflare — docs/adr/0004-hosting-netlify.md
+# Деплой: Netlify. Обоснование и отменённый выбор Cloudflare —
+# docs/adr/0004-hosting-netlify.md
+
 [build]
   command = "pnpm build"
   publish = "apps/web/dist"
@@ -9,8 +11,12 @@
 [functions]
   directory = "apps/web/netlify/functions"
   node_bundler = "esbuild"
+  # sharp — нативный модуль, esbuild его не бандлит; шрифты и конфиг модели
+  # функция читает с диска, поэтому их надо положить рядом.
+  external_node_modules = ["sharp"]
+  included_files = ["apps/web/netlify/functions/assets/**"]
 
-# Короткий адрес картинки: /og?s=...&v=... вместо /.netlify/functions/og
+# Короткий адрес картинки: /og?s=…&l=… вместо /.netlify/functions/og
 [[redirects]]
   from = "/og"
   to = "/.netlify/functions/og"

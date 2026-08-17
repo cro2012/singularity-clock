@@ -1,0 +1,19 @@
+---
+import Section from '../../../layouts/Section.astro';
+import { Catastrophe } from '../../../components/Catastrophe.tsx';
+import { MESSAGES } from '@sc/i18n';
+
+const t = MESSAGES['ru'];
+const now = Date.now();
+---
+
+<Section
+  locale="ru"
+  section="catastrophe"
+  title="Лестница катастроф — три ступени риска"
+  description="Локальный, региональный и глобальный уровни: интенсивность риска, накопленная вероятность и медианные даты."
+  heading={t.nav.catastrophe}
+  lede={t.catastropheIntro}
+>
+  <Catastrophe client:load locale="ru" now={now} />
+</Section>

@@ -40,9 +40,10 @@ export function computeModel(args: ComputeArgs): ModelResult {
 
   // --- строки разбивки ---
   const itemCtx: ItemContext = { anchor, assumptions, effective, constants, now };
-  const items: readonly ItemResult[] = [...config.functions, ...config.industries]
-    .map((item) => itemResult(item, itemCtx))
-    .sort((a, b) => a.date - b.date);
+  const items: readonly ItemResult[] = [
+    ...config.functions.map((item) => itemResult(item, 'function', itemCtx)),
+    ...config.industries.map((item) => itemResult(item, 'industry', itemCtx)),
+  ].sort((a, b) => a.date - b.date);
 
   // --- сингулярность: перцентиль по датам, а не отдельная формула ---
   // Головной счётчик выводится из разбивки, поэтому в него всегда можно ткнуть

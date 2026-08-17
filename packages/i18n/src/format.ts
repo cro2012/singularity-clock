@@ -84,6 +84,30 @@ export function endSentence(text: string): string {
   return text.endsWith('.') ? text : `${text}.`;
 }
 
+const HORIZON_UNITS: Record<Locale, { min: string; hour: string; day: string; month: string; year: string }> = {
+  ru: { min: 'мин', hour: 'ч', day: 'дн.', month: 'мес.', year: 'лет' },
+  en: { min: 'min', hour: 'h', day: 'd', month: 'mo', year: 'yr' },
+};
+
+/**
+ * Горизонт задачи в человеческих единицах.
+ *
+ * Считается рабочее время, а не календарное: рабочий день — 8 часов, месяц —
+ * четыре рабочие недели. Иначе «1 год = 115 200 минут» читается как ошибка.
+ */
+export function formatHorizon(locale: Locale, minutes: number): string {
+  const u = HORIZON_UNITS[locale];
+  const one = (value: number, unit: string, digits = 1) =>
+    `${formatNumber(locale, value, { maximumFractionDigits: digits })} ${unit}`;
+
+  if (!Number.isFinite(minutes)) return '∞';
+  if (minutes < 60) return one(minutes, u.min, minutes < 10 ? 1 : 0);
+  if (minutes < 480) return one(minutes / 60, u.hour);
+  if (minutes < 9600) return one(minutes / 480, u.day);
+  if (minutes < 115200) return one(minutes / 9600, u.month);
+  return one(minutes / 115200, u.year);
+}
+
 export interface Countdown {
   readonly kind: 'future' | 'past' | 'never';
   /** Крупная строка: «14 лет 212 дней». */

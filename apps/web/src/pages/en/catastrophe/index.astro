@@ -1,0 +1,19 @@
+---
+import Section from '../../../layouts/Section.astro';
+import { Catastrophe } from '../../../components/Catastrophe.tsx';
+import { MESSAGES } from '@sc/i18n';
+
+const t = MESSAGES['en'];
+const now = Date.now();
+---
+
+<Section
+  locale="en"
+  section="catastrophe"
+  title="Ladder of catastrophes — three rungs of risk"
+  description="Local, regional and global levels: risk intensity, cumulative probability and median dates."
+  heading={t.nav.catastrophe}
+  lede={t.catastropheIntro}
+>
+  <Catastrophe client:load locale="en" now={now} />
+</Section>

@@ -11,7 +11,14 @@
 
 import { dateForLog2Horizon, log2HorizonAt, type Anchor } from './horizon.ts';
 import { clamp, YEAR_MS } from './time.ts';
-import type { Assumptions, EffectiveParams, Item, ItemResult, ModelConstants } from './types.ts';
+import type {
+  Assumptions,
+  EffectiveParams,
+  Item,
+  ItemKind,
+  ItemResult,
+  ModelConstants,
+} from './types.ts';
 
 export interface ItemContext {
   readonly anchor: Anchor;
@@ -32,7 +39,7 @@ function lagMs(item: Item, ctx: ItemContext): number {
   return item.lag * groupMultiplier * YEAR_MS;
 }
 
-export function itemResult(item: Item, ctx: ItemContext): ItemResult {
+export function itemResult(item: Item, kind: ItemKind, ctx: ItemContext): ItemResult {
   const { anchor, constants, now } = ctx;
   const doublingDays = ctx.effective.doublingDays;
 
@@ -55,6 +62,7 @@ export function itemResult(item: Item, ctx: ItemContext): ItemResult {
 
   return {
     id: item.id,
+    kind,
     date,
     progress: clamp(progress, 0, 1),
     passed: date <= now,

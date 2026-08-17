@@ -189,8 +189,15 @@ export interface EffectiveParams {
   readonly reliabilityFactor: number;
 }
 
+export type ItemKind = 'function' | 'industry';
+
 export interface ItemResult {
   readonly id: string;
+  /**
+   * Идентификатор `software` есть и среди видов деятельности, и среди
+   * отраслей: по одному id строку не отличить, а тексты у них разные.
+   */
+  readonly kind: ItemKind;
   readonly date: number;
   readonly progress: number;
   readonly passed: boolean;

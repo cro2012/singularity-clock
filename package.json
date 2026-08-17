@@ -9,7 +9,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm --filter @sc/web build",
+    "build": "pnpm --filter @sc/web run build:fonts && pnpm --filter @sc/web build",
     "dev": "pnpm --filter @sc/web dev",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",

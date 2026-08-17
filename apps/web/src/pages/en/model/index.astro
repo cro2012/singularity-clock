@@ -1,0 +1,150 @@
+---
+import Section from '../../../layouts/Section.astro';
+import { MODEL_CONFIG as config } from '../../../model-config.ts';
+
+const anchor = new Date(config.anchor.at);
+const c = config.constants;
+---
+
+<Section
+  locale="en"
+  section="model"
+  title="How it is computed — the model, its assumptions and its red lines"
+  description="Formulas, coefficients and rationale behind the Singularity Clock. What is measured here, what is invented, and where the limits of decency run."
+  heading="How it is computed"
+>
+  <div class="prose">
+    <p>
+      The short answer: from one number. Everything this service shows is derived from METR's
+      autonomous task horizon — the length of work a model completes unaided. As of
+      {anchor.getUTCFullYear()} the anchor is <b>{config.anchor.horizonMinutes} minutes</b> at
+      50% success ({config.anchor.model}).
+    </p>
+
+    <h2>What is measured and what is invented</h2>
+    <p>
+      The distinction matters, and it is worth holding in mind the whole time you are moving
+      sliders.
+    </p>
+    <ul>
+      <li>
+        <b>Measured:</b> the historical METR horizon points and the doubling time. External data
+        with a source.
+      </li>
+      <li>
+        <b>Invented:</b> difficulty coefficients, deployment lags, rung weights, trigger
+        multipliers, mitigation ceilings. These are the author's expert judgement. None of these
+        numbers is measured, and none of them can be.
+      </li>
+    </ul>
+    <p>
+      The second group carries the load. That is exactly why every one of its values is exposed as
+      a slider rather than buried in the code: those are the things worth arguing about.
+    </p>
+
+    <h2>Extrapolation</h2>
+    <p>
+      <code>D_eff = doubling time × friction × Π(trigger multipliers)</code><br />
+      <code>log₂H(t) = log₂H₀ + (t − t₀) / D_eff</code>
+    </p>
+    <p>
+      The line is anchored at the latest point, not fitted to history. Two consequences look like
+      bugs and are not: the line diverges from the early METR points, and raising friction pushes
+      future dates to the right while pushing already-passed ones further into the past.
+    </p>
+    <p>
+      The computation runs on the logarithm of the horizon rather than the horizon itself. This is
+      not aesthetics: with the minimum doubling time and two accelerating triggers,
+      <code>2^1590</code> by 2100 overflows a double, and the user would see <code>NaN</code>
+      instead of a date.
+    </p>
+
+    <h2>Dates for the breakdown rows</h2>
+    <p>
+      <code>date = date(coefficient × threshold × reliability) + lag × group multiplier</code>
+    </p>
+    <p>
+      The difficulty coefficient is how many times longer a chain of reasoning a domain demands
+      relative to software engineering, which is what METR measures. The deployment lag is the
+      years for hardware, capital, trust and regulators after the capability technically exists.
+      Raising the bar from 50% to 80% success multiplies the required horizon by
+      {c.reliability80Factor}: per METR, the 80% horizon is roughly five times shorter.
+    </p>
+    <p>
+      The rationale for each coefficient sits inside its row in the Singularity section — expand
+      the row.
+    </p>
+
+    <h2>The ladder of catastrophes</h2>
+    <p>
+      <code>λᵢ(t) = (malice·wᵢ + control failure·uᵢ) · cᵢ(t) · d(t) · (1 − mitigation·eᵢ) · aᵢ(t)</code>
+    </p>
+    <p>
+      Four multipliers, each of which you set by eye. A product of such multipliers is accurate to
+      an order of magnitude at best — every decimal place in these dates is a polite lie told by
+      the interface.
+    </p>
+    <h3>The rungs are nested</h3>
+    <p>
+      A rung's curve is the probability of an event at <b>that level or worse</b>. The bottom rung
+      therefore always sits above the top one: a global catastrophe by definition also clears
+      "≥1,000 dead". In the prototype the rungs were computed independently, and under some
+      assumptions the model claimed extinction was likelier than a local incident. That has been
+      fixed.
+    </p>
+    <h3>The window of vulnerability</h3>
+    <p>
+      The <code>aᵢ(t)</code> multiplier damps risk after capability plateaus: the world learns to
+      live with what has already happened. Without it every curve runs to 100% and the model stops
+      meaning anything. Setting the window slider to 100 years effectively switches the decay off.
+    </p>
+    <h3>The count starts today</h3>
+    <p>
+      Integration begins in the current year, not a fixed one. Otherwise, a few years from now the
+      service would be accumulating risk over years already survived, and every curve would creep
+      upward from the mere passage of time.
+    </p>
+
+    <h2>The Doomsday Clock</h2>
+    <p>
+      <code>minutes to midnight = max({c.doomsday.floorMinutes}; {c.doomsday.scaleMinutes} × (1 − P(global) by {c.doomsday.horizonYear}))</code>
+    </p>
+    <p>
+      Fifteen minutes means global catastrophe is ruled out; midnight means it is certain. The
+      scale is invented here and bears no relation to the real Doomsday Clock of the Bulletin of
+      the Atomic Scientists beyond the visual nod.
+    </p>
+
+    <h2>Red lines</h2>
+    <p>This service deals in casualty figures. That imposes obligations, and they are kept:</p>
+    <ul>
+      <li>no personal predictions and no geotargeted forecasts;</li>
+      <li>
+        no specific company, laboratory or country is named as responsible for future events;
+      </li>
+      <li>
+        the scenarios on the catastrophe cards are described at the level of mechanism —
+        "cascading failure" — with none of the operational detail anyone could read as
+        instructions;
+      </li>
+      <li>triggers are phrased as observable criteria, not as calls to action or predictions.</li>
+    </ul>
+
+    <h2>And the main thing</h2>
+    <p>
+      This apparatus does not predict the future and cannot. An event that has never occurred has
+      no training sample, no validation, and no way to tell a good model from a pretty one. All
+      that happens here is that assumptions get laid out so you can see which one carries the
+      whole load. If the control-failure slider moves the global date by forty years and the
+      doubling-time slider moves it by five, then the argument is about the first one. That is the
+      entire value; the dates are a by-product.
+    </p>
+
+    <h2>Openness</h2>
+    <p>
+      The code is MIT; the model constants and texts are CC BY 4.0. A model whose assumptions
+      cannot be inspected has no claim to being taken seriously, so every coefficient lives in one
+      versioned file and changes through a pull request with a stated rationale.
+    </p>
+  </div>
+</Section>

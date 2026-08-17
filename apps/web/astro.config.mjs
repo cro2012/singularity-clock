@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 
 /**
  * Полностью статическая сборка. Модель считается на этапе сборки и попадает
@@ -8,7 +9,9 @@ import react from '@astrojs/react';
  */
 export default defineConfig({
   output: 'static',
-  integrations: [react()],
+  // site нужен карте сайта: заменить на боевой домен, когда он появится.
+  site: process.env.URL ?? 'https://singularity-clock.netlify.app',
+  integrations: [react(), sitemap()],
   i18n: {
     locales: ['ru', 'en'],
     defaultLocale: 'ru',

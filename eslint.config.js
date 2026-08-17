@@ -86,12 +86,20 @@ export default tseslint.config(
 
   // Скрипты сборки и загрузчики данных исполняются в Node.
   {
-    files: ['scripts/**', 'packages/ui/scripts/**', 'packages/data/**/*.ts', 'eslint.config.js'],
+    files: [
+      'scripts/**',
+      'packages/ui/scripts/**',
+      'packages/data/**/*.ts',
+      'apps/web/scripts/**',
+      'apps/web/netlify/**',
+      'apps/web/astro.config.mjs',
+      'eslint.config.js',
+    ],
     languageOptions: { globals: globals.node },
   },
 
   {
-    files: ['**/*.test.ts', 'packages/ui/scripts/**', 'scripts/**'],
+    files: ['**/*.test.ts', 'packages/ui/scripts/**', 'scripts/**', 'apps/web/scripts/**'],
     rules: { 'no-console': 'off', 'no-restricted-syntax': 'off' },
   },
 

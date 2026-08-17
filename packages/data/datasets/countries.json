@@ -1,0 +1,24 @@
+{
+  "provisional": true,
+  "checkedAt": null,
+  "note": "ЧЕРНОВИК. Баллы расставлены как правдоподобная заготовка под структуру рейтинга и НЕ выверены по источникам. До сверки раздел обязан показывать предупреждение, а связь с моделью риска остаётся выключенной по умолчанию. Заменить цифрами из отчётов и проставить checkedAt.",
+  "sources": [
+    { "id": "hai", "title": "Stanford HAI · AI Index 2026", "url": "https://hai.stanford.edu/ai-index/2026-ai-index-report" },
+    { "id": "tortoise", "title": "Tortoise · Global AI Index", "url": "https://www.tortoisemedia.com/data/global-ai" },
+    { "id": "oecd", "title": "OECD.AI Index", "url": "https://www.oecd.org/" }
+  ],
+  "countries": [
+    { "iso3": "USA", "components": { "research": 96, "patents": 88, "talent": 100, "infrastructure": 100, "investment": 100, "commercialization": 100, "governance": 62 } },
+    { "iso3": "CHN", "components": { "research": 100, "patents": 100, "talent": 82, "infrastructure": 71, "investment": 58, "commercialization": 66, "governance": 55 } },
+    { "iso3": "GBR", "components": { "research": 52, "patents": 31, "talent": 55, "infrastructure": 34, "investment": 33, "commercialization": 42, "governance": 84 } },
+    { "iso3": "KOR", "components": { "research": 42, "patents": 64, "talent": 41, "infrastructure": 46, "investment": 24, "commercialization": 37, "governance": 58 } },
+    { "iso3": "DEU", "components": { "research": 45, "patents": 39, "talent": 46, "infrastructure": 32, "investment": 22, "commercialization": 34, "governance": 79 } },
+    { "iso3": "FRA", "components": { "research": 41, "patents": 28, "talent": 42, "infrastructure": 29, "investment": 26, "commercialization": 31, "governance": 81 } },
+    { "iso3": "JPN", "components": { "research": 38, "patents": 45, "talent": 36, "infrastructure": 31, "investment": 17, "commercialization": 29, "governance": 66 } },
+    { "iso3": "CAN", "components": { "research": 40, "patents": 22, "talent": 44, "infrastructure": 24, "investment": 21, "commercialization": 27, "governance": 74 } },
+    { "iso3": "ISR", "components": { "research": 33, "patents": 26, "talent": 38, "infrastructure": 15, "investment": 30, "commercialization": 40, "governance": 47 } },
+    { "iso3": "IND", "components": { "research": 44, "patents": 20, "talent": 63, "infrastructure": 22, "investment": 19, "commercialization": 26, "governance": 43 } },
+    { "iso3": "SGP", "components": { "research": 29, "patents": 17, "talent": 31, "infrastructure": 27, "investment": 15, "commercialization": 25, "governance": 72 } },
+    { "iso3": "NLD", "components": { "research": 27, "patents": 19, "talent": 28, "infrastructure": 21, "investment": 12, "commercialization": 22, "governance": 77 } }
+  ]
+}
