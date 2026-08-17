@@ -1,0 +1,70 @@
+name: Deploy
+
+# Деплой из main плюс превью на каждый pull request (ТЗ §9.1).
+#
+# Требует двух секретов в настройках репозитория:
+#   CLOUDFLARE_API_TOKEN  — токен с правами Workers Scripts:Edit
+#   CLOUDFLARE_ACCOUNT_ID — идентификатор аккаунта
+# Пока их нет, задание пропускается, а не падает: красный CI на пустом
+# репозитории приучает не смотреть на CI.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'push' && 'production' || 'preview' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Проверить наличие секретов
+        id: secrets
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Секреты Cloudflare не заданы, деплой пропущен."
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.secrets.outputs.configured == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.configured == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        if: steps.secrets.outputs.configured == 'true'
+
+      - run: pnpm build
+        if: steps.secrets.outputs.configured == 'true'
+
+      - name: Сайт
+        if: steps.secrets.outputs.configured == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/web
+          command: >-
+            versions upload
+            ${{ github.event_name == 'push' && '--tag production' || '--tag pr-' }}${{ github.event.number }}
+
+      - name: OG-функция
+        if: steps.secrets.outputs.configured == 'true' && github.event_name == 'push'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/og
+          command: deploy

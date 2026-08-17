@@ -1,0 +1,11 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+
+# Пакеты с нативными бинарниками, которым нужен postinstall.
+# esbuild — сборка Astro/Vite, workerd — локальный рантайм Cloudflare,
+# sharp — оптимизация изображений Astro.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true

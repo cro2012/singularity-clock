@@ -1,0 +1,196 @@
+# Константы модели «Часы Сингулярности».
+#
+# Это экспертные суждения, а не измерения. Каждое изменение — через pull request
+# с обоснованием в описании и правкой соответствующего раздела docs/model.md.
+# Любая правка обязана уронить golden-тесты ядра. Это фича.
+#
+# Источник значений: reference/prototype.html (строки 409–524) + приложение А ТЗ.
+# Расхождения между ними разобраны в docs/model-review.md.
+#
+# Файл валидируется zod-схемой на сборке и превращается в типизированный
+# ModelConfig. Пакет core не читает YAML — он принимает готовый объект.
+
+version: "1.0.0"
+
+# Семантика ступеней катастроф.
+#   nested — «событие не ниже этого уровня», кривые вложены арифметически
+#   exact  — три независимые кривые, как в прототипе; оставлен для сверки
+# Принято в docs/adr/0002-model-semantics.md, разбор — docs/model-review.md §2.1
+tierSemantics: nested
+
+# Опорная точка. Читается отсюда, но переопределяется из БД, если появилась
+# точка METR с большим горизонтом (docs/architecture.md §2.3).
+anchor:
+  at: "2025-11-24T00:00:00Z"
+  horizonMinutes: 320
+  sourceId: metr-th11
+  model: "Claude Opus 4.5"
+
+constants:
+  # Логистика способности c_i(t): 1 / (1 + exp(-slope * (log2H - log2(порог))))
+  capabilitySlope: 0.8
+  # t_нас_i = дата(порог_i * saturationMultiple); при 8 это c ≈ 0,92
+  saturationMultiple: 8
+  # Полоса прогресса: p = (log2H - log2(требуемый) + window) / window
+  progressWindowDoublings: 12
+  # Хвост полосы, отданный лагу внедрения: p = base + (1-base) * доля_лага
+  progressLagTailBase: 0.88
+  # METR: 80%-горизонт примерно впятеро короче 50%-го
+  reliability80Factor: 5
+  # Часы судного дня: минут = max(floor, scale * (1 - P_глобальный(horizonYear)))
+  doomsday:
+    scaleMinutes: 15
+    floorMinutes: 0.2
+    horizonYear: 2100
+  # Пороги бейджа тревоги по P(глобальный) к 2100
+  alertThresholds: [0.05, 0.15, 0.35]
+  # Интегрирование интенсивности риска
+  integration:
+    # true — начинать с года, содержащего now (принято, ADR-0002)
+    # false — жёстко с startYear, как в прототипе
+    startFromNow: true
+    startYear: 2026        # используется только при startFromNow: false
+    endYear: 2100
+    # Год представляется серединой: 1 июля UTC
+    yearAnchorMonth: 7
+    yearAnchorDay: 1
+  # Связь странового рейтинга с митигацией (ТЗ §6.2)
+  geopolitics:
+    mitigationPenalty: 0.4
+    topN: 5
+
+targets:
+  - { minutes: 480,    key: day   }   # рабочий день
+  - { minutes: 2400,   key: week  }   # рабочая неделя, 5 × 8 ч
+  - { minutes: 9600,   key: month }   # 4 рабочие недели
+  - { minutes: 115200, key: year  }   # 48 рабочих недель
+
+# Исторические оценки METR. В проде загружаются из БД; здесь — фолбэк для
+# офлайна и для тестов. approx: точки до 2025 пересматривались при переходе
+# методики TH1 → TH1.1 (GPT-4 понижен на 35–57%).
+metrPoints:
+  - { at: "2023-03-15", model: "GPT-4",             horizonMinutes: 3,   methodology: TH1,   approx: true  }
+  - { at: "2024-06-20", model: "Claude 3.5 Sonnet", horizonMinutes: 18,  methodology: TH1,   approx: true  }
+  - { at: "2024-12-05", model: "o1",                horizonMinutes: 39,  methodology: TH1,   approx: true  }
+  - { at: "2025-04-16", model: "o3",                horizonMinutes: 121, methodology: TH1.1, approx: false }
+  - { at: "2025-08-07", model: "GPT-5",             horizonMinutes: 214, methodology: TH1.1, approx: false }
+  - { at: "2025-11-24", model: "Claude Opus 4.5",   horizonMinutes: 320, methodology: TH1.1, approx: false }
+
+# ---------------------------------------------------------------------------
+# Виды мыслительной деятельности.
+# m — коэффициент сложности относительно программной инженерии (= 1,0)
+# lag — лаг внедрения в годах после появления способности
+# group — на что действуют групповые множители триггеров
+# rationale — якорь раздела в docs/model.md, обязателен: без обоснования
+#             коэффициент в модель не попадает
+# ---------------------------------------------------------------------------
+functions:
+  - { id: memory,    m: 0.01, lag: 0,  rationale: fn-memory    }
+  - { id: perception,m: 0.02, lag: 0,  rationale: fn-perception}
+  - { id: language,  m: 0.08, lag: 0,  rationale: fn-language  }
+  - { id: formal,    m: 0.5,  lag: 0,  rationale: fn-formal    }
+  - { id: software,  m: 1.0,  lag: 0,  rationale: fn-software  }   # базовая шкала METR
+  - { id: expert,    m: 1.6,  lag: 1,  rationale: fn-expert    }
+  - { id: planning,  m: 5,    lag: 2,  rationale: fn-planning  }
+  - { id: social,    m: 9,    lag: 5,  group: soc,  rationale: fn-social    }
+  - { id: discovery, m: 14,   lag: 4,  rationale: fn-discovery }
+  - { id: creativity,m: 22,   lag: 3,  rationale: fn-creativity}
+  - { id: goals,     m: 40,   lag: 8,  rationale: fn-goals     }
+  - { id: dexterity, m: 55,   lag: 12, group: phys, rationale: fn-dexterity }
+
+industries:
+  - { id: translation, m: 0.1, lag: 0,  rationale: ind-translation }
+  - { id: copywriting, m: 0.3, lag: 0,  rationale: ind-copywriting }
+  - { id: support,     m: 0.4, lag: 1,  rationale: ind-support     }
+  - { id: design,      m: 0.8, lag: 1,  rationale: ind-design      }
+  - { id: accounting,  m: 0.9, lag: 2,  rationale: ind-accounting  }
+  - { id: software,    m: 1.0, lag: 0,  rationale: ind-software    }
+  - { id: journalism,  m: 1.0, lag: 1,  rationale: ind-journalism  }
+  - { id: finance,     m: 1.3, lag: 2,  rationale: ind-finance     }
+  - { id: law,         m: 1.8, lag: 3,  rationale: ind-law         }
+  - { id: diagnostics, m: 2.5, lag: 5,  rationale: ind-diagnostics }
+  - { id: education,   m: 3.0, lag: 4,  rationale: ind-education   }
+  - { id: management,  m: 7,   lag: 5,  rationale: ind-management  }
+  - { id: science,     m: 12,  lag: 4,  group: sci,  rationale: ind-science   }
+  - { id: logistics,   m: 12,  lag: 5,  group: phys, rationale: ind-logistics }
+  - { id: agriculture, m: 30,  lag: 7,  group: phys, rationale: ind-agriculture }
+  - { id: construction,m: 45,  lag: 10, group: phys, rationale: ind-construction }
+  - { id: care,        m: 50,  lag: 12, group: phys, rationale: ind-care      }
+  - { id: fieldwork,   m: 60,  lag: 12, group: phys, rationale: ind-fieldwork }
+
+# ---------------------------------------------------------------------------
+# Ступени катастроф.
+# capabilityThresholdMinutes — порог способности
+# maliceWeight w / controlFailWeight u — веса двух механизмов
+# mitigationCeiling e — потолок эффективности митигации на этой ступени
+# Диапазоны жертв и ущерба — для расчёта математического ожидания через
+# геометрическое среднее sqrt(low * high)
+# ---------------------------------------------------------------------------
+tiers:
+  - id: local
+    capabilityThresholdMinutes: 480
+    maliceWeight: 0.30
+    controlFailWeight: 0.05
+    mitigationCeiling: 0.80
+    deaths: [1.0e3, 1.0e5]
+    usd:    [1.0e10, 1.0e11]
+  - id: regional
+    capabilityThresholdMinutes: 9600
+    maliceWeight: 0.06
+    controlFailWeight: 0.05
+    mitigationCeiling: 0.60
+    deaths: [1.0e6, 1.0e8]
+    usd:    [1.0e12, 1.0e13]
+  - id: global
+    capabilityThresholdMinutes: 115200
+    maliceWeight: 0.008
+    controlFailWeight: 0.055
+    mitigationCeiling: 0.45
+    deaths: [8.0e8, 8.0e9]
+    usd:    [1.0e14, 1.0e15]
+
+# ---------------------------------------------------------------------------
+# Триггеры. calming: true — успокаивающие (зелёная рамка).
+# Эффекты: doubling / align — множители; mitigationAdd — прибавка в долях;
+# local|regional|global — множители интенсивности ступени;
+# dep — множитель текущей подключённости; phys|sci|soc — множители лагов группы.
+# Тексты и критерии — в словарях i18n, не здесь.
+# ---------------------------------------------------------------------------
+triggers:
+  - { id: selfcopy,  effects: { align: 1.6 } }
+  - { id: selfimp,   effects: { doubling: 0.70 } }
+  - { id: jump,      effects: { doubling: 0.82 } }
+  - { id: deaths10,  effects: { local: 1.6, dep: 1.1 } }
+  - { id: cyber,     effects: { regional: 2.0, local: 1.3 } }
+  - { id: jailbreak, effects: { align: 1.4 } }
+  - { id: weapons,   effects: { global: 1.9, regional: 1.5 } }
+  - { id: deceit,    effects: { align: 1.5 } }
+  - { id: robots,    effects: { phys: 0.5 } }
+  - { id: discovery, effects: { sci: 0.6 } }
+  - { id: treaty,    calming: true, effects: { mitigationAdd: 0.25 } }
+  - { id: pause,     calming: true, effects: { doubling: 1.35, mitigationAdd: 0.10 } }
+
+# ---------------------------------------------------------------------------
+# Пресеты — это именованные сценарии в той же системе, отдельного механизма
+# для них нет. Закодированные строки этих пресетов зафиксированы в golden-
+# тестах кодека, чтобы ссылки на них никогда не протухли.
+# ---------------------------------------------------------------------------
+presets:
+  base:      { doublingDays: 131, friction: 1.8, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 40, alignFailPct: 20, mitigationPct: 45, dep0Pct: 12, tauYears: 12, adaptWindowYears: 25 }
+  optimist:  { doublingDays: 196, friction: 3.0, targetMinutes: 9600, reliability: 80, singularityPct: 50, malicePct: 20, alignFailPct: 5,  mitigationPct: 80, dep0Pct: 10, tauYears: 20, adaptWindowYears: 15 }
+  skeptic:   { doublingDays: 250, friction: 3.5, targetMinutes: 9600, reliability: 80, singularityPct: 50, malicePct: 35, alignFailPct: 3,  mitigationPct: 60, dep0Pct: 8,  tauYears: 25, adaptWindowYears: 12 }
+  anxious:   { doublingDays: 110, friction: 1.3, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 50, alignFailPct: 40, mitigationPct: 30, dep0Pct: 20, tauYears: 8,  adaptWindowYears: 40 }
+  doomsday:  { doublingDays: 89,  friction: 1.0, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 50, alignFailPct: 75, mitigationPct: 10, dep0Pct: 20, tauYears: 6,  adaptWindowYears: 60 }
+
+# Диапазоны ползунков — тоже конфиг: property-тесты перебирают крайние
+# положения именно отсюда, а не из разметки.
+ranges:
+  doublingDays:     { min: 60,  max: 300, step: 1 }
+  friction:         { min: 0.5, max: 4.0, step: 0.1 }
+  singularityPct:   { min: 10,  max: 95,  step: 5 }
+  malicePct:        { min: 0,   max: 100, step: 1 }
+  alignFailPct:     { min: 0,   max: 100, step: 1 }
+  mitigationPct:    { min: 0,   max: 100, step: 1 }
+  dep0Pct:          { min: 0,   max: 80,  step: 1 }
+  tauYears:         { min: 2,   max: 40,  step: 1 }
+  adaptWindowYears: { min: 5,   max: 100, step: 1 }

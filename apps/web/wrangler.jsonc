@@ -1,0 +1,8 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "singularity-clock",
+  "compatibility_date": "2026-08-01",
+  // Воркер без скрипта: отдаёт только статику, собранную Astro.
+  "assets": { "directory": "./dist", "not_found_handling": "404-page" },
+  "observability": { "enabled": true }
+}

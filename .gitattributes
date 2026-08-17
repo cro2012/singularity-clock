@@ -1,0 +1,8 @@
+# LF везде, включая рабочую копию на Windows.
+# Иначе проверка check:generated падает: генератор пишет \n, а git отдаёт \r\n.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.woff2 binary
+*.ttf binary

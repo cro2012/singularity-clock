@@ -1,0 +1,28 @@
+{
+  "name": "@sc/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check --minimumSeverity error"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.2.0",
+    "@sc/core": "workspace:*",
+    "@sc/data": "workspace:*",
+    "@sc/i18n": "workspace:*",
+    "@sc/ui": "workspace:*",
+    "astro": "^5.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "wrangler": "^3.100.0"
+  }
+}

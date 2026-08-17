@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Линтер и границы пакетов
+        run: pnpm lint
+
+      - name: Ядро без зависимостей
+        run: pnpm check:core-deps
+
+      - name: Типы
+        run: pnpm typecheck
+
+      # Контраст токенов проверяется здесь же: tokens.test.ts падает, если
+      # текстовый токен даёт меньше 4,5:1 или графический меньше 3:1
+      # на любой разрешённой поверхности.
+      - name: Тесты
+        run: pnpm test
+
+      - name: CSS токенов не разошёлся с источником
+        run: pnpm check:generated
+
+      - name: Сборка
+        run: pnpm build

@@ -1,0 +1,25 @@
+/* Сгенерировано из tokens.ts. Не редактировать: pnpm gen:css. */
+:root {
+  color-scheme: dark;
+  --plane: #0d0d0d;
+  --surface-1: #1a1a19;
+  --surface-2: #212120;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --muted: #908e87; /* светлее прототипного #898781: тот давал 4,49:1 на surface-2 */
+  --tier-local: #3d6fae;
+  --tier-regional: #4a92e8;
+  --tier-global: #86b6ef;
+  --series-1: #3987e5;
+  --text-good: #0ca30c;
+  --text-warning: #fab219;
+  --text-serious: #ec835a;
+  --text-critical: #e56a6a; /* светлее графического: #d03b3b даёт лишь 3,6:1 и в текст не годится */
+  --graphic-good: #0ca30c;
+  --graphic-warning: #fab219;
+  --graphic-serious: #ec835a;
+  --graphic-critical: #d03b3b;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+}

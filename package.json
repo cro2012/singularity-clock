@@ -1,0 +1,31 @@
+{
+  "name": "singularity-clock",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter \"./apps/*\" build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "gen:css": "pnpm --filter @sc/ui gen:css",
+    "check:core-deps": "node scripts/check-core-deps.mjs",
+    "check:generated": "pnpm gen:css && git diff --exit-code -- packages/ui/src/tokens.generated.css",
+    "check": "pnpm lint && pnpm check:core-deps && pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.18.0",
+    "globals": "^17.11.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.0"
+  }
+}

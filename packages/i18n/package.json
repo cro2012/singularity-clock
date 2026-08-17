@@ -1,0 +1,16 @@
+{
+  "name": "@sc/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Локали, форматтеры, правила множественного числа.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sc/core": "workspace:*"
+  }
+}

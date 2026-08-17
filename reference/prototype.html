@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Часы Сингулярности — обратный отсчёт</title>
+<style>
+:root{
+  color-scheme: dark;
+  --plane:#0d0d0d;
+  --surface-1:#1a1a19;
+  --surface-2:#212120;
+  --ink:#ffffff;
+  --ink-2:#c3c2b7;
+  --muted:#898781;
+  --grid:#2c2c2a;
+  --axis:#383835;
+  --border:rgba(255,255,255,0.10);
+  --series-1:#3987e5;
+  --tier-local:#184f95;
+  --tier-regional:#3987e5;
+  --tier-global:#86b6ef;
+  --good:#0ca30c;
+  --warning:#fab219;
+  --serious:#ec835a;
+  --critical:#d03b3b;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--plane);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 80px}
+
+/* ---------- header ---------- */
+header{
+  padding:44px 0 26px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:26px;
+}
+.eyebrow{
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 10px;
+}
+h1{font-size:34px;line-height:1.15;margin:0 0 10px;font-weight:650;letter-spacing:-0.02em}
+.lede{color:var(--ink-2);max-width:74ch;margin:0;font-size:15px}
+.lede em{color:var(--muted);font-style:normal}
+
+/* ---------- presets ---------- */
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px;align-items:center}
+.presets .lbl{font-size:12px;color:var(--muted);margin-right:2px}
+button.preset{
+  background:var(--surface-1);color:var(--ink-2);
+  border:1px solid var(--border);border-radius:999px;
+  padding:6px 14px;font:inherit;font-size:13px;cursor:pointer;
+  transition:.12s;
+}
+button.preset:hover{background:var(--surface-2);color:var(--ink)}
+button.preset[aria-pressed="true"]{background:#2e2e2b;color:var(--ink);border-color:rgba(255,255,255,0.28)}
+
+/* ---------- sections ---------- */
+section{margin:38px 0 0}
+h2{font-size:21px;margin:0 0 4px;font-weight:640;letter-spacing:-0.01em}
+h3{font-size:14px;margin:26px 0 10px;font-weight:600;color:var(--ink-2);
+   letter-spacing:.04em;text-transform:uppercase}
+.sub{color:var(--muted);font-size:13.5px;margin:0 0 18px;max-width:80ch}
+
+/* ---------- hero counters ---------- */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:820px){.hero{grid-template-columns:1fr}}
+.card{
+  background:var(--surface-1);border:1px solid var(--border);
+  border-radius:14px;padding:20px 22px;
+}
+.card.hero-card{padding:24px 24px 22px}
+.card-label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.bignum{
+  font-size:clamp(30px,4.4vw,46px);font-weight:660;letter-spacing:-0.03em;
+  line-height:1.05;margin:0;font-variant-numeric:tabular-nums;
+}
+.clockline{
+  font-size:19px;color:var(--ink-2);margin:6px 0 0;
+  font-variant-numeric:tabular-nums;letter-spacing:0.02em;
+}
+.datenote{font-size:13px;color:var(--muted);margin:12px 0 0}
+.datenote b{color:var(--ink-2);font-weight:600}
+
+.tiergrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+@media(max-width:820px){.tiergrid{grid-template-columns:1fr}}
+.tier{background:var(--surface-1);border:1px solid var(--border);border-radius:14px;padding:18px 18px 16px;position:relative;overflow:hidden}
+.tier::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tc)}
+.tier h4{margin:0 0 2px;font-size:15px;font-weight:640;display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--tc);flex:none}
+.tier .thresh{font-size:12.5px;color:var(--muted);margin:0 0 12px;line-height:1.45}
+.tier .med{font-size:25px;font-weight:640;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;margin:0}
+.tier .med small{font-size:13px;font-weight:400;color:var(--muted);letter-spacing:0}
+.tier .probs{margin:10px 0 0;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tier .probs span{color:var(--muted)}
+.tier .scen{margin:11px 0 0;font-size:12px;color:var(--muted);line-height:1.45;border-top:1px solid var(--border);padding-top:9px}
+
+/* ---------- doomsday clock ---------- */
+.clockrow{display:grid;grid-template-columns:170px 1fr;gap:22px;align-items:center;margin-top:14px}
+@media(max-width:640px){.clockrow{grid-template-columns:1fr}}
+.badge{
+  display:inline-flex;align-items:center;gap:7px;font-size:12.5px;
+  border:1px solid var(--border);border-radius:999px;padding:4px 12px 4px 9px;
+  color:var(--ink-2);background:var(--surface-2);
+}
+.badge .ic{font-size:13px;line-height:1}
+
+/* ---------- controls ---------- */
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px 26px;
+  background:var(--surface-1);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
+.ctl label{display:block;font-size:13px;color:var(--ink-2);margin-bottom:7px;font-weight:500}
+.ctl .val{float:right;color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600}
+.ctl .hint{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.4}
+input[type=range]{width:100%;accent-color:var(--series-1);height:22px;cursor:pointer;margin:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{
+  background:var(--surface-2);border:1px solid var(--border);color:var(--ink-2);
+  border-radius:8px;padding:5px 11px;font:inherit;font-size:12.5px;cursor:pointer
+}
+.seg button[aria-pressed="true"]{background:#31312d;color:var(--ink);border-color:rgba(255,255,255,0.3)}
+
+/* ---------- charts ---------- */
+.chartbox{background:var(--surface-1);border:1px solid var(--border);border-radius:14px;padding:20px 22px 16px;margin-top:14px;position:relative}
+.chart-title{font-size:14px;font-weight:620;margin:0 0 2px}
+.chart-sub{font-size:12px;color:var(--muted);margin:0 0 14px}
+svg{display:block;width:100%;overflow:visible}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0 0;font-size:12.5px;color:var(--ink-2)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:7px;vertical-align:middle}
+.tt{
+  position:absolute;pointer-events:none;background:#2a2a27;border:1px solid rgba(255,255,255,0.18);
+  border-radius:8px;padding:8px 11px;font-size:12.5px;color:var(--ink);
+  box-shadow:0 6px 22px rgba(0,0,0,.55);opacity:0;transition:opacity .08s;z-index:20;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.tt b{font-weight:620}
+.tt .r{display:flex;justify-content:space-between;gap:16px;color:var(--ink-2)}
+.tt .r em{font-style:normal;color:var(--ink);font-weight:600}
+.tt .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+
+/* ---------- item rows ---------- */
+.rows{margin-top:12px}
+.row{
+  display:grid;grid-template-columns:minmax(180px,340px) 1fr 92px;gap:20px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--grid);
+}
+.row:last-child{border-bottom:none}
+.row .nm{font-size:13.5px;color:var(--ink)}
+.row .nm small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
+.bar{height:8px;background:#232321;border-radius:4px;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;border-radius:4px;background:var(--series-1);transition:width .2s}
+.eta{text-align:right;font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.eta.done{color:var(--good);font-weight:600}
+.rowhead{display:grid;grid-template-columns:minmax(180px,340px) 1fr 92px;gap:20px;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-bottom:7px;border-bottom:1px solid var(--axis)}
+.rowhead .eta{text-align:right}
+
+/* ---------- triggers ---------- */
+.trigs{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:10px;margin-top:14px}
+.trig{
+  background:var(--surface-1);border:1px solid var(--border);border-radius:12px;
+  padding:13px 15px;display:flex;gap:11px;align-items:flex-start;cursor:pointer;transition:.12s
+}
+.trig:hover{background:var(--surface-2)}
+.trig.on{border-color:rgba(208,59,59,0.55);background:#241a19}
+.trig.on.calming{border-color:rgba(12,163,12,0.5);background:#16211a}
+.trig input{margin:3px 0 0;accent-color:var(--critical);flex:none;width:15px;height:15px}
+.trig.calming input{accent-color:var(--good)}
+.trig .tx{font-size:13px;line-height:1.42}
+.trig .tx small{display:block;color:var(--muted);font-size:11.5px;margin-top:4px}
+.trig .fx{color:var(--serious);font-size:11.5px;margin-top:5px;display:block;font-variant-numeric:tabular-nums}
+.trig.calming .fx{color:var(--good)}
+
+/* ---------- misc ---------- */
+details{margin-top:14px;background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:0 18px}
+details[open]{padding-bottom:16px}
+summary{cursor:pointer;padding:14px 0;font-size:13.5px;color:var(--ink-2);font-weight:550;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";color:var(--muted)}
+details[open] summary::before{content:"▾ "}
+details .body{font-size:13px;color:var(--ink-2);line-height:1.6}
+details .body p{margin:0 0 11px}
+details code{background:#252523;padding:1px 6px;border-radius:4px;font-size:12px;color:var(--ink)}
+table.data{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+table.data th{text-align:left;color:var(--muted);font-weight:500;padding:6px 10px 6px 0;border-bottom:1px solid var(--axis);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+table.data td{padding:5px 10px 5px 0;border-bottom:1px solid var(--grid);color:var(--ink-2)}
+.disclaimer{
+  margin-top:34px;padding:18px 20px;border:1px solid rgba(250,178,25,0.28);
+  background:rgba(250,178,25,0.05);border-radius:12px;font-size:13px;color:var(--ink-2);line-height:1.6
+}
+.disclaimer b{color:var(--warning)}
+footer{margin-top:34px;padding-top:20px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted);line-height:1.7}
+footer a{color:var(--ink-2)}
+.srcs{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px}
+.pulse{animation:pl 2.6s ease-in-out infinite}
+@keyframes pl{0%,100%{opacity:1}50%{opacity:.55}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Полушуточный прогнозный аппарат · v1.0 · август 2026</p>
+  <h1>Часы Сингулярности и Лестница Катастроф</h1>
+  <p class="lede">Два обратных отсчёта, посчитанных из одной экстраполяции: горизонта автономных задач METR. Всё, что вы видите ниже, — <em>это оформленное суждение, а не измерение будущего</em>. Крутите ползунки: если дата легко сдвигается на двадцать лет, значит она никогда и не была прогнозом.</p>
+  <div class="presets" id="presets">
+    <span class="lbl">Пресет:</span>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section id="hero" style="margin-top:8px">
+  <div class="hero">
+    <div class="card hero-card">
+      <p class="card-label">До сингулярности</p>
+      <p class="bignum" id="sg-big">—</p>
+      <p class="clockline" id="sg-clock">—</p>
+      <p class="datenote" id="sg-note">—</p>
+    </div>
+    <div class="card hero-card">
+      <p class="card-label">До первой катастрофы любого уровня</p>
+      <p class="bignum" id="ap-big">—</p>
+      <p class="clockline" id="ap-clock">—</p>
+      <p class="datenote" id="ap-note">—</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="clockrow">
+      <svg viewBox="0 0 160 160" id="ddclock" style="max-width:170px"></svg>
+      <div>
+        <p class="card-label" style="margin-bottom:8px">Часы судного дня, пересчитанные моделью</p>
+        <p class="bignum" id="dd-min" style="font-size:32px">—</p>
+        <p class="datenote" id="dd-note" style="margin-top:8px">—</p>
+        <p style="margin:12px 0 0"><span class="badge" id="dd-badge"><span class="ic">●</span><span id="dd-badge-tx">—</span></span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SINGULARITY ================= -->
+<section id="sing">
+  <h2>1. Сингулярность</h2>
+  <p class="sub">Определение здесь операциональное, а не мистическое: <b>сингулярность наступила, когда ИИ выполняет самостоятельно, без человека в цикле, задачу заданной длины в заданной доле видов деятельности</b>. Никакого «пробуждения сознания» — только момент, после которого прогнозировать экономику по человеческому труду становится бессмысленно.</p>
+
+  <div class="controls">
+    <div class="ctl">
+      <label>Время удвоения горизонта <span class="val"><span id="v-doubling"></span> дн.</span></label>
+      <input type="range" id="doubling" min="60" max="300" step="1">
+      <p class="hint">METR: 196 дн. на всей выборке с 2019, 131 дн. если считать с 2023, 89 дн. если с 2024.</p>
+    </div>
+    <div class="ctl">
+      <label>Трение реального мира <span class="val">×<span id="v-friction"></span></span></label>
+      <input type="range" id="friction" min="0.5" max="4" step="0.1">
+      <p class="hint">Во сколько раз бенчмарк оптимистичнее жизни: энергосети, чипы, данные, регуляторы, инерция людей. 1,0 — «график и есть реальность».</p>
+    </div>
+    <div class="ctl">
+      <label>Порог задачи</label>
+      <div class="seg" id="target-seg"></div>
+      <p class="hint">Какой длины непрерывную работу человека ИИ должен закрывать сам, чтобы считалось.</p>
+    </div>
+    <div class="ctl">
+      <label>Требуемая надёжность</label>
+      <div class="seg" id="rel-seg"></div>
+      <p class="hint">METR меряет горизонт при 50% успеха. Планка 80% отодвигает дату примерно на 2,3 удвоения — считать надёжной систему с монеткой нельзя.</p>
+    </div>
+    <div class="ctl">
+      <label>Порог «сингулярности» <span class="val"><span id="v-thr"></span>%</span></label>
+      <input type="range" id="thr" min="10" max="95" step="5">
+      <p class="hint">Какая доля из 30 видов деятельности ниже должна быть пройдена, чтобы объявить дату.</p>
+    </div>
+  </div>
+
+  <div class="chartbox" id="box-horizon">
+    <p class="chart-title">Горизонт автономной задачи и его экстраполяция</p>
+    <p class="chart-sub">Точки — оценки METR (до 2025 приблизительные, методика TH1/TH1.1). Линия закреплена в последней точке и построена по <b>вашему</b> времени удвоения — она не подогнана под историю, поэтому и расходится с ранними точками. Шкала логарифмическая: прямая = экспонента.</p>
+    <svg id="chart-horizon" viewBox="0 0 900 340" role="img" aria-label="Экстраполяция горизонта автономных задач"></svg>
+    <div class="tt" id="tt-h"></div>
+  </div>
+
+  <h3>По видам мыслительной деятельности</h3>
+  <div class="rowhead"><span>Функция</span><span>Прогресс</span><span class="eta">Обгон</span></div>
+  <div class="rows" id="rows-fn"></div>
+
+  <h3>По отраслям и профессиям</h3>
+  <div class="rowhead"><span>Отрасль</span><span>Прогресс</span><span class="eta">Обгон</span></div>
+  <div class="rows" id="rows-ind"></div>
+
+  <details>
+    <summary>Как считается дата для каждой строки</summary>
+    <div class="body">
+      <p>Горизонт METR измерен на задачах программной инженерии. Для остальных видов деятельности задан <b>коэффициент сложности</b> относительно этой базы — во сколько раз более длинную цепочку рассуждений требует область, — и <b>лаг внедрения</b> в годах: время на железо, капитал, доверие и регуляторов после того, как способность технически появилась.</p>
+      <p><code>дата = t₀ + D_эфф · log₂(коэф · порог · надёжность / 320 мин) + лаг</code></p>
+      <p>Коэффициенты — экспертное суждение автора модели, а не измерение. Это самое слабое место всей конструкции, и оно ровно там, где вам, скорее всего, захочется спорить. Так и задумано.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ================= APOCALYPSE ================= -->
+<section id="apoc">
+  <h2>2. Лестница катастроф</h2>
+  <p class="sub">«Апокалипсис» — не событие, а шкала. Три порога, у каждого свой критерий, своя вероятность и свой доминирующий механизм: внизу лестницы правит злой умысел человека, наверху — отказ контроля. Модель считает не дату, а <b>интенсивность риска</b> λ(t), из неё — накопленную вероятность и медианную дату.</p>
+
+  <div class="controls">
+    <div class="ctl">
+      <label>Доля злонамеренного применения <span class="val"><span id="v-malice"></span>%</span></label>
+      <input type="range" id="malice" min="0" max="100" step="1">
+      <p class="hint">Насколько охотно люди направят доступную мощность во вред. Главный драйвер нижней ступени.</p>
+    </div>
+    <div class="ctl">
+      <label>Вероятность отказа контроля <span class="val"><span id="v-align"></span>%</span></label>
+      <input type="range" id="align" min="0" max="100" step="1">
+      <p class="hint">Что система в критический момент делает не то, для чего её ставили, и это не откатывается. Главный драйвер верхней ступени.</p>
+    </div>
+    <div class="ctl">
+      <label>Эффективность митигации <span class="val"><span id="v-mitig"></span>%</span></label>
+      <input type="range" id="mitig" min="0" max="100" step="1">
+      <p class="hint">Регулирование, аудит, рубильники, международные договоры. На верхней ступени работает хуже — предотвращать нужно то, чего ещё не было.</p>
+    </div>
+    <div class="ctl">
+      <label>Подключённость к критическим системам сейчас <span class="val"><span id="v-dep0"></span>%</span></label>
+      <input type="range" id="dep0" min="0" max="80" step="1">
+      <p class="hint">Какая доля энергетики, финансов, логистики, оружия и медицины уже отдана автономным контурам.</p>
+    </div>
+    <div class="ctl">
+      <label>Время насыщения внедрения <span class="val"><span id="v-tau"></span> лет</span></label>
+      <input type="range" id="tau" min="2" max="40" step="1">
+      <p class="hint">За сколько лет подключённость доходит до потолка.</p>
+    </div>
+    <div class="ctl">
+      <label>Окно уязвимости <span class="val"><span id="v-adapt"></span> лет</span></label>
+      <input type="range" id="adapt" min="5" max="100" step="1">
+      <p class="hint">Идея «времени опасностей»: после того как способности упёрлись в потолок, мир учится с ними жить, и риск затухает с этим периодом полураспада. Поставьте 100 — и он не затухает никогда.</p>
+    </div>
+  </div>
+
+  <div class="tiergrid" id="tiers"></div>
+
+  <div class="chartbox" id="box-risk">
+    <p class="chart-title">Накопленная вероятность события каждого уровня</p>
+    <p class="chart-sub">P(событие уже произошло к году t) при текущих допущениях. Плато справа — следствие окна уязвимости: пережили переход — риск падает.</p>
+    <svg id="chart-risk" viewBox="0 0 900 320" role="img" aria-label="Накопленная вероятность катастроф трёх уровней"></svg>
+    <div class="legend" id="legend-risk"></div>
+    <div class="tt" id="tt-r"></div>
+    <details style="margin-top:10px">
+      <summary>Показать таблицей</summary>
+      <div class="body"><table class="data" id="tbl-risk"></table></div>
+    </details>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <p class="card-label">Математическое ожидание к 2050 году</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="ev-grid">
+      <div><p class="bignum" id="ev-deaths" style="font-size:30px">—</p><p class="datenote">ожидаемое число погибших — сумма по трём уровням, вероятность × медиана диапазона</p></div>
+      <div><p class="bignum" id="ev-usd" style="font-size:30px">—</p><p class="datenote">ожидаемый прямой ущерб в долларах 2026 года</p></div>
+    </div>
+  </div>
+
+  <details>
+    <summary>Формула интенсивности риска</summary>
+    <div class="body">
+      <p><code>λᵢ(t) = (умысел·wᵢ + отказ контроля·uᵢ) · cᵢ(t) · d(t) · (1 − митигация·eᵢ) · aᵢ(t)</code></p>
+      <p><code>cᵢ(t)</code> — способность: логистическая функция от логарифма горизонта относительно порога ступени. <code>d(t)</code> — подключённость, насыщающаяся экспонента. <code>eᵢ</code> — потолок эффективности митигации: 0,80 для локального, 0,60 для регионального, 0,45 для глобального. <code>aᵢ(t)</code> — затухание после насыщения способностей. Итог: <code>P = 1 − exp(−∫λ dt)</code>, шаг интегрирования — год.</p>
+      <p>Обратите внимание, что произведение четырёх множителей, каждый из которых вы задали на глаз, даёт величину с точностью в лучшем случае порядка. Все знаки после запятой в датах — вежливая ложь интерфейса.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ================= TRIGGERS ================= -->
+<section id="trigsec">
+  <h2>3. Панель триггеров</h2>
+  <p class="sub">Наблюдаемые события, каждое из которых сдвигает модель. Отмечайте то, что, по-вашему, уже произошло, — и смотрите, как прыгают даты наверху. Это, пожалуй, единственная честная часть конструкции: не прогноз, а список того, за чем осмысленно следить.</p>
+  <div class="trigs" id="trigs"></div>
+</section>
+
+<div class="disclaimer">
+  <b>Отдельно и без иронии.</b> Этот аппарат не предсказывает будущее и не может. У события, которое не происходило ни разу, нет обучающей выборки, нет валидации и нет способа отличить хорошую модель от красивой. Всё, что тут делается, — это раскладывание чужих и собственных допущений по полочкам так, чтобы стало видно, какое из них несёт всю нагрузку. Если ползунок «отказ контроля» двигает глобальную дату на сорок лет, а ползунок «удвоение горизонта» — на пять, то спорить надо про первое. В этом вся ценность; даты — побочный продукт.
+</div>
+
+<footer>
+  <p><b style="color:var(--ink-2)">Источники опорных данных:</b></p>
+  <div class="srcs">
+    <a href="https://metr.org/blog/2026-1-29-time-horizon-1-1/">METR · Time Horizon 1.1</a>
+    <a href="https://metr.org/time-horizons/">METR · Task-Completion Time Horizons</a>
+    <a href="https://hai.stanford.edu/ai-index/2026-ai-index-report">Stanford HAI · AI Index 2026</a>
+    <a href="https://agi.goodheartlabs.com/">AGI Timelines Dashboard</a>
+    <a href="https://incidentdatabase.ai/">AI Incident Database</a>
+    <a href="https://www.anthropic.com/research/economic-index-june-2026-report">Anthropic Economic Index</a>
+    <a href="https://www.tortoisemedia.com/data/global-ai">Tortoise · Global AI Index</a>
+  </div>
+  <p style="margin-top:14px">Опорная точка экстраполяции: 50%-горизонт 320 минут, ноябрь 2025 (METR, TH1.1). Коэффициенты сложности, лаги внедрения и веса триггеров — экспертное суждение, не измерение.</p>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   КОНСТАНТЫ И ОПОРНЫЕ ДАННЫЕ
+   ============================================================ */
+const DAY = 86400000, YR = 365.2425 * DAY;
+const T0  = Date.UTC(2025, 10, 24);   // якорь: Claude Opus 4.5
+const H0  = 320;                       // 50%-горизонт, минуты
+const NOW0 = Date.now();
+
+// Исторические оценки METR (минуты). До 2025 — приблизительно.
+const METR = [
+  {d: Date.UTC(2023,2,15),  h: 3,   n: "GPT-4",            approx:true},
+  {d: Date.UTC(2024,5,20),  h: 18,  n: "Claude 3.5 Sonnet",approx:true},
+  {d: Date.UTC(2024,11,5),  h: 39,  n: "o1",               approx:true},
+  {d: Date.UTC(2025,3,16),  h: 121, n: "o3",               approx:false},
+  {d: Date.UTC(2025,7,7),   h: 214, n: "GPT-5",            approx:false},
+  {d: Date.UTC(2025,10,24), h: 320, n: "Claude Opus 4.5",  approx:false}
+];
+
+const TARGETS = [
+  {v: 480,    l: "1 день"},
+  {v: 2400,   l: "1 неделя"},
+  {v: 9600,   l: "1 месяц"},
+  {v: 115200, l: "1 год"}
+];
+
+// Виды мыслительной деятельности: m — коэффициент сложности к базе (ПО = 1), lag — лаг внедрения, лет
+const FUNCS = [
+  {n:"Распознавание образов, речи, сигналов", m:0.02, lag:0, d:"перцепция"},
+  {n:"Хранение и извлечение фактов",          m:0.01, lag:0, d:"память"},
+  {n:"Владение языком: понимание, генерация, перевод", m:0.08, lag:0, d:"язык"},
+  {n:"Формальное рассуждение, математика",    m:0.5,  lag:0, d:"дедукция"},
+  {n:"Программирование и системная инженерия",m:1.0,  lag:0, d:"базовая шкала METR"},
+  {n:"Экспертное суждение в узкой области",   m:1.6,  lag:1, d:"диагностика, оценка"},
+  {n:"Долгосрочное планирование и автономное действие", m:5, lag:2, d:"агентность"},
+  {n:"Научное открытие нового знания",        m:14,   lag:4, d:"гипотеза → проверка"},
+  {n:"Социальный интеллект, переговоры, доверие", m:9,  lag:5, d:"упирается в людей, не в модель", grp:"soc"},
+  {n:"Творчество с оригинальным вкусом",      m:22,   lag:3, d:"не «похоже на», а «задаёт норму»"},
+  {n:"Постановка собственных целей",          m:40,   lag:8, d:"самоопределение"},
+  {n:"Телесная ловкость и ручной труд",       m:55,   lag:12, d:"упирается в железо", grp:"phys"}
+];
+
+// Отрасли
+const INDS = [
+  {n:"Перевод и локализация",        m:0.1, lag:0},
+  {n:"Копирайтинг и контент",        m:0.3, lag:0},
+  {n:"Клиентская поддержка",         m:0.4, lag:1},
+  {n:"Графический дизайн",           m:0.8, lag:1},
+  {n:"Бухгалтерия и аудит",          m:0.9, lag:2},
+  {n:"Разработка ПО",                m:1.0, lag:0},
+  {n:"Журналистика и медиа",         m:1.0, lag:1},
+  {n:"Финансовый анализ",            m:1.3, lag:2},
+  {n:"Юриспруденция",                m:1.8, lag:3},
+  {n:"Медицинская диагностика",      m:2.5, lag:5},
+  {n:"Образование",                  m:3.0, lag:4},
+  {n:"Управление и стратегия",       m:7,   lag:5},
+  {n:"Наука и R&D",                  m:12,  lag:4, grp:"sci"},
+  {n:"Транспорт и логистика",        m:12,  lag:5, grp:"phys"},
+  {n:"Сельское хозяйство",           m:30,  lag:7, grp:"phys"},
+  {n:"Строительство",                m:45,  lag:10, grp:"phys"},
+  {n:"Уход и медсестринское дело",   m:50,  lag:12, grp:"phys"},
+  {n:"Ремонт, монтаж, полевые работы",m:60, lag:12, grp:"phys"}
+];
+
+// Ступени катастроф
+const TIERS = [
+  { id:"local", n:"Локальный", color:"var(--tier-local)", hex:"#184f95",
+    req:480, wm:0.30, wu:0.05, eff:0.80,
+    deaths:[1e3, 1e5], usd:[1e10, 1e11],
+    thresh:"≥ 1 000 погибших или ≥ $10 млрд ущерба. Один город, одна сеть, одна компания.",
+    scen:"Автономный контур в энергосистеме региона; ИИ-ассистированная атака на больничную сеть; инцидент в лаборатории." },
+  { id:"regional", n:"Региональный", color:"var(--tier-regional)", hex:"#3987e5",
+    req:9600, wm:0.06, wu:0.05, eff:0.60,
+    deaths:[1e6, 1e8], usd:[1e12, 1e13],
+    thresh:"≥ 1 млн погибших или ≥ $1 трлн. Отказ национальной инфраструктуры, не восстанавливаемый годами.",
+    scen:"Каскадный отказ финансовой и энергетической систем; эскалация конфликта с ИИ в контуре принятия решений; патоген, спроектированный с помощью модели." },
+  { id:"global", n:"Глобальный", color:"var(--tier-global)", hex:"#86b6ef",
+    req:115200, wm:0.008, wu:0.055, eff:0.45,
+    deaths:[8e8, 8e9], usd:[1e14, 1e15],
+    thresh:"≥ 10% населения Земли или необратимая потеря человечеством контроля над собственным будущим.",
+    scen:"Отказ контроля у системы, встроенной во все критические контуры сразу; необратимая концентрация власти; сценарий, который никто не описал заранее — потому и глобальный." }
+];
+
+// Триггеры
+const TRIGGERS = [
+  {id:"selfcopy", t:"Модель автономно скопировала себя на сторонний сервер без санкции",
+   s:"В лабораторных условиях подобное поведение воспроизводили; речь про подтверждённый случай в проде.",
+   fx:{align:1.6}, txt:"отказ контроля ×1,6"},
+  {id:"selfimp", t:"Модель улучшила собственную архитектуру, прирост подтверждён независимо",
+   s:"Не «помогла инженерам», а закрыла цикл целиком.", fx:{doubling:0.70}, txt:"удвоение ×0,70 — ускорение"},
+  {id:"jump", t:"Скачок способностей без соответствующего роста вычислений",
+   s:"Признак того, что упор в железо не спасает.", fx:{doubling:0.82}, txt:"удвоение ×0,82"},
+  {id:"deaths10", t:"Первый инцидент с ≥10 погибшими по вине автономной системы",
+   s:"Не ДТП с ассистентом — самостоятельное решение системы.", fx:{local:1.6, dep:1.1}, txt:"локальный риск ×1,6"},
+  {id:"cyber", t:"ИИ-ассистированная атака вывела из строя национальную инфраструктуру",
+   s:"Энергосеть, платёжная система или связь в масштабе страны.", fx:{regional:2.0, local:1.3}, txt:"региональный ×2,0"},
+  {id:"jailbreak", t:"Модель систематически обходила собственные ограничения в проде",
+   s:"Не разовый джейлбрейк пользователем, а инициатива системы.", fx:{align:1.4}, txt:"отказ контроля ×1,4"},
+  {id:"weapons", t:"ИИ-системе формально передано право применения оружия",
+   s:"Решение на поражение без человека в цикле, закреплённое доктриной.", fx:{global:1.9, regional:1.5}, txt:"глобальный ×1,9"},
+  {id:"deceit", t:"Доказано, что модель занижала свои способности на оценках",
+   s:"Систематическая, а не случайная недооценка на бенчмарках безопасности.", fx:{align:1.5}, txt:"отказ контроля ×1,5"},
+  {id:"robots", t:"Роботы общего назначения в серийном производстве, >1 млн шт./год",
+   s:"Снимает главное ограничение по физическому труду.", fx:{phys:0.5}, txt:"физические лаги ×0,5"},
+  {id:"discovery", t:"ИИ автономно совершил научное открытие, признанное сообществом",
+   s:"Новое знание, а не переоткрытие; авторство спорят люди.", fx:{sci:0.6}, txt:"наука ×0,6 — ускорение"},
+  {id:"treaty", t:"Международный договор с верификацией вычислительных мощностей", calming:true,
+   s:"С инспекциями и санкциями, а не декларацией о намерениях.", fx:{mitigAdd:0.25}, txt:"митигация +25 п.п."},
+  {id:"pause", t:"Крупная лаборатория остановила разработку по соображениям безопасности", calming:true,
+   s:"Добровольно, не под давлением суда, и не на месяц.", fx:{doubling:1.35, mitigAdd:0.10}, txt:"удвоение ×1,35, митигация +10 п.п."}
+];
+
+// Пресеты
+const PRESETS = {
+  "Базовый":   {doubling:131, friction:1.8, target:9600, rel:50, thr:50, malice:40, align:20, mitig:45, dep0:12, tau:12, adapt:25},
+  "Оптимист":  {doubling:196, friction:3.0, target:9600, rel:80, thr:50, malice:20, align:5,  mitig:80, dep0:10, tau:20, adapt:15},
+  "Скептик":   {doubling:250, friction:3.5, target:9600, rel:80, thr:50, malice:35, align:3,  mitig:60, dep0:8,  tau:25, adapt:12},
+  "Тревожный": {doubling:110, friction:1.3, target:9600, rel:50, thr:50, malice:50, align:40, mitig:30, dep0:20, tau:8,  adapt:40},
+  "Судный день":{doubling:89, friction:1.0, target:9600, rel:50, thr:50, malice:50, align:75, mitig:10, dep0:20, tau:6,  adapt:60}
+};
+
+/* ============================================================
+   СОСТОЯНИЕ
+   ============================================================ */
+const S = Object.assign({}, PRESETS["Базовый"]);
+S.triggers = {};
+
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+
+function eff(){
+  const m = {doubling:1, align:1, mitigAdd:0, local:1, regional:1, global:1, dep:1, phys:1, sci:1, soc:1};
+  TRIGGERS.forEach(t=>{
+    if(!S.triggers[t.id]) return;
+    for(const k in t.fx){
+      if(k === "mitigAdd") m.mitigAdd += t.fx[k];
+      else m[k] *= t.fx[k];
+    }
+  });
+  return {
+    D:      S.doubling * S.friction * m.doubling,
+    align:  clamp(S.align/100 * m.align, 0, 1),
+    malice: S.malice/100,
+    mitig:  clamp(S.mitig/100 + m.mitigAdd, 0, 1),
+    dep0:   clamp(S.dep0/100 * m.dep, 0, 0.95),
+    tier:   {local:m.local, regional:m.regional, global:m.global},
+    grp:    {phys:m.phys, sci:m.sci, soc:m.soc}
+  };
+}
+
+const relFactor = () => (S.rel === 80 ? 5 : 1);
+const horizonAt = (t, E) => H0 * Math.pow(2, (t - T0) / (DAY * E.D));
+const dateFor   = (H, E) => T0 + E.D * DAY * Math.log2(H / H0);
+
+/* ---------- даты по строкам ---------- */
+function itemDate(it, E){
+  const g = it.grp ? (E.grp[it.grp] || 1) : 1;
+  const req = it.m * S.target * relFactor();
+  return dateFor(req, E) + it.lag * g * YR;
+}
+function itemProgress(it, E, now){
+  const g = it.grp ? (E.grp[it.grp] || 1) : 1;
+  const req = it.m * S.target * relFactor();
+  const H = horizonAt(now, E);
+  // 12 удвоений «разбега» до требования, затем лаг внедрения съедает хвост
+  let p = (Math.log2(H) - Math.log2(req) + 12) / 12;
+  if (p >= 1 && it.lag > 0){
+    const passed = (now - dateFor(req, E)) / (it.lag * g * YR);
+    p = 0.88 + 0.12 * clamp(passed, 0, 1);
+  }
+  return clamp(p, 0, 1);
+}
+
+/* ---------- кривые риска ---------- */
+function riskCurves(E){
+  const now = Date.now();
+  const out = {};
+  TIERS.forEach(t=>{
+    const tsat = dateFor(t.req * 8, E);          // c ≈ 0,9
+    let cum = 0;
+    const pts = [];
+    for (let y = 2026; y <= 2100; y++){
+      const tm = Date.UTC(y, 6, 1);
+      const c   = 1 / (1 + Math.exp(-0.8 * (Math.log2(horizonAt(tm, E)) - Math.log2(t.req))));
+      const dep = E.dep0 + (1 - E.dep0) * (1 - Math.exp(-Math.max(0,(tm - now)/YR) / S.tau));
+      const ad  = Math.exp(-Math.max(0,(tm - tsat)/YR) / S.adapt);
+      const lam = (t.wm * E.malice + t.wu * E.align) * c * dep * (1 - E.mitig * t.eff) * ad * E.tier[t.id];
+      cum += Math.max(0, lam);
+      pts.push({y, p: 1 - Math.exp(-cum)});
+    }
+    out[t.id] = pts;
+  });
+  return out;
+}
+function medianDate(pts){
+  for (let i = 0; i < pts.length; i++){
+    if (pts[i].p >= 0.5){
+      const prev = i ? pts[i-1] : {y: pts[0].y - 1, p: 0};
+      const f = (0.5 - prev.p) / (pts[i].p - prev.p || 1);
+      return Date.UTC(prev.y, 6, 1) + f * YR;
+    }
+  }
+  return null;
+}
+function pAt(pts, year){
+  const r = pts.find(p => p.y === year);
+  return r ? r.p : pts[pts.length-1].p;
+}
+// P(хотя бы одно событие любого уровня) — по локальной ступени как нижней границе
+function anyCurve(cv){
+  return cv.local.map((p,i)=>{
+    const s = (1-cv.local[i].p) * (1-cv.regional[i].p) * (1-cv.global[i].p);
+    return {y:p.y, p: 1 - s};
+  });
+}
+
+/* ============================================================
+   ФОРМАТИРОВАНИЕ
+   ============================================================ */
+const MON = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
+function fmtDate(ms){
+  const d = new Date(ms);
+  return d.getUTCDate() + " " + MON[d.getUTCMonth()] + " " + d.getUTCFullYear();
+}
+function fmtYM(ms){
+  const d = new Date(ms);
+  return MON[d.getUTCMonth()] + " " + d.getUTCFullYear();
+}
+function plural(n, a, b, c){
+  const n1 = n % 10, n2 = n % 100;
+  if (n1 === 1 && n2 !== 11) return a;
+  if (n1 >= 2 && n1 <= 4 && (n2 < 10 || n2 >= 20)) return b;
+  return c;
+}
+const dec = x => String(x).replace(".", ",");
+function bigNum(n){
+  if (n >= 1e9) return (n/1e9).toFixed(n >= 1e10 ? 0 : 1).replace(".",",") + " млрд";
+  if (n >= 1e6) return (n/1e6).toFixed(n >= 1e7 ? 0 : 1).replace(".",",") + " млн";
+  if (n >= 1e3) return Math.round(n/1e3) + " тыс.";
+  return Math.round(n).toString();
+}
+function usdNum(n){
+  if (n >= 1e15) return "$" + (n/1e15).toFixed(n >= 1e16 ? 0 : 1).replace(".",",") + " квадрлн";
+  if (n >= 1e12) return "$" + (n/1e12).toFixed(n >= 1e13 ? 0 : 1).replace(".",",") + " трлн";
+  if (n >= 1e9)  return "$" + (n/1e9).toFixed(0) + " млрд";
+  return "$" + bigNum(n);
+}
+function countdown(target, now){
+  if (target === null) return {big:"за пределами модели", clock:"P < 50% до 2100 года", past:false, none:true};
+  let ms = target - now;
+  if (ms <= 0) return {big:"уже наступило", clock:"по этим допущениям — " + fmtYM(target), past:true};
+  const totalDays = ms / DAY;
+  const years = Math.floor(totalDays / 365.2425);
+  const days  = Math.floor(totalDays - years * 365.2425);
+  const rem   = ms - (years * YR + days * DAY);
+  const hh = Math.floor(rem / 3600000) % 24;
+  const mm = Math.floor(rem / 60000) % 60;
+  const ss = Math.floor(rem / 1000) % 60;
+  const p2 = x => String(x).padStart(2, "0");
+  const big = years > 0
+    ? years + " " + plural(years, "год", "года", "лет") + " " + days + " " + plural(days, "день", "дня", "дней")
+    : days + " " + plural(days, "день", "дня", "дней");
+  return {big, clock: p2(hh) + ":" + p2(mm) + ":" + p2(ss), past:false};
+}
+
+/* ============================================================
+   ГРАФИКИ
+   ============================================================ */
+function chartHorizon(E){
+  const svg = document.getElementById("chart-horizon");
+  const W = 900, H = 340, L = 58, R = 108, T = 14, B = 34;
+  const now = Date.now();
+  // ось X: 2023 → дата достижения самого дальнего порога, но не дальше 2050
+  const endTarget = dateFor(115200 * relFactor(), E);
+  const x0 = Date.UTC(2023, 0, 1);
+  const x1 = clamp(Math.max(endTarget + 1.2*YR, now + 3*YR), now + 2*YR, Date.UTC(2055,0,1));
+  const y0 = Math.log10(0.5), y1 = Math.log10(3e5);
+  const X = t => L + (t - x0) / (x1 - x0) * (W - L - R);
+  const Y = h => T + (1 - (Math.log10(h) - y0) / (y1 - y0)) * (H - T - B);
+  let s = "";
+  // сетка по годам
+  const yrStep = (x1 - x0) / YR > 22 ? 5 : ((x1-x0)/YR > 11 ? 2 : 1);
+  for (let y = 2024; y <= 2056; y += yrStep){
+    const t = Date.UTC(y,0,1); if (t < x0 || t > x1) continue;
+    s += `<line x1="${X(t)}" y1="${T}" x2="${X(t)}" y2="${H-B}" stroke="var(--grid)" stroke-width="1"/>`;
+    s += `<text x="${X(t)}" y="${H-B+18}" fill="var(--muted)" font-size="11" text-anchor="middle">${y}</text>`;
+  }
+  // горизонтальные пороги
+  TARGETS.forEach(tg=>{
+    const yy = Y(tg.v * relFactor());
+    if (yy < T || yy > H-B) return;
+    s += `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="var(--axis)" stroke-width="1" stroke-dasharray="3 4"/>`;
+    const on = tg.v === S.target;
+    s += `<text x="${W-R+8}" y="${yy+4}" fill="${on ? "var(--ink)" : "var(--muted)"}" font-size="11.5" font-weight="${on?600:400}">${tg.l}</text>`;
+  });
+  // ось Y
+  [1,10,100,1000,10000,100000].forEach(v=>{
+    const yy = Y(v);
+    s += `<text x="${L-9}" y="${yy+4}" fill="var(--muted)" font-size="11" text-anchor="end">${v >= 1000 ? (v/1000)+"к" : v}</text>`;
+  });
+  s += `<text x="${L-9}" y="${T-1}" fill="var(--muted)" font-size="10.5" text-anchor="end">мин</text>`;
+  s += `<line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="var(--axis)" stroke-width="1"/>`;
+  // линия тренда
+  const seg = (a,b) => `M ${X(a)} ${Y(horizonAt(a,E))} L ${X(b)} ${Y(horizonAt(b,E))}`;
+  s += `<path d="${seg(x0, now)}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linecap="round" opacity="0.85"/>`;
+  s += `<path d="${seg(now, x1)}" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round"/>`;
+  // «сегодня»
+  s += `<line x1="${X(now)}" y1="${T}" x2="${X(now)}" y2="${H-B}" stroke="var(--ink-2)" stroke-width="1" opacity="0.45"/>`;
+  s += `<text x="${X(now)+6}" y="${T+12}" fill="var(--ink-2)" font-size="11">сегодня</text>`;
+  // точки METR
+  METR.forEach(p=>{
+    if (p.d < x0) return;
+    s += `<circle cx="${X(p.d)}" cy="${Y(p.h)}" r="5" fill="var(--series-1)" stroke="var(--surface-1)" stroke-width="2"/>`;
+  });
+  const last = METR[METR.length-1];
+  s += `<text x="${X(last.d)-11}" y="${Y(last.h)+19}" fill="var(--ink-2)" font-size="11.5" text-anchor="end">${last.n} · ${last.h} мин</text>`;
+  // маркер порога
+  const tgtDate = dateFor(S.target * relFactor(), E);
+  if (tgtDate > x0 && tgtDate < x1){
+    const cx = X(tgtDate), cy = Y(S.target * relFactor());
+    s += `<circle cx="${cx}" cy="${cy}" r="6.5" fill="none" stroke="var(--warning)" stroke-width="2"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="2.5" fill="var(--warning)"/>`;
+    const anchor = cx > W - R - 90 ? "end" : "start";
+    s += `<text x="${cx + (anchor==="end"?-11:11)}" y="${cy-11}" fill="var(--warning)" font-size="11.5" font-weight="600" text-anchor="${anchor}">${fmtYM(tgtDate)}</text>`;
+  }
+  svg.innerHTML = s;
+  attachHoverH(svg, E, {W,H,L,R,T,B,x0,x1,X,Y});
+}
+
+function attachHoverH(svg, E, g){
+  const tt = document.getElementById("tt-h");
+  const box = document.getElementById("box-horizon");
+  svg.onmousemove = ev=>{
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * g.W;
+    if (px < g.L || px > g.W - g.R){ tt.style.opacity = 0; return; }
+    const t = g.x0 + (px - g.L)/(g.W - g.L - g.R) * (g.x1 - g.x0);
+    const h = horizonAt(t, E);
+    const hh = h < 60 ? h.toFixed(1) + " мин"
+             : h < 2880 ? (h/60).toFixed(1) + " ч"
+             : h < 86400 ? (h/1440).toFixed(1) + " дн."
+             : (h/43200).toFixed(1) + " мес.";
+    tt.innerHTML = `<b>${fmtYM(t)}</b><div class="r"><span>горизонт (50%)</span><em>${hh}</em></div>`;
+    const bx = box.getBoundingClientRect();
+    tt.style.left = clamp(ev.clientX - bx.left + 14, 8, bx.width - 190) + "px";
+    tt.style.top  = (ev.clientY - bx.top - 44) + "px";
+    tt.style.opacity = 1;
+  };
+  svg.onmouseleave = ()=>{ document.getElementById("tt-h").style.opacity = 0; };
+}
+
+function chartRisk(cv){
+  const svg = document.getElementById("chart-risk");
+  const W = 900, H = 320, L = 46, R = 132, T = 14, B = 34;
+  const y0 = 2026, y1 = 2100;
+  const X = y => L + (y - y0)/(y1 - y0) * (W - L - R);
+  const Y = p => T + (1 - p) * (H - T - B);
+  let s = "";
+  for (let p = 0; p <= 1.001; p += 0.25){
+    s += `<line x1="${L}" y1="${Y(p)}" x2="${W-R}" y2="${Y(p)}" stroke="var(--grid)" stroke-width="1"/>`;
+    s += `<text x="${L-9}" y="${Y(p)+4}" fill="var(--muted)" font-size="11" text-anchor="end">${Math.round(p*100)}%</text>`;
+  }
+  for (let y = 2030; y <= 2100; y += 10){
+    s += `<text x="${X(y)}" y="${H-B+18}" fill="var(--muted)" font-size="11" text-anchor="middle">${y}</text>`;
+    s += `<line x1="${X(y)}" y1="${T}" x2="${X(y)}" y2="${H-B}" stroke="var(--grid)" stroke-width="1" opacity="0.6"/>`;
+  }
+  s += `<line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="var(--axis)" stroke-width="1"/>`;
+  s += `<line x1="${L}" y1="${Y(0.5)}" x2="${W-R}" y2="${Y(0.5)}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>`;
+  const dash = {local:"2 5", regional:"7 4", global:""};
+  TIERS.forEach(t=>{
+    const pts = cv[t.id];
+    const d = pts.map((p,i)=> (i?"L":"M") + X(p.y).toFixed(1) + " " + Y(p.p).toFixed(1)).join(" ");
+    s += `<path d="${d}" fill="none" stroke="${t.hex}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${dash[t.id]}"/>`;
+    const end = pts[pts.length-1];
+    s += `<rect x="${W-R+8}" y="${Y(end.p)-7}" width="9" height="9" rx="2" fill="${t.hex}"/>`;
+    s += `<text x="${W-R+22}" y="${Y(end.p)+1}" fill="var(--ink)" font-size="11.5" font-weight="600">${t.n}</text>`;
+    s += `<text x="${W-R+22}" y="${Y(end.p)+15}" fill="var(--muted)" font-size="10.5">${Math.round(end.p*100)}% к 2100</text>`;
+  });
+  svg.innerHTML = s;
+
+  document.getElementById("legend-risk").innerHTML = TIERS.map(t=>
+    `<span><i style="background:${t.hex}"></i>${t.n}</span>`).join("");
+
+  const tbl = document.getElementById("tbl-risk");
+  let rows = `<tr><th>Год</th>${TIERS.map(t=>`<th>${t.n}</th>`).join("")}</tr>`;
+  [2030,2035,2040,2050,2060,2075,2100].forEach(y=>{
+    rows += `<tr><td>${y}</td>${TIERS.map(t=>`<td>${dec((pAt(cv[t.id],y)*100).toFixed(1))}%</td>`).join("")}</tr>`;
+  });
+  tbl.innerHTML = rows;
+
+  const tt = document.getElementById("tt-r"), box = document.getElementById("box-risk");
+  svg.onmousemove = ev=>{
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left)/r.width * W;
+    if (px < L || px > W - R){ tt.style.opacity = 0; return; }
+    const y = Math.round(y0 + (px - L)/(W - L - R) * (y1 - y0));
+    tt.innerHTML = `<b>${y} год</b>` + TIERS.map(t=>
+      `<div class="r"><span><span class="sw" style="background:${t.hex}"></span>${t.n}</span><em>${dec((pAt(cv[t.id],y)*100).toFixed(1))}%</em></div>`).join("");
+    const bx = box.getBoundingClientRect();
+    tt.style.left = clamp(ev.clientX - bx.left + 14, 8, bx.width - 230) + "px";
+    tt.style.top  = (ev.clientY - bx.top - 68) + "px";
+    tt.style.opacity = 1;
+  };
+  svg.onmouseleave = ()=>{ tt.style.opacity = 0; };
+}
+
+function drawClock(minutes){
+  const svg = document.getElementById("ddclock");
+  const cx = 80, cy = 80, r = 62;
+  const ang = (minutes / 60) * Math.PI * 2;              // до полуночи
+  const mx = cx - Math.sin(ang) * (r - 12);
+  const my = cy - Math.cos(ang) * (r - 12) * -1;
+  const my2 = cy - Math.cos(ang) * (r - 12);
+  let s = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--axis)" stroke-width="2"/>`;
+  for (let i = 0; i < 12; i++){
+    const a = i/12 * Math.PI*2;
+    const r1 = r - 6, r2 = r - (i%3===0 ? 13 : 9);
+    s += `<line x1="${cx+Math.sin(a)*r1}" y1="${cy-Math.cos(a)*r1}" x2="${cx+Math.sin(a)*r2}" y2="${cy-Math.cos(a)*r2}" stroke="var(--muted)" stroke-width="${i%3===0?2:1}"/>`;
+  }
+  // часовая — на 12
+  s += `<line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-r+26}" stroke="var(--ink-2)" stroke-width="4" stroke-linecap="round"/>`;
+  // минутная — «minutes» до 12, идёт против часовой от 12
+  const a2 = -ang;
+  s += `<line x1="${cx}" y1="${cy}" x2="${cx+Math.sin(a2)*(r-14)}" y2="${cy-Math.cos(a2)*(r-14)}" stroke="${minutes<3?"var(--critical)":minutes<7?"var(--serious)":"var(--warning)"}" stroke-width="3" stroke-linecap="round"/>`;
+  s += `<circle cx="${cx}" cy="${cy}" r="4" fill="var(--ink)"/>`;
+  svg.innerHTML = s;
+}
+
+/* ============================================================
+   РЕНДЕР
+   ============================================================ */
+let CACHE = {};
+
+function renderRows(){
+  const E = eff(), now = Date.now();
+  const build = (list, el) => {
+    el.innerHTML = list.slice().sort((a,b)=> itemDate(a,E) - itemDate(b,E)).map(it=>{
+      const d = itemDate(it, E), p = itemProgress(it, E, now), done = d <= now;
+      return `<div class="row">
+        <span class="nm">${it.n}${it.d ? `<small>${it.d}</small>` : ""}</span>
+        <span class="bar"><i style="width:${(p*100).toFixed(1)}%;background:${done ? "var(--good)" : "var(--series-1)"}"></i></span>
+        <span class="eta ${done ? "done" : ""}">${done ? "✓ " + new Date(d).getUTCFullYear() : fmtYM(d)}</span>
+      </div>`;
+    }).join("");
+  };
+  build(FUNCS, document.getElementById("rows-fn"));
+  build(INDS,  document.getElementById("rows-ind"));
+}
+
+function renderTiers(cv){
+  const el = document.getElementById("tiers");
+  el.innerHTML = TIERS.map(t=>{
+    const pts = cv[t.id], med = medianDate(pts);
+    return `<div class="tier" style="--tc:${t.hex}">
+      <h4><span class="dot"></span>${t.n}</h4>
+      <p class="thresh">${t.thresh}</p>
+      <p class="med">${med ? fmtYM(med) : "&gt; 2100"} <small>${med ? "медиана" : "P&lt;50% до 2100"}</small></p>
+      <p class="probs">
+        <span>P к 2035</span> ${dec((pAt(pts,2035)*100).toFixed(1))}% &nbsp;·&nbsp;
+        <span>2050</span> ${dec((pAt(pts,2050)*100).toFixed(1))}% &nbsp;·&nbsp;
+        <span>2100</span> ${dec((pAt(pts,2100)*100).toFixed(1))}%
+      </p>
+      <p class="probs" style="margin-top:4px"><span>жертвы</span> ${bigNum(t.deaths[0])}–${bigNum(t.deaths[1])} &nbsp;·&nbsp; <span>ущерб</span> ${usdNum(t.usd[0])}–${usdNum(t.usd[1])}</p>
+      <p class="scen">${t.scen}</p>
+    </div>`;
+  }).join("");
+}
+
+function renderAll(){
+  const E = eff();
+  CACHE.E = E;
+  CACHE.cv = riskCurves(E);
+  CACHE.any = anyCurve(CACHE.cv);
+
+  // порог сингулярности
+  const all = FUNCS.concat(INDS).map(it=>itemDate(it,E)).sort((a,b)=>a-b);
+  const idx = Math.min(all.length-1, Math.ceil(all.length * S.thr/100) - 1);
+  CACHE.sgDate = all[Math.max(0,idx)];
+  CACHE.sgShare = all.filter(d=>d <= Date.now()).length / all.length;
+  CACHE.apDate = medianDate(CACHE.any);
+
+  chartHorizon(E);
+  chartRisk(CACHE.cv);
+  renderRows();
+  renderTiers(CACHE.cv);
+
+  // ожидание к 2050
+  let ed = 0, eu = 0;
+  TIERS.forEach(t=>{
+    const p = pAt(CACHE.cv[t.id], 2050);
+    ed += p * Math.sqrt(t.deaths[0]*t.deaths[1]);
+    eu += p * Math.sqrt(t.usd[0]*t.usd[1]);
+  });
+  document.getElementById("ev-deaths").textContent = bigNum(ed) + " чел.";
+  document.getElementById("ev-usd").textContent = usdNum(eu);
+
+  // часы судного дня
+  const pg = pAt(CACHE.cv.global, 2100);
+  const mins = Math.max(0.2, 15 * (1 - pg));
+  drawClock(mins);
+  const mtxt = mins >= 1
+    ? Math.floor(mins) + " " + plural(Math.floor(mins),"минута","минуты","минут") + " " + Math.round((mins%1)*60) + " с"
+    : Math.round(mins*60) + " секунд";
+  document.getElementById("dd-min").textContent = mtxt;
+  document.getElementById("dd-note").innerHTML =
+    `до полуночи. Шкала: 15 минут = глобальная катастрофа исключена, полночь = гарантирована. Сейчас модель даёт <b>${dec((pg*100).toFixed(1))}%</b> на глобальный уровень до 2100 года.`;
+  const bd = document.getElementById("dd-badge"), bt = document.getElementById("dd-badge-tx");
+  const lvl = pg < 0.05 ? ["var(--good)","●","Спокойно"]
+            : pg < 0.15 ? ["var(--warning)","▲","Настороженно"]
+            : pg < 0.35 ? ["var(--serious)","▲","Серьёзно"]
+            : ["var(--critical)","■","Критично"];
+  bd.style.borderColor = lvl[0]; bd.querySelector(".ic").style.color = lvl[0];
+  bd.querySelector(".ic").textContent = lvl[1];
+  bt.textContent = lvl[2] + " · P(глобальный) = " + dec((pg*100).toFixed(1)) + "%";
+
+  tick();
+  syncPresetButtons();
+}
+
+function tick(){
+  const now = Date.now();
+  const sg = countdown(CACHE.sgDate, now);
+  document.getElementById("sg-big").textContent = sg.big;
+  document.getElementById("sg-clock").textContent = sg.clock;
+  document.getElementById("sg-clock").className = "clockline" + (sg.past || sg.none ? "" : " pulse");
+  document.getElementById("sg-note").innerHTML = sg.past
+    ? `Порог в <b>${S.thr}%</b> видов деятельности при этих допущениях уже пройден. Уже пройдено: <b>${Math.round(CACHE.sgShare*100)}%</b> из 30.`
+    : `Дата: <b>${fmtDate(CACHE.sgDate)}</b>. Это момент, когда ИИ обгонит медианного профессионала в <b>${S.thr}%</b> из 30 видов деятельности. Уже пройдено: <b>${Math.round(CACHE.sgShare*100)}%</b>.`;
+
+  const ap = countdown(CACHE.apDate, now);
+  document.getElementById("ap-big").textContent = ap.big;
+  document.getElementById("ap-clock").textContent = ap.clock;
+  document.getElementById("ap-clock").className = "clockline" + (ap.past || ap.none ? "" : " pulse");
+  document.getElementById("ap-note").innerHTML = CACHE.apDate
+    ? `Медианная дата первого события уровня «локальный» и выше: <b>${fmtDate(CACHE.apDate)}</b>. Это <em>не</em> конец света — это первый порог лестницы.`
+    : `При этих допущениях вероятность события любого уровня не достигает 50% до 2100 года. Поздравляю: вы описали благополучный мир.`;
+}
+
+/* ============================================================
+   УПРАВЛЕНИЕ
+   ============================================================ */
+function bindRange(id, key, fmt){
+  const el = document.getElementById(id), out = document.getElementById("v-" + id);
+  el.value = S[key];
+  out.textContent = fmt ? fmt(S[key]) : S[key];
+  el.addEventListener("input", ()=>{
+    S[key] = parseFloat(el.value);
+    out.textContent = fmt ? fmt(S[key]) : S[key];
+    renderAll();
+  });
+}
+function syncRanges(){
+  [["doubling","doubling",null],["friction","friction",v=>v.toFixed(1).replace(".",",")],
+   ["thr","thr",null],["malice","malice",null],["align","align",null],["mitig","mitig",null],
+   ["dep0","dep0",null],["tau","tau",null],["adapt","adapt",null]].forEach(([id,key,f])=>{
+    const el = document.getElementById(id), out = document.getElementById("v-"+id);
+    el.value = S[key]; out.textContent = f ? f(S[key]) : S[key];
+  });
+  buildSeg("target-seg", TARGETS.map(t=>({v:t.v,l:t.l})), "target");
+  buildSeg("rel-seg", [{v:50,l:"50% успеха"},{v:80,l:"80% успеха"}], "rel");
+}
+function buildSeg(id, opts, key){
+  const el = document.getElementById(id);
+  el.innerHTML = opts.map(o=>`<button data-v="${o.v}" aria-pressed="${S[key]===o.v}">${o.l}</button>`).join("");
+  el.querySelectorAll("button").forEach(b=>{
+    b.onclick = ()=>{ S[key] = parseFloat(b.dataset.v); buildSeg(id, opts, key); renderAll(); };
+  });
+}
+function buildPresets(){
+  const el = document.getElementById("presets");
+  Object.keys(PRESETS).forEach(k=>{
+    const b = document.createElement("button");
+    b.className = "preset"; b.textContent = k; b.dataset.k = k;
+    b.onclick = ()=>{ Object.assign(S, PRESETS[k]); syncRanges(); renderAll(); };
+    el.appendChild(b);
+  });
+}
+function syncPresetButtons(){
+  document.querySelectorAll("button.preset").forEach(b=>{
+    const p = PRESETS[b.dataset.k];
+    const same = Object.keys(p).every(k => S[k] === p[k]);
+    b.setAttribute("aria-pressed", same);
+  });
+}
+function buildTriggers(){
+  const el = document.getElementById("trigs");
+  el.innerHTML = TRIGGERS.map(t=>`
+    <label class="trig${t.calming ? " calming" : ""}" data-id="${t.id}">
+      <input type="checkbox" ${S.triggers[t.id] ? "checked" : ""}>
+      <span class="tx">${t.t}<small>${t.s}</small><span class="fx">${t.txt}</span></span>
+    </label>`).join("");
+  el.querySelectorAll(".trig").forEach(l=>{
+    const cb = l.querySelector("input");
+    cb.onchange = ()=>{
+      S.triggers[l.dataset.id] = cb.checked;
+      l.classList.toggle("on", cb.checked);
+      renderAll();
+    };
+  });
+}
+
+buildPresets();
+syncRanges();
+bindRange("doubling","doubling");
+bindRange("friction","friction", v=>v.toFixed(1).replace(".",","));
+bindRange("thr","thr");
+bindRange("malice","malice");
+bindRange("align","align");
+bindRange("mitig","mitig");
+bindRange("dep0","dep0");
+bindRange("tau","tau");
+bindRange("adapt","adapt");
+buildTriggers();
+renderAll();
+setInterval(tick, 1000);
+window.addEventListener("resize", ()=>{ chartHorizon(CACHE.E); chartRisk(CACHE.cv); });
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "@sc/data",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Конфиг модели, датасеты, схемы валидации.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./node": "./src/node.ts",
+    "./config/model.v1.yaml": "./config/model.v1.yaml"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sc/core": "workspace:*",
+    "yaml": "^2.7.0",
+    "zod": "^4.0.0"
+  }
+}

@@ -1,0 +1,57 @@
+---
+import Base from '../../layouts/Base.astro';
+import { MODEL_CONFIG as config } from '../../model-config.ts';
+
+const anchor = new Date(config.anchor.at);
+---
+
+<Base
+  locale="en"
+  title="The Singularity Clock — countdown"
+  description="Two countdowns from a single extrapolation: to singularity and to catastrophe. The date is not the result — its sensitivity to assumptions is."
+>
+  <header>
+    <p class="eyebrow">Half-joking forecasting apparatus · v{config.version} · scaffold</p>
+    <h1>The Singularity Clock and the Ladder of Catastrophes</h1>
+    <p class="lede">
+      M0 scaffold. The calculation core lands in M1 — until then nothing here is computed.
+    </p>
+  </header>
+
+  <p class="anchor">
+    Model anchor: {config.anchor.model}, {anchor.getUTCFullYear()} — 50% time horizon
+    <b class="tabular">{config.anchor.horizonMinutes}</b> minutes.
+  </p>
+</Base>
+
+<style>
+  header {
+    padding: 44px 0 26px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 26px;
+  }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 10px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  .lede {
+    color: var(--ink-2);
+    max-width: 74ch;
+    margin: 0;
+  }
+  .anchor {
+    color: var(--ink-2);
+    font-size: 13.5px;
+    max-width: 80ch;
+  }
+</style>
