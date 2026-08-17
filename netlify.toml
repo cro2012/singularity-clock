@@ -14,7 +14,7 @@
   # sharp — нативный модуль, esbuild его не бандлит; шрифты и конфиг модели
   # функция читает с диска, поэтому их надо положить рядом.
   external_node_modules = ["sharp"]
-  included_files = ["apps/web/netlify/functions/assets/**"]
+  included_files = ["apps/web/netlify/assets/**"]
 
 # Короткий адрес картинки: /og?s=…&l=… вместо /.netlify/functions/og
 [[redirects]]

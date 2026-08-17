@@ -7,7 +7,7 @@
 
 import { writeFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import og from './og.mts';
+import og from '../netlify/functions/og.mts';
 
 // OG_DUMP=<каталог> — сохранить отрендеренные картинки, чтобы посмотреть
 // глазами. Проверить PNG-магию тест может, а вёрстку — нет.

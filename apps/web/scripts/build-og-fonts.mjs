@@ -16,7 +16,10 @@ import { decompress } from 'wawoff2';
 
 const require = createRequire(import.meta.url);
 const here = dirname(fileURLToPath(import.meta.url));
-const out = join(here, '..', 'netlify', 'functions', 'assets');
+// Ассеты лежат РЯДОМ с каталогом функций, а не внутри: Netlify считает
+// функцией каждый файл и каталог внутри functions/, и `assets` с точками
+// в именах ронял сборку с «Incorrect function names».
+const out = join(here, '..', 'netlify', 'assets');
 mkdirSync(out, { recursive: true });
 
 // Латиница и кириллица лежат в разных подмножествах. Satori принимает список

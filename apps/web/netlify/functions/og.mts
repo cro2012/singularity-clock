@@ -13,8 +13,8 @@
  * — иначе пришлось бы тащить fontconfig в лямбду.
  */
 
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import satori from 'satori';
 import type { ReactNode } from 'react';
@@ -30,7 +30,28 @@ import {
   type Locale,
 } from '@sc/i18n';
 
-const ASSETS = join(dirname(fileURLToPath(import.meta.url)), 'assets');
+/**
+ * Каталог с шрифтами и конфигом.
+ *
+ * В исходниках он лежит рядом с функцией, в собранной лямбде — там, куда его
+ * положил included_files, то есть относительно корня проекта. Проверяем
+ * кандидатов и падаем с внятным сообщением, а не с ENOENT в глубине satori.
+ */
+const ASSETS = (() => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    join(here, '..', 'assets'),
+    join(here, 'assets'),
+    resolve(process.cwd(), 'apps/web/netlify/assets'),
+    resolve(process.cwd(), 'netlify/assets'),
+  ];
+  const found = candidates.find((path) => existsSync(join(path, 'model.v1.yaml')));
+  if (!found) {
+    throw new Error(`Ассеты OG-функции не найдены. Проверены пути: ${candidates.join(', ')}`);
+  }
+  return found;
+})();
+
 const font = (name: string) => readFileSync(join(ASSETS, name));
 
 const MODEL_CONFIG = parseModelConfig(readFileSync(join(ASSETS, 'model.v1.yaml'), 'utf8'));
