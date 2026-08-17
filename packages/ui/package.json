@@ -6,7 +6,8 @@
   "description": "Дизайн-токены и переиспользуемые компоненты.",
   "exports": {
     ".": "./src/index.ts",
-    "./tokens.css": "./src/tokens.generated.css"
+    "./tokens.css": "./src/tokens.generated.css",
+    "./app.css": "./src/app.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -14,6 +15,10 @@
   },
   "dependencies": {
     "@sc/core": "workspace:*",
-    "@sc/i18n": "workspace:*"
+    "@sc/i18n": "workspace:*",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0"
   }
 }

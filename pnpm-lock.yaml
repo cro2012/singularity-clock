@@ -102,6 +102,13 @@ importers:
       '@sc/i18n':
         specifier: workspace:*
         version: link:../i18n
+      react:
+        specifier: ^19.0.0
+        version: 19.2.8
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.18
 
 packages:
 

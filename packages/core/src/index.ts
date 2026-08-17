@@ -6,3 +6,5 @@ export * from './items.ts';
 export * from './risk.ts';
 export * from './countries.ts';
 export * from './compute.ts';
+export * from './base64url.ts';
+export * from './codec.ts';

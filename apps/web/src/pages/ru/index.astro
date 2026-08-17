@@ -1,9 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { MODEL_CONFIG as config } from '../../model-config.ts';
+import { Screen } from '../../components/Screen.tsx';
+import '@sc/ui/app.css';
 
-// Конфиг читается на этапе сборки: если YAML не пройдёт схему, упадёт сборка,
-// а не страница у пользователя.
+// Модель считается на этапе сборки и попадает в HTML готовыми числами;
+// гидратация оживляет ползунки и подставляет настоящее время.
+const now = Date.now();
 const anchor = new Date(config.anchor.at);
 ---
 
@@ -13,56 +16,28 @@ const anchor = new Date(config.anchor.at);
   description="Два обратных отсчёта из одной экстраполяции: до сингулярности и до катастрофы. Дата не результат — результат её чувствительность к допущениям."
 >
   <header>
-    <p class="eyebrow">Полушуточный прогнозный аппарат · v{config.version} · каркас</p>
+    <p class="eyebrow">Полушуточный прогнозный аппарат · v{config.version}</p>
     <h1>Часы Сингулярности и Лестница Катастроф</h1>
     <p class="lede">
-      Каркас M0. Расчётное ядро появится в M1 — до тех пор здесь честно ничего не считается.
+      Два обратных отсчёта, посчитанных из одной экстраполяции: горизонта автономных задач METR.
+      Всё, что вы видите ниже, — <em>оформленное суждение, а не измерение будущего</em>. Крутите
+      ползунки: если дата легко сдвигается на двадцать лет, значит она никогда и не была прогнозом.
     </p>
   </header>
 
-  <p class="anchor">
-    Опорная точка модели: {config.anchor.model}, {anchor.getUTCFullYear()} — 50%-горизонт
-    <b class="tabular">{config.anchor.horizonMinutes}</b> минут. Загружено из
-    <code>model.v{config.version.split('.')[0]}.yaml</code>, {config.functions.length} видов
-    деятельности и {config.industries.length} отраслей прошли валидацию.
-  </p>
-</Base>
+  <Screen client:load locale="ru" now={now} />
 
-<style>
-  header {
-    padding: 44px 0 26px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 26px;
-  }
-  .eyebrow {
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 0 0 10px;
-  }
-  h1 {
-    font-size: 34px;
-    line-height: 1.15;
-    margin: 0 0 10px;
-    font-weight: 650;
-    letter-spacing: -0.02em;
-  }
-  .lede {
-    color: var(--ink-2);
-    max-width: 74ch;
-    margin: 0;
-  }
-  .anchor {
-    color: var(--ink-2);
-    font-size: 13.5px;
-    max-width: 80ch;
-  }
-  code {
-    background: var(--surface-2);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 12px;
-    color: var(--ink);
-  }
-</style>
+  <footer>
+    <p>
+      Опорная точка экстраполяции: 50%-горизонт <b>{config.anchor.horizonMinutes}</b> минут,
+      {config.anchor.model}, {anchor.getUTCFullYear()} (METR, TH1.1). Коэффициенты сложности, лаги
+      внедрения и веса ступеней — экспертное суждение, не измерение.
+    </p>
+    <div class="srcs">
+      <a href="https://metr.org/blog/2026-1-29-time-horizon-1-1/">METR · Time Horizon 1.1</a>
+      <a href="https://metr.org/time-horizons/">METR · Task-Completion Time Horizons</a>
+      <a href="https://hai.stanford.edu/ai-index/2026-ai-index-report">Stanford HAI · AI Index 2026</a>
+      <a href="https://incidentdatabase.ai/">AI Incident Database</a>
+    </div>
+  </footer>
+</Base>

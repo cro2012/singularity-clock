@@ -1,7 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { MODEL_CONFIG as config } from '../../model-config.ts';
+import { Screen } from '../../components/Screen.tsx';
+import '@sc/ui/app.css';
 
+// Модель считается на этапе сборки и попадает в HTML готовыми числами;
+// гидратация оживляет ползунки и подставляет настоящее время.
+const now = Date.now();
 const anchor = new Date(config.anchor.at);
 ---
 
@@ -11,47 +16,28 @@ const anchor = new Date(config.anchor.at);
   description="Two countdowns from a single extrapolation: to singularity and to catastrophe. The date is not the result — its sensitivity to assumptions is."
 >
   <header>
-    <p class="eyebrow">Half-joking forecasting apparatus · v{config.version} · scaffold</p>
+    <p class="eyebrow">A half-joking forecasting apparatus · v{config.version}</p>
     <h1>The Singularity Clock and the Ladder of Catastrophes</h1>
     <p class="lede">
-      M0 scaffold. The calculation core lands in M1 — until then nothing here is computed.
+      Two countdowns derived from a single extrapolation: METR's autonomous task horizon.
+      Everything below is <em>a formalised judgement, not a measurement of the future</em>. Move the
+      sliders: if a date shifts by twenty years that easily, it was never a forecast.
     </p>
   </header>
 
-  <p class="anchor">
-    Model anchor: {config.anchor.model}, {anchor.getUTCFullYear()} — 50% time horizon
-    <b class="tabular">{config.anchor.horizonMinutes}</b> minutes.
-  </p>
-</Base>
+  <Screen client:load locale="en" now={now} />
 
-<style>
-  header {
-    padding: 44px 0 26px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 26px;
-  }
-  .eyebrow {
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 0 0 10px;
-  }
-  h1 {
-    font-size: 34px;
-    line-height: 1.15;
-    margin: 0 0 10px;
-    font-weight: 650;
-    letter-spacing: -0.02em;
-  }
-  .lede {
-    color: var(--ink-2);
-    max-width: 74ch;
-    margin: 0;
-  }
-  .anchor {
-    color: var(--ink-2);
-    font-size: 13.5px;
-    max-width: 80ch;
-  }
-</style>
+  <footer>
+    <p>
+      Extrapolation anchor: a 50% horizon of <b>{config.anchor.horizonMinutes}</b> minutes,
+      {config.anchor.model}, {anchor.getUTCFullYear()} (METR, TH1.1). Difficulty coefficients,
+      deployment lags and rung weights are expert judgement, not measurement.
+    </p>
+    <div class="srcs">
+      <a href="https://metr.org/blog/2026-1-29-time-horizon-1-1/">METR · Time Horizon 1.1</a>
+      <a href="https://metr.org/time-horizons/">METR · Task-Completion Time Horizons</a>
+      <a href="https://hai.stanford.edu/ai-index/2026-ai-index-report">Stanford HAI · AI Index 2026</a>
+      <a href="https://incidentdatabase.ai/">AI Incident Database</a>
+    </div>
+  </footer>
+</Base>
