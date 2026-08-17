@@ -37,6 +37,10 @@ constants:
   progressLagTailBase: 0.88
   # METR: 80%-горизонт примерно впятеро короче 50%-го
   reliability80Factor: 5
+  # Потолок подключённости: полностью автономным мир не становится
+  maxDependency: 0.95
+  # Год, на который считается математическое ожидание жертв и ущерба
+  expectedAtYear: 2050
   # Часы судного дня: минут = max(floor, scale * (1 - P_глобальный(horizonYear)))
   doomsday:
     scaleMinutes: 15

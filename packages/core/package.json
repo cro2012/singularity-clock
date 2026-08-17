@@ -10,5 +10,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "@sc/data": "workspace:*"
+  },
+  "//": "devDependencies разрешены: гарантия нулевых зависимостей относится к рантайму. Проверяет scripts/check-core-deps.mjs."
 }

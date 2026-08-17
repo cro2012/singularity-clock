@@ -94,4 +94,13 @@ export default tseslint.config(
     files: ['**/*.test.ts', 'packages/ui/scripts/**', 'scripts/**'],
     rules: { 'no-console': 'off', 'no-restricted-syntax': 'off' },
   },
+
+  // Тестам ядра нужен настоящий конфиг модели, иначе константы пришлось бы
+  // дублировать в фикстурах — и тест перестал бы ловить их правку. Гарантия
+  // «ядро без зависимостей» относится к рантайму и проверяется отдельно
+  // скриптом check-core-deps.mjs, который смотрит только dependencies.
+  {
+    files: ['packages/core/**/*.test.ts'],
+    rules: { 'no-restricted-imports': 'off' },
+  },
 );

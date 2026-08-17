@@ -93,6 +93,8 @@ export const modelConfigSchema = z
       progressWindowDoublings: positive,
       progressLagTailBase: unitInterval,
       reliability80Factor: positive,
+      maxDependency: unitInterval,
+      expectedAtYear: z.number().int(),
       doomsday: z.object({
         scaleMinutes: positive,
         floorMinutes: positive,

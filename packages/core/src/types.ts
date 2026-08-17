@@ -107,6 +107,8 @@ export interface ModelConstants {
   readonly progressWindowDoublings: number;
   readonly progressLagTailBase: number;
   readonly reliability80Factor: number;
+  readonly maxDependency: number;
+  readonly expectedAtYear: number;
   readonly doomsday: {
     readonly scaleMinutes: number;
     readonly floorMinutes: number;
@@ -203,8 +205,24 @@ export type Curve = readonly CurvePoint[];
 
 export interface TierResult {
   readonly id: TierId;
+  /**
+   * Кривая, которую показывает интерфейс. При tierSemantics = 'nested' это
+   * «событие не ниже этого уровня», при 'exact' — только этот уровень.
+   */
   readonly curve: Curve;
+  /**
+   * Вероятность события ровно этого уровня: 1 − exp(−Λ_i). Нужна для
+   * математического ожидания, чтобы глобальная катастрофа не была
+   * посчитана трижды. При 'exact' совпадает с curve.
+   */
+  readonly ownCurve: Curve;
   readonly medianDate: number | null;
+}
+
+/** Нормированные баллы страны по компонентам рейтинга, 0…100. */
+export interface CountryScores {
+  readonly iso3: string;
+  readonly components: Readonly<Record<ComponentId, number>>;
 }
 
 export interface ModelResult {
@@ -227,4 +245,10 @@ export interface ComputeArgs {
   readonly config: ModelConfig;
   /** Текущее время в мс UTC. Обязательный параметр: Date.now() в ядре запрещён. */
   readonly now: number;
+  /**
+   * Страновые баллы для индекса гонки. Это измеряемые данные, а не константы
+   * модели, поэтому они приходят отдельно от конфига. Без них индекс гонки
+   * равен null, а переключатель геополитики ни на что не влияет.
+   */
+  readonly countries?: readonly CountryScores[] | undefined;
 }
