@@ -9,8 +9,9 @@ import sitemap from '@astrojs/sitemap';
  */
 export default defineConfig({
   output: 'static',
-  // site нужен карте сайта: заменить на боевой домен, когда он появится.
-  site: process.env.URL ?? 'https://singularity-clock.netlify.app',
+  // site нужен карте сайта. На сборке в Netlify URL — это основной адрес
+  // сайта, то есть боевой домен; запасное значение для локальной сборки.
+  site: process.env.URL ?? 'https://aiapocalypse.now',
   integrations: [react(), sitemap()],
   i18n: {
     locales: ['ru', 'en'],
