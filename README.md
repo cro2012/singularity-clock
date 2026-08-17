@@ -34,8 +34,9 @@ pnpm dev       # сайт на localhost
 Палитра правится только в `packages/ui/src/tokens.ts`; CSS генерируется
 командой `pnpm gen:css`, и CI падает, если файл разошёлся с источником.
 
-Деплой требует секретов `CLOUDFLARE_API_TOKEN` и `CLOUDFLARE_ACCOUNT_ID` в
-настройках репозитория. Пока их нет, задание деплоя пропускается, а не падает.
+Деплой — Netlify, git auto-deploy из `main` плюс Deploy Preview на каждый
+pull request. Настройки сборки лежат в `netlify.toml`; в GitHub Actions
+деплоя нет, там только проверки.
 
 ## Документы
 
@@ -45,6 +46,7 @@ pnpm dev       # сайт на localhost
 | [docs/adr/0001-stack.md](docs/adr/0001-stack.md) | стек, статика первой, что вырезано из V0 и почему это не больно |
 | [docs/adr/0002-model-semantics.md](docs/adr/0002-model-semantics.md) | три правки в ядро: вложенные ступени, старт интегрирования, log₂-пространство |
 | [docs/adr/0003-palette.md](docs/adr/0003-palette.md) | порядковая шкала ступеней, разделение текстовых и графических токенов |
+| [docs/adr/0004-hosting-netlify.md](docs/adr/0004-hosting-netlify.md) | хостинг Netlify, почему не Cloudflare и почему не свой Hetzner |
 | [docs/model-review.md](docs/model-review.md) | построчный разбор прототипа: расхождения с ТЗ и найденные дефекты |
 | [packages/data/config/model.v1.yaml](packages/data/config/model.v1.yaml) | все константы модели, включая семь магических чисел, которых нет в ТЗ |
 | [reference/prototype.html](reference/prototype.html) | рабочий прототип, эталон формул |

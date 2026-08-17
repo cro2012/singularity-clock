@@ -1,0 +1,31 @@
+# Деплой: Netlify. Обоснование и отменённый выбор Cloudflare — docs/adr/0004-hosting-netlify.md
+[build]
+  command = "pnpm build"
+  publish = "apps/web/dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "apps/web/netlify/functions"
+  node_bundler = "esbuild"
+
+# Короткий адрес картинки: /og?s=...&v=... вместо /.netlify/functions/og
+[[redirects]]
+  from = "/og"
+  to = "/.netlify/functions/og"
+  status = 200
+
+# Корень уводит на локаль по умолчанию: язык задаётся префиксом пути,
+# а не заголовком браузера (ТЗ §12).
+[[redirects]]
+  from = "/"
+  to = "/ru/"
+  status = 302
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
