@@ -10,13 +10,12 @@
 
 [functions]
   directory = "apps/web/netlify/functions"
-  # og.mts — функция второго поколения (export default с Request/Response).
-  # С esbuild — а это бандлер по умолчанию — модуль собирается в CommonJS,
-  # рантайм не находит default и падает с 502 "D.handler is not a function".
-  # nft трассирует зависимости вместо бандлинга: модуль остаётся ESM, а нативный
-  # sharp едет в лямбду целиком, поэтому external_node_modules больше не нужен.
-  # Шрифты и конфиг модели функция читает с диска — их кладёт included_files.
-  node_bundler = "nft"
+  # Бандлер не задан специально. node_bundler = "esbuild" — это режим функций
+  # первого поколения: рантайм ищет exports.handler и падает с 502
+  # "D.handler is not a function", потому что og.mts написан через export default.
+  # Бандлер по умолчанию трассирует зависимости и сам кладёт в лямбду нативный sharp,
+  # поэтому external_node_modules больше не нужен. Шрифты и конфиг модели
+  # функция читает с диска — их по-прежнему кладёт included_files.
   included_files = ["apps/web/netlify/assets/**"]
 
 # Короткий адрес картинки: /og?s=…&l=… вместо /.netlify/functions/og
