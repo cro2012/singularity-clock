@@ -30,10 +30,24 @@ const SECTIONS: { id: SectionId; path: string }[] = [
 ];
 
 const anchor = new Date(MODEL_CONFIG.anchor.at);
+const path = SECTIONS.find((s) => s.id === section)!.path;
+
+/**
+ * Адреса в разметке для краулеров — абсолютные.
+ *
+ * Относительный og:image часть мессенджеров просто не разбирает, и
+ * предпросмотр собирается без картинки. Поскольку картинка — заявленный
+ * основной канал распространения, относительный адрес здесь равносилен
+ * неработающей функции.
+ *
+ * Astro.site приходит из astro.config; на сборке Netlify это URL деплоя.
+ */
+const abs = (href: string) => new URL(href, Astro.site).href;
 
 // Версия конфига в адресе картинки обязательна: без неё после правки констант
 // в мессенджерах навсегда застынет старый предпросмотр.
-const ogImage = `/og?l=${locale}&v=${MODEL_CONFIG.version}`;
+const ogImage = abs(`/og?l=${locale}&v=${MODEL_CONFIG.version}`);
+const canonical = abs(`/${locale}/${path}`);
 ---
 
 <!doctype html>
@@ -43,23 +57,30 @@ const ogImage = `/og?l=${locale}&v=${MODEL_CONFIG.version}`;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={t.title} />
+    <meta property="og:locale" content={locale === 'ru' ? 'ru_RU' : 'en_GB'} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
-    <link rel="alternate" hreflang={other} href={`/${other}/${SECTIONS.find((s) => s.id === section)!.path}`} />
-    <link rel="alternate" hreflang={locale} href={`/${locale}/${SECTIONS.find((s) => s.id === section)!.path}`} />
+    <link rel="alternate" hreflang={locale} href={canonical} />
+    <link rel="alternate" hreflang={other} href={abs(`/${other}/${path}`)} />
+    <link rel="alternate" hreflang="x-default" href={abs(`/ru/${path}`)} />
   </head>
   <body>
     <div class="wrap">
       <header>
         <p class="eyebrow">
           {t.eyebrow} · v{MODEL_CONFIG.version}
-          <a class="lang" href={`/${other}/${SECTIONS.find((s) => s.id === section)!.path}`}>
+          <a class="lang" href={`/${other}/${path}`}>
             {other === 'ru' ? 'Русский' : 'English'}
           </a>
         </p>
