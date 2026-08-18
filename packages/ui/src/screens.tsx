@@ -5,8 +5,8 @@
  * страницами нет — его переносит параметр `s` в адресе (см. useScenario).
  */
 
-import type { ComponentId, ModelConfig } from '@sc/core';
-import { EQUAL_WEIGHTS, raceIndex } from '@sc/core';
+import type { Assumptions, ComponentId, ModelConfig, RangedAssumption } from '@sc/core';
+import { EQUAL_WEIGHTS, encodeScenario, matchPreset, raceIndex } from '@sc/core';
 import {
 
   endSentence,
@@ -27,10 +27,12 @@ import { DoomsdayClock } from './components/DoomsdayClock.tsx';
 import { HorizonChart } from './components/HorizonChart.tsx';
 import { ItemTable } from './components/ItemTable.tsx';
 import { RiskChart } from './components/RiskChart.tsx';
+import { CompareRiskChart } from './components/CompareRiskChart.tsx';
 import { ScenarioBar, SliderFor } from './components/ScenarioBar.tsx';
 import { TierCards } from './components/TierCards.tsx';
 import { TriggerPanel } from './components/TriggerPanel.tsx';
 import { ControlGroup, Segmented } from './components/controls.tsx';
+import { useCompare } from './useCompare.ts';
 import { useScenario } from './useScenario.ts';
 import type { CountryScores } from '@sc/core';
 
@@ -413,6 +415,145 @@ export function CountriesScreen({
           })
         }
       />
+    </>
+  );
+}
+
+/* =========================== сравнение =========================== */
+
+const COMPARED: readonly RangedAssumption[] = [
+  'doublingDays',
+  'friction',
+  'singularityPct',
+  'malicePct',
+  'alignFailPct',
+  'mitigationPct',
+  'dep0Pct',
+  'tauYears',
+  'adaptWindowYears',
+];
+
+export function CompareScreen({ config, locale, now }: ScreenProps) {
+  const t = MESSAGES[locale];
+  const pair = useCompare(config, now);
+  const labels = { never: t.neverInModel, past: t.alreadyHappened };
+
+  const nameOf = (assumptions: Assumptions) => {
+    const preset = matchPreset(assumptions, config);
+    return preset ? (t.presets[preset] ?? preset) : t.customScenario;
+  };
+  const nameA = nameOf(pair.a.assumptions);
+  const nameB = nameOf(pair.b.assumptions);
+  const identical = encodeScenario(pair.a.assumptions, config) === encodeScenario(pair.b.assumptions, config);
+
+  const countdown = (date: number | null) => formatCountdown(locale, date, now, labels).headline;
+  const number = (value: number) => formatNumber(locale, value);
+
+  const rows: { label: string; a: string; b: string }[] = [
+    { label: t.compare.singularity, a: countdown(pair.a.model.singularity.date), b: countdown(pair.b.model.singularity.date) },
+    { label: t.compare.catastrophe, a: countdown(pair.a.model.anyLevel.medianDate), b: countdown(pair.b.model.anyLevel.medianDate) },
+    {
+      label: t.compare.doomsday,
+      a: number(Math.round(pair.a.model.doomsday.minutesToMidnight * 10) / 10),
+      b: number(Math.round(pair.b.model.doomsday.minutesToMidnight * 10) / 10),
+    },
+    {
+      label: interpolate(t.compare.deaths, {
+        year: formatNumber(locale, pair.a.model.expected.atYear, { useGrouping: false }),
+      }),
+      a: formatCompact(locale, pair.a.model.expected.deaths),
+      b: formatCompact(locale, pair.b.model.expected.deaths),
+    },
+    {
+      label: interpolate(t.compare.usd, {
+        year: formatNumber(locale, pair.a.model.expected.atYear, { useGrouping: false }),
+      }),
+      a: formatUsd(locale, pair.a.model.expected.usd),
+      b: formatUsd(locale, pair.b.model.expected.usd),
+    },
+  ];
+
+  const assumptionRows = COMPARED.map((id) => {
+    const copy = MESSAGES[locale].sliders[id];
+    const decimals = (String(config.ranges[id].step).split('.')[1] ?? '').length;
+    const show = (value: number) =>
+      `${formatNumber(locale, value, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${copy.unit ? ` ${copy.unit}` : ''}`;
+    return {
+      label: copy.label,
+      a: show(pair.a.assumptions[id]),
+      b: show(pair.b.assumptions[id]),
+    };
+  });
+
+  const picker = (side: 'a' | 'b', current: Assumptions) => (
+    <div className="presets">
+      <span className="lbl">{side === 'a' ? t.compare.sideA : t.compare.sideB}</span>
+      {Object.keys(config.presets).map((name) => (
+        <button
+          key={name}
+          type="button"
+          className="preset"
+          aria-pressed={matchPreset(current, config) === name}
+          onClick={() => pair.setSide(side, config.presets[name]!)}
+        >
+          {t.presets[name] ?? name}
+        </button>
+      ))}
+    </div>
+  );
+
+  return (
+    <>
+      {/* Вступление живёт в шапке страницы (lede), здесь его повторять незачем. */}
+      {picker('a', pair.a.assumptions)}
+      {picker('b', pair.b.assumptions)}
+      <p className="row-actions">
+        <button type="button" className="preset" onClick={pair.swap}>
+          {t.compare.swap}
+        </button>
+      </p>
+
+      {identical ? (
+        <p className="notice" role="status">
+          {t.compare.identical}
+        </p>
+      ) : null}
+
+      <div className="table-scroll">
+        <table className="data compare-table">
+          <thead>
+            <tr>
+              <th scope="col">{t.compare.assumption}</th>
+              <th scope="col">{nameA}</th>
+              <th scope="col">{nameB}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.label} className="compare-result">
+                <th scope="row">{row.label}</th>
+                <td>{row.a}</td>
+                <td className={row.a === row.b ? undefined : 'differs'}>{row.b}</td>
+              </tr>
+            ))}
+            {assumptionRows.map((row) => (
+              <tr key={row.label}>
+                <th scope="row">{row.label}</th>
+                <td>{row.a}</td>
+                <td className={row.a === row.b ? undefined : 'differs'}>{row.b}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <CompareRiskChart
+        a={pair.a.model}
+        b={pair.b.model}
+        labels={{ a: nameA, b: nameB }}
+        locale={locale}
+      />
+      <p className="datenote">{t.keyboardHint}</p>
     </>
   );
 }

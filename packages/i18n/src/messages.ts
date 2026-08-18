@@ -79,6 +79,7 @@ export const ru = {
     catastrophe: 'Лестница катастроф',
     triggers: 'Триггеры',
     countries: 'Страны',
+    compare: 'Сравнение',
     model: 'Как это считается',
   },
   navLabel: 'Разделы',
@@ -177,6 +178,23 @@ export const ru = {
     } as Record<string, string>,
   },
 
+  compare: {
+    intro:
+      'Две колонки с одинаковой структурой. Смысл не в том, чтобы узнать, какая дата «правильная», а в том, чтобы увидеть, насколько она зависит от того, во что вы верите. Отличающиеся допущения подсвечены.',
+    sideA: 'Слева',
+    sideB: 'Справа',
+    swap: 'Поменять местами',
+    assumption: 'Допущение',
+    chartTitle: 'Накопленная вероятность: два сценария наложены',
+    chartSubtitle:
+      'Цвет закреплён за ступенью, а не за колонкой: сплошная и пунктирная линии одного цвета — это одна и та же величина при разных допущениях. Разные цвета читались бы как разные величины.',
+    singularity: 'До сингулярности',
+    catastrophe: 'До первой катастрофы',
+    doomsday: 'Минут до полуночи',
+    deaths: 'Ожидаемые жертвы к {year}',
+    usd: 'Ожидаемый ущерб к {year}',
+    identical: 'Сценарии совпадают — выберите разные, иначе сравнивать нечего.',
+  },
   singularityIntro:
     'Определение здесь операциональное, а не мистическое: сингулярность наступила, когда ИИ выполняет самостоятельно, без человека в цикле, задачу заданной длины в заданной доле видов деятельности. Никакого «пробуждения сознания» — только момент, после которого прогнозировать экономику по человеческому труду становится бессмысленно.',
   catastropheIntro:
@@ -327,6 +345,7 @@ export const en: Messages = {
     catastrophe: 'Ladder of catastrophes',
     triggers: 'Triggers',
     countries: 'Countries',
+    compare: 'Comparison',
     model: 'How it is computed',
   },
   navLabel: 'Sections',
@@ -425,6 +444,23 @@ export const en: Messages = {
     },
   },
 
+  compare: {
+    intro:
+      'Two columns with the same structure. The point is not to find out which date is "right" but to see how much it depends on what you believe. Assumptions that differ are highlighted.',
+    sideA: 'Left',
+    sideB: 'Right',
+    swap: 'Swap sides',
+    assumption: 'Assumption',
+    chartTitle: 'Cumulative probability: two scenarios overlaid',
+    chartSubtitle:
+      'Colour belongs to the rung, not to the column: a solid and a dashed line of the same colour are the same quantity under different assumptions. Two different colours would read as two different quantities.',
+    singularity: 'To singularity',
+    catastrophe: 'To the first catastrophe',
+    doomsday: 'Minutes to midnight',
+    deaths: 'Expected deaths by {year}',
+    usd: 'Expected damage by {year}',
+    identical: 'The scenarios are identical — pick different ones, otherwise there is nothing to compare.',
+  },
   singularityIntro:
     'The definition here is operational, not mystical: singularity has arrived when AI completes, unaided and with no human in the loop, a task of a given length across a given share of activities. No "awakening of consciousness" — only the point past which forecasting the economy in terms of human labour stops making sense.',
   catastropheIntro:

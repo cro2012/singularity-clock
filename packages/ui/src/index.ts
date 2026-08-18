@@ -6,3 +6,4 @@ export * from './screens.tsx';
 export { Counter } from './components/Counter.tsx';
 export { DoomsdayClock } from './components/DoomsdayClock.tsx';
 export { ControlGroup, Segmented, Slider } from './components/controls.tsx';
+export * from './useCompare.ts';

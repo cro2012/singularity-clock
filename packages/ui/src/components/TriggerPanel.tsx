@@ -30,7 +30,9 @@ export function TriggerPanel({ specs, active, locale, onToggle }: TriggerPanelPr
     <>
       {groups.map((group) => (
         <section key={String(group.calming)} className="trigger-group">
-          <h3>{group.title}</h3>
+          {/* h2, а не h3: на странице триггеров это первый уровень после
+              заголовка страницы, и пропуск ступени ломает порядок заголовков. */}
+          <h2>{group.title}</h2>
           <div className="trigs">
             {group.items.map((spec) => {
               const text = copy[spec.id];

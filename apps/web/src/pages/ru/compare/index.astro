@@ -1,0 +1,19 @@
+---
+import Section from '../../../layouts/Section.astro';
+import { Compare } from '../../../components/Compare.tsx';
+import { MESSAGES } from '@sc/i18n';
+
+const t = MESSAGES['ru'];
+const now = Date.now();
+---
+
+<Section
+  locale="ru"
+  section="compare"
+  title="Сравнение сценариев — насколько дата зависит от допущений"
+  description="Два набора допущений рядом: счётчики, ожидание и кривые риска. Отличающиеся допущения подсвечены."
+  heading={t.nav.compare}
+  lede={t.compare.intro}
+>
+  <Compare client:load locale="ru" now={now} />
+</Section>

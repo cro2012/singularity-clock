@@ -5,7 +5,9 @@ import '../styles/base.css';
 import { MESSAGES, type Locale } from '@sc/i18n';
 import { MODEL_CONFIG } from '../model-config.ts';
 
-export type SectionId = 'home' | 'singularity' | 'catastrophe' | 'triggers' | 'countries' | 'model';
+// Одной строкой: разбор фронтматтера Astro спотыкается на объединении типов
+// с переносом и ведущей вертикальной чертой.
+export type SectionId = 'home' | 'singularity' | 'catastrophe' | 'triggers' | 'countries' | 'compare' | 'model';
 
 interface Props {
   locale: Locale;
@@ -26,6 +28,7 @@ const SECTIONS: { id: SectionId; path: string }[] = [
   { id: 'catastrophe', path: 'catastrophe/' },
   { id: 'triggers', path: 'triggers/' },
   { id: 'countries', path: 'countries/' },
+  { id: 'compare', path: 'compare/' },
   { id: 'model', path: 'model/' },
 ];
 

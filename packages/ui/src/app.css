@@ -635,7 +635,7 @@ table.data td {
 }
 
 /* ---------- триггеры ---------- */
-.trigger-group h3 {
+.trigger-group h2 {
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -818,4 +818,34 @@ code {
   .chartbox {
     padding: 14px 12px 12px;
   }
+}
+
+/* ---------- сравнение сценариев ---------- */
+.compare-table th[scope='row'] {
+  width: 34%;
+}
+.compare-table td {
+  width: 33%;
+  color: var(--ink);
+}
+.compare-result th[scope='row'],
+.compare-result td {
+  font-weight: 600;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+/* Подсвечивается отличие, а не колонка: если значения совпали, подсветки нет. */
+.compare-table td.differs {
+  color: var(--text-warning);
+}
+.compare-table td.differs::before {
+  content: '≠ ';
+  color: var(--muted);
+  font-weight: 400;
+}
+.legend-style {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
 }
