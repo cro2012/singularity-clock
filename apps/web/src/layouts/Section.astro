@@ -80,7 +80,9 @@ const canonical = abs(`/${locale}/${path}`);
       <header>
         <p class="eyebrow">
           {t.eyebrow} · v{MODEL_CONFIG.version}
-          <a class="lang" href={`/${other}/${path}`}>
+          {/* data-scenario обязателен и здесь: переключение языка — такой же
+              переход между страницами, и без него сценарий молча сбрасывался. */}
+          <a class="lang" href={`/${other}/${path}`} data-scenario>
             {other === 'ru' ? 'Русский' : 'English'}
           </a>
         </p>
