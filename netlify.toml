@@ -9,10 +9,14 @@
   NODE_VERSION = "22"
 
 [functions]
-  directory = "apps/web/netlify/functions"
+  # Не исходники, а результат нашего шага сборки: пакеты packages/* отдают
+  # сырой TypeScript, и штатный сборщик функций их не разворачивает — модуль
+  # падал при загрузке и отдавал 502. Подробности в
+  # docs/adr/0004-hosting-netlify.md.
+  directory = "apps/web/netlify/dist-functions"
   node_bundler = "esbuild"
-  # sharp — нативный модуль, esbuild его не бандлит; шрифты и конфиг модели
-  # функция читает с диска, поэтому их надо положить рядом.
+  # sharp — нативный модуль, бандлить нельзя; шрифты и конфиг модели функция
+  # читает с диска, поэтому их надо доставить рядом.
   external_node_modules = ["sharp"]
   included_files = ["apps/web/netlify/assets/**"]
 

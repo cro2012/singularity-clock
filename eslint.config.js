@@ -23,7 +23,16 @@ const forbid = (packages, message) => ({
 });
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', '**/.astro/**', '**/.wrangler/**', '**/*.generated.*'] },
+  {
+    ignores: [
+      '**/dist/**',
+      // Сгенерированный бандл функции: тысячи строк чужого кода.
+      '**/dist-functions/**',
+      '**/node_modules/**',
+      '**/.astro/**',
+      '**/*.generated.*',
+    ],
+  },
 
   js.configs.recommended,
   ...tseslint.configs.recommended,
