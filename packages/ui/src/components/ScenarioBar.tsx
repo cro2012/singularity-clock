@@ -3,6 +3,7 @@ import { matchPreset } from '@sc/core';
 import type { Assumptions, ModelConfig, RangedAssumption } from '@sc/core';
 import { formatNumber, MESSAGES } from '@sc/i18n';
 import type { Locale } from '@sc/i18n';
+import { Badge, type ProvenanceKind } from './Provenance.tsx';
 import { Slider } from './controls.tsx';
 import type { ScenarioStore } from '../store.ts';
 
@@ -79,6 +80,25 @@ function ShareButton({
   );
 }
 
+/**
+ * Откуда взялось значение по умолчанию у каждого ползунка.
+ *
+ * Время удвоения — продолжение измеренного тренда METR, всё остальное —
+ * суждение автора модели. Плашка стоит у ползунка, чтобы разница читалась
+ * без похода в методологию.
+ */
+const PROVENANCE: Record<RangedAssumption, ProvenanceKind> = {
+  doublingDays: 'extrapolated',
+  friction: 'assumed',
+  singularityPct: 'assumed',
+  malicePct: 'assumed',
+  alignFailPct: 'assumed',
+  mitigationPct: 'assumed',
+  dep0Pct: 'assumed',
+  tauYears: 'assumed',
+  adaptWindowYears: 'assumed',
+};
+
 export interface SliderForProps {
   readonly id: RangedAssumption;
   readonly config: ModelConfig;
@@ -100,6 +120,7 @@ export function SliderFor({ id, config, locale, assumptions, onChange }: SliderF
   return (
     <Slider
       label={copy.label}
+      badge={<Badge kind={PROVENANCE[id]} locale={locale} />}
       hint={copy.hint}
       value={value}
       display={copy.unit ? `${shown} ${copy.unit}` : `×${shown}`}

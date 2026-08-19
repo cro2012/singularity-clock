@@ -113,6 +113,16 @@ export interface ModelConstants {
     readonly scaleMinutes: number;
     readonly floorMinutes: number;
     readonly horizonYear: number;
+    /**
+     * 'linear' — как в прототипе, минуты пропорциональны (1 − P);
+     * 'logarithmic' — фиксированный ход стрелки за порядок вероятности.
+     * Обоснование: docs/adr/0005-clock-scale.md.
+     */
+    readonly scale: 'linear' | 'logarithmic';
+    /** Вероятность, при которой стрелка стоит на пятнадцати минутах. */
+    readonly probabilityFloor: number;
+    /** Сколько порядков вероятности укладывается в полный ход стрелки. */
+    readonly decades: number;
   };
   /** Пороги бейджа тревоги: [calm, watchful, serious]. */
   readonly alertThresholds: readonly [number, number, number];

@@ -18,6 +18,21 @@ function geometricMean([low, high]: readonly [number, number]): number {
   return Math.sqrt(low * high);
 }
 
+/**
+ * Положение стрелки от 0 до 1.
+ *
+ * Линейная шкала при 4% даёт 14,4 минуты, при 20% — 11,95. То есть на всём
+ * интервале, где спорят живые люди, стрелка почти неподвижна, а главный
+ * визуальный элемент сервиса ничего не показывает. Логарифмическая шкала
+ * отдаёт фиксированный ход за каждый порядок вероятности.
+ */
+function clockPosition(p: number, constants: ModelConstants): number {
+  const { scale, probabilityFloor, decades } = constants.doomsday;
+  if (scale === 'linear') return p;
+  if (p <= probabilityFloor) return 0;
+  return Math.min(1, Math.log10(p / probabilityFloor) / decades);
+}
+
 function alertLevelFor(p: number, thresholds: ModelConstants['alertThresholds']): AlertLevel {
   const [calm, watchful, serious] = thresholds;
   if (p < calm) return 'calm';
@@ -75,7 +90,7 @@ export function computeModel(args: ComputeArgs): ModelResult {
   const pGlobal = probabilityAt(globalTier.ownCurve, constants.doomsday.horizonYear);
   const minutesToMidnight = Math.max(
     constants.doomsday.floorMinutes,
-    constants.doomsday.scaleMinutes * (1 - pGlobal),
+    constants.doomsday.scaleMinutes * (1 - clockPosition(pGlobal, constants)),
   );
 
   return {

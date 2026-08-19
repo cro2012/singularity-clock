@@ -3,6 +3,8 @@ import { useId } from 'react';
 
 export interface SliderProps {
   readonly label: string;
+  /** Плашка происхождения значения; рисуется под подписью. */
+  readonly badge?: ReactNode;
   readonly hint: string;
   readonly value: number;
   readonly display: string;
@@ -12,7 +14,7 @@ export interface SliderProps {
   readonly onChange: (value: number) => void;
 }
 
-export function Slider({ label, hint, value, display, min, max, step, onChange }: SliderProps) {
+export function Slider({ label, badge, hint, value, display, min, max, step, onChange }: SliderProps) {
   const hintId = useId();
   return (
     <div className="ctl">
@@ -30,6 +32,7 @@ export function Slider({ label, hint, value, display, min, max, step, onChange }
         />
       </label>
       <p className="hint" id={hintId}>
+        {badge ? <>{badge} </> : null}
         {hint}
       </p>
     </div>

@@ -46,6 +46,11 @@ constants:
     scaleMinutes: 15
     floorMinutes: 0.2
     horizonYear: 2100
+    # linear — как в прототипе; logarithmic — фиксированный ход стрелки
+    # за порядок вероятности. Разбор: docs/adr/0005-clock-scale.md
+    scale: logarithmic
+    probabilityFloor: 0.001
+    decades: 3
   # Пороги бейджа тревоги по P(глобальный) к 2100
   alertThresholds: [0.05, 0.15, 0.35]
   # Интегрирование интенсивности риска

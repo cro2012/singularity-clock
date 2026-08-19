@@ -906,3 +906,201 @@ code {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- зачем этот сервис ---------- */
+.purpose {
+  margin: 6px 0 4px;
+  max-width: 82ch;
+}
+.purpose-kicker {
+  font-size: clamp(20px, 2.6vw, 27px);
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.purpose-lead {
+  color: var(--ink-2);
+  font-size: 14.5px;
+  line-height: 1.65;
+  margin: 0 0 18px;
+}
+.purpose-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  counter-reset: none;
+}
+.purpose-steps li {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.purpose-num {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--series-1);
+  margin-bottom: 6px;
+}
+.purpose-steps b {
+  display: block;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.purpose-takeaway {
+  color: var(--ink-2);
+  font-size: 13.5px;
+  line-height: 1.6;
+  border-left: 2px solid var(--series-1);
+  padding-left: 14px;
+  margin: 0;
+}
+.baseline-note {
+  max-width: 80ch;
+  margin-top: 0;
+}
+
+/* ---------- плашки происхождения ---------- */
+.prov {
+  display: inline-block;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-right: 6px;
+  vertical-align: 1px;
+  cursor: help;
+  border: 1px solid currentColor;
+}
+.prov-measured {
+  color: var(--text-good);
+}
+.prov-extrapolated {
+  color: var(--tier-global);
+}
+.prov-assumed {
+  color: var(--text-warning);
+}
+.prov-unverified {
+  color: var(--text-critical);
+}
+.prov-legend {
+  margin-top: 30px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px 10px;
+  max-width: 82ch;
+}
+.prov-legend dl {
+  margin: 0;
+}
+.prov-legend dl > div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+  padding: 6px 0;
+  align-items: baseline;
+}
+.prov-legend dt {
+  margin: 0;
+}
+.prov-legend dd {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+/* ---------- чувствительность ---------- */
+.sens {
+  margin-top: 34px;
+}
+.sens h2 {
+  font-size: 17px;
+  color: var(--ink);
+  margin: 0 0 8px;
+  font-weight: 620;
+}
+.sens-table th[scope='row'] {
+  width: 34%;
+}
+.sens-table td:nth-child(2) {
+  width: 46%;
+}
+.sens-num {
+  text-align: right;
+  white-space: nowrap;
+}
+.sens-table .bar {
+  min-width: 80px;
+}
+
+/* ---------- тяжесть и выведенное снижение ---------- */
+.severity,
+.implied {
+  margin-top: 16px;
+}
+.implied ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 30px;
+}
+.implied li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.implied b {
+  color: var(--ink);
+  font-size: 19px;
+  font-weight: 640;
+}
+.metr-caveat {
+  margin-top: 22px;
+  max-width: 90ch;
+}
+.metr-caveat b {
+  color: var(--ink);
+}
+.operational-note {
+  max-width: 80ch;
+  margin-top: 0;
+}
+
+@media (max-width: 820px) {
+  .purpose-steps {
+    grid-template-columns: 1fr;
+  }
+  .prov-legend dl > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+.reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.reveal p {
+  margin: 0;
+}

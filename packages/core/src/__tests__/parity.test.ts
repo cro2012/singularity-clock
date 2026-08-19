@@ -37,6 +37,9 @@ function prototypeMode(config: ModelConfig): ModelConfig {
     constants: {
       ...config.constants,
       integration: { ...config.constants.integration, startFromNow: false },
+      // Логарифмическая шкала часов — сознательная правка (ADR-0005);
+      // паритет проверяется против прототипной линейной.
+      doomsday: { ...config.constants.doomsday, scale: 'linear' as const },
     },
   };
 }

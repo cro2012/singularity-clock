@@ -99,6 +99,9 @@ export const modelConfigSchema = z
         scaleMinutes: positive,
         floorMinutes: positive,
         horizonYear: z.number().int(),
+        scale: z.enum(['linear', 'logarithmic']),
+        probabilityFloor: z.number().gt(0).lt(1),
+        decades: positive,
       }),
       alertThresholds: z.tuple([unitInterval, unitInterval, unitInterval]),
       integration: z.object({

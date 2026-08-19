@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 /**
  * Экраны разделов.
  *
@@ -8,7 +10,7 @@
 import type { Assumptions, ComponentId, ModelConfig, RangedAssumption } from '@sc/core';
 import { EQUAL_WEIGHTS, encodeScenario, matchPreset, raceIndex } from '@sc/core';
 import {
-
+  CONTENT,
   endSentence,
   formatCompact,
   formatCountdown,
@@ -31,6 +33,9 @@ import { CompareRiskChart } from './components/CompareRiskChart.tsx';
 import { ScenarioBar, SliderFor } from './components/ScenarioBar.tsx';
 import { TierCards } from './components/TierCards.tsx';
 import { TriggerPanel } from './components/TriggerPanel.tsx';
+import { Purpose } from './components/Purpose.tsx';
+import { ProvenanceLegend } from './components/Provenance.tsx';
+import { Sensitivity } from './components/Sensitivity.tsx';
 import { WhatItIs } from './components/WhatItIs.tsx';
 import { ControlGroup, Segmented } from './components/controls.tsx';
 import { useCompare } from './useCompare.ts';
@@ -67,6 +72,8 @@ export function HomeScreen({ config, locale, now }: ScreenProps) {
 
   return (
     <>
+      <Purpose locale={locale} />
+
       <ScenarioBar
         config={config}
         assumptions={assumptions}
@@ -74,6 +81,7 @@ export function HomeScreen({ config, locale, now }: ScreenProps) {
         store={store}
         linkRejected={state.linkRejected}
       />
+      <p className="datenote baseline-note">{t.baselineNote}</p>
 
       <div className="hero">
         <Counter
@@ -129,26 +137,11 @@ export function HomeScreen({ config, locale, now }: ScreenProps) {
         </div>
       </div>
 
-      <div className="card expected">
-        <div>
-          <p className="card-label">
-            {interpolate(t.expectedTitle, {
-              year: formatNumber(locale, model.expected.atYear, { useGrouping: false }),
-            })}
-          </p>
-          <p className="bignum tabular exp-num">{formatCompact(locale, model.expected.deaths)}</p>
-          <p className="datenote">{t.expectedDeaths}</p>
-        </div>
-        <div>
-          <p className="card-label" aria-hidden="true">
-            &nbsp;
-          </p>
-          <p className="bignum tabular exp-num">{formatUsd(locale, model.expected.usd)}</p>
-          <p className="datenote">{t.expectedUsd}</p>
-        </div>
-      </div>
+      <Sensitivity config={config} assumptions={assumptions} locale={locale} now={clock} />
 
       <WhatItIs locale={locale} />
+
+      <ProvenanceLegend locale={locale} />
 
       <div className="disclaimer">
         <b>{t.disclaimerTitle}</b> {t.disclaimer}
@@ -207,6 +200,8 @@ export function SingularityScreen({ config, locale, now }: ScreenProps) {
         />
       </ControlGroup>
 
+      <p className="datenote operational-note">{t.operationalNote}</p>
+
       <HorizonChart
         config={config}
         effective={model.effective}
@@ -215,6 +210,10 @@ export function SingularityScreen({ config, locale, now }: ScreenProps) {
         now={clock}
       />
       <p className="datenote">{t.keyboardHint}</p>
+
+      <div className="notice metr-caveat" role="note">
+        <b>{t.metrCaveat.title}</b> {t.metrCaveat.body}
+      </div>
 
       <h2 className="section-h">{t.items.functionsTitle}</h2>
       <ItemTable
@@ -285,24 +284,62 @@ export function CatastropheScreen({ config, locale, now }: ScreenProps) {
       <RiskChart model={model} locale={locale} />
       <p className="datenote">{t.keyboardHint}</p>
 
-      <div className="card expected">
-        <div>
-          <p className="card-label">
-            {interpolate(t.expectedTitle, {
-              year: formatNumber(locale, model.expected.atYear, { useGrouping: false }),
-            })}
-          </p>
-          <p className="bignum tabular exp-num">{formatCompact(locale, model.expected.deaths)}</p>
-          <p className="datenote">{t.expectedDeaths}</p>
+      <section className="card severity">
+        <p className="card-label">
+          {interpolate(t.expectedTitle, {
+            year: formatNumber(locale, model.expected.atYear, { useGrouping: false }),
+          })}
+        </p>
+        <div className="table-scroll">
+          <table className="data">
+            <thead>
+              <tr>
+                <th scope="col">{t.tiers.rung}</th>
+                <th scope="col">
+                  {t.tiers.pBy} {model.expected.atYear}
+                </th>
+                <th scope="col">{t.tiers.deaths}</th>
+                <th scope="col">{t.tiers.damage}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {model.tiers.map((tier, index) => {
+                const spec = config.tiers[index]!;
+                const p =
+                  tier.ownCurve.find((point) => point.year === model.expected.atYear)?.p ?? 0;
+                return (
+                  <tr key={tier.id}>
+                    <th scope="row">{CONTENT[locale].tiers[tier.id]!.name}</th>
+                    <td className="tabular">{formatPercent(locale, p)}</td>
+                    <td className="tabular">
+                      {formatCompact(locale, spec.deaths[0])}&ndash;{formatCompact(locale, spec.deaths[1])}
+                    </td>
+                    <td className="tabular">
+                      {formatUsd(locale, spec.usd[0])}&ndash;{formatUsd(locale, spec.usd[1])}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-        <div>
-          <p className="card-label" aria-hidden="true">
-            &nbsp;
-          </p>
-          <p className="bignum tabular exp-num">{formatUsd(locale, model.expected.usd)}</p>
-          <p className="datenote">{t.expectedUsd}</p>
-        </div>
-      </div>
+        <p className="datenote">{t.expectedRangeNote}</p>
+      </section>
+
+      <section className="card implied">
+        <p className="card-label">{t.impliedReduction.title}</p>
+        <ul>
+          {model.tiers.map((tier, index) => (
+            <li key={tier.id}>
+              <span>{CONTENT[locale].tiers[tier.id]!.name}</span>
+              <b className="tabular">
+                &minus;{formatPercent(locale, model.effective.mitigation * config.tiers[index]!.mitigationCeiling, 0)}
+              </b>
+            </li>
+          ))}
+        </ul>
+        <p className="datenote">{t.impliedReduction.note}</p>
+      </section>
 
       <details>
         <summary>{t.tiers.formulaTitle}</summary>
@@ -378,6 +415,9 @@ export function CountriesScreen({
   provisional,
 }: CountriesScreenProps) {
   const t = MESSAGES[locale];
+  // Черновые баллы спрятаны за явным действием. Предупреждение рядом с
+  // таблицей читают не все, а скриншот таблицы уезжает дальше предупреждения.
+  const [revealed, setRevealed] = useState(!provisional);
   const { store, state } = useScenario(config, now);
   const { assumptions, model } = state;
   const weights = assumptions.geopolitics === false ? EQUAL_WEIGHTS : assumptions.geopolitics.weights;
@@ -398,6 +438,18 @@ export function CountriesScreen({
       />
       <p className="sub">{t.countries.intro}</p>
 
+      {revealed ? null : (
+        <div className="notice notice-strong reveal" role="note">
+          <p>
+            <b>{t.countries.provisionalTitle}</b> {t.countries.hidden}
+          </p>
+          <button type="button" className="preset" onClick={() => setRevealed(true)}>
+            {t.countries.reveal}
+          </button>
+        </div>
+      )}
+
+      {revealed ? (
       <CountryPanel
         countries={countries}
         weights={weights}
@@ -416,6 +468,7 @@ export function CountriesScreen({
           })
         }
       />
+      ) : null}
     </>
   );
 }

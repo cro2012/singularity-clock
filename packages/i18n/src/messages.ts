@@ -11,14 +11,14 @@ import type { PluralForms } from './format.ts';
 import type { Locale } from './locales.ts';
 
 export const en = {
-  eyebrow: 'A half-joking forecasting apparatus',
+  eyebrow: 'A half-joking interface for a serious uncertainty',
   title: 'The Singularity Clock and the Ladder of Catastrophes',
   lede:
     "Two countdowns derived from a single extrapolation: METR's autonomous task horizon. Everything below is a formalised judgement, not a measurement of the future. Move the sliders: if a date shifts by twenty years that easily, it was never a forecast.",
 
   presetLabel: 'Preset',
   presets: {
-    base: 'Baseline',
+    base: 'Author baseline',
     optimist: 'Optimist',
     skeptic: 'Sceptic',
     anxious: 'Anxious',
@@ -38,9 +38,9 @@ export const en = {
     'Median date of the first event at the local level or worse. This is not the end of the world — it is the bottom rung of the ladder.',
   dateIs: 'Date',
 
-  clockTitle: 'The Doomsday Clock, recomputed by the model',
+  clockTitle: 'The totally unofficial AI Risk Clock',
   clockNote:
-    'to midnight. Scale: 15 minutes means global catastrophe is ruled out, midnight means it is certain. The model currently gives {p} for the global level through 2100.',
+    'to midnight. A playful mapping of the model’s {p} global-risk estimate onto a 15-minute dial — five minutes of hand per order of magnitude of probability, so the plausible range is actually visible. Not affiliated with the real Doomsday Clock of the Bulletin of the Atomic Scientists.',
   minutes: { one: 'minute', other: 'minutes' } as PluralForms,
   seconds: { one: 'second', other: 'seconds' } as PluralForms,
   alert: { calm: 'Calm', watchful: 'Watchful', serious: 'Serious', critical: 'Critical' },
@@ -104,6 +104,7 @@ export const en = {
   },
 
   tiers: {
+    rung: 'Rung',
     median: 'median',
     noMedian: 'P < 50% within the horizon',
     pBy: 'P by',
@@ -131,6 +132,9 @@ export const en = {
     intro:
       'Seven components, each normalised to 0–100. The total is a weighted sum, and you set the weights. That is not decoration: the entire substantive difference between public AI-leadership indices comes down to weights, and hiding that would be dishonest.',
     provisionalTitle: 'These figures are not verified.',
+    reveal: 'Show unverified prototype data',
+    hidden:
+      'The country table is hidden by default. The numbers below have not been reconciled with any source, and a screenshot of them would travel further than this warning.',
     provisional:
       'The scores in this table are a placeholder for the structure of the ranking, not a measurement. Until they are reconciled with AI Index, Tortoise and OECD, neither the numbers nor the ordering mean anything. For that reason the link to the risk model is off by default.',
     equalWeights: 'Equal weights',
@@ -138,9 +142,9 @@ export const en = {
     country: 'Country',
     score: 'Score',
     breakdown: 'Share of the leader',
-    raceTitle: 'Race index',
+    raceTitle: 'AI race competitiveness',
     raceNote:
-      'Herfindahl–Hirschman concentration of leadership across the top five. One means five equals, zero means a single dominant player.',
+      'Derived as 1 − normalised Herfindahl–Hirschman concentration across the top five. 1 means an evenly matched race, 0 means a single dominant leader. Note the inversion: plain HHI rises with concentration, this index falls with it.',
     geopoliticsToggle: 'Account for geopolitics in the risk model',
     geopoliticsNote:
       "The author's assumption, not an established fact: the tighter the race, the harder it is to agree. When on, the mitigation ceiling is multiplied by (1 − {penalty} × race index), currently −{effect}.",
@@ -213,12 +217,79 @@ export const en = {
       'Not advice. No personal or geographic predictions, no survival guidance, and no named company, laboratory or country blamed for anything.',
     ],
   },
+  purpose: {
+    kicker: 'The date is not the result. The sensitivity is.',
+    lead:
+      'This is an interactive stress test for AI futures, not a forecasting service. It starts from one measured quantity \u2014 how long a task frontier AI can finish on its own \u2014 extrapolates it, and then asks you for everything the extrapolation cannot answer: how fast capability gets deployed, how often it gets misused, whether a failure can be rolled back, how well any of it can be mitigated.',
+    steps: [
+      {
+        title: 'It starts from measured data',
+        body:
+          'METR measures the length of software, ML and security tasks that frontier models complete unaided. That number is external, dated and sourced.',
+      },
+      {
+        title: 'You supply the assumptions',
+        body:
+          'Everything after that measurement is judgement: transfer to other domains, deployment lags, misuse, control failure, mitigation. All of it sits on sliders instead of being buried in the code.',
+      },
+      {
+        title: 'The point is how much the answer moves',
+        body:
+          'Move one slider and a date can jump by decades; move another and it barely twitches. Which sliders matter is the actual output of this service. The dates are a by-product.',
+      },
+    ],
+    takeaway:
+      'Most arguments about AI risk look like arguments about dates. They are almost always arguments about two or three hidden assumptions. This is a place to find out which ones.',
+  },
+
+  sensitivity: {
+    title: 'What actually drives this result?',
+    subtitle:
+      'Each assumption is nudged by a fifth of its range in both directions, with everything else held where you left it, and the bar shows how far {metric} moves. Long bar means the argument is about that assumption; short bar means it is not worth having.',
+    metric: 'global catastrophe risk by {year}',
+    assumption: 'Assumption',
+    effect: 'Effect',
+    negligible: 'below 0.1 pp',
+  },
+
+  provenance: {
+    measured: 'MEASURED',
+    extrapolated: 'EXTRAPOLATED',
+    assumed: 'ASSUMED',
+    unverified: 'UNVERIFIED',
+    measuredNote: 'An external observation with a source and a date.',
+    extrapolatedNote: 'A mathematical continuation of an observed trend, not an observation.',
+    assumedNote: 'An expert judgement by the author of the model. Contestable by design.',
+    unverifiedNote: 'Draft data that has not been reconciled with any source. Treat as illustrative.',
+    legend: 'Every number on this site is one of four kinds:',
+  },
+
+  impliedReduction: {
+    title: 'Implied risk reduction',
+    note:
+      'The slider is a strength, not a percentage of risk removed. Each rung caps how much mitigation can achieve, and the cap is lowest where the event has never happened before.',
+  },
+
+  metrCaveat: {
+    title: 'What METR measures, and what this model adds on top',
+    body:
+      'METR\u2019s task suite is primarily software engineering, machine learning and cybersecurity, with self-contained tasks and automatic success criteria. METR is explicit that a horizon of N hours does not mean AI can do every N-hour human job: real work carries prior context, human interaction and success criteria nobody can score automatically. Everything past software here \u2014 all thirty rows below \u2014 is reached through transfer coefficients and deployment lags defined by the author of this model, not by METR. METR also warns that measurements above 16 hours are unreliable on the current suite, which is well short of the month and year thresholds this page lets you select.',
+  },
+
+  operationalNote:
+    'Operational definition used by this model. Not consciousness, not recursive self-improvement, not AGI in any of its usual senses.',
+
+  baselineNote:
+    'The default scenario is the author\u2019s, not a consensus. It puts global catastrophe risk near 20% by 2100, whereas surveys of AI researchers cluster around 5\u201310%. Treat it as one contestable position among several, and move the sliders.',
+
   singularityIntro:
     'The definition here is operational, not mystical: singularity has arrived when AI completes, unaided and with no human in the loop, a task of a given length across a given share of activities. No "awakening of consciousness" — only the point past which forecasting the economy in terms of human labour stops making sense.',
   catastropheIntro:
     '"Apocalypse" is not an event but a scale. Three thresholds, each with its own criterion, its own probability and its own dominant mechanism: human malice rules the bottom of the ladder, control failure the top. The model computes not a date but a risk intensity, and from it a cumulative probability and a median date.',
 
-  expectedTitle: 'Expected value by {year}',
+  expectedTitle: 'Illustrative severity by {year}',
+  expectedRangeNote:
+    'Ranges, not an expected value. A single number would hide two things: the cumulative probability of an event is not a count of events, and every rung is defined with an OR \u2014 an event can clear the damage limb while killing nobody. Probability of an event at exactly this level, times the severity band the rung is defined with.',
   expectedDeaths:
     'expected deaths: summed over three levels, probability × geometric mean of the range',
   expectedUsd: 'expected direct damage in 2026 dollars',
@@ -240,23 +311,23 @@ export const en = {
       hint: 'What share of the 30 kinds of activity must be passed before a date is declared.',
     },
     malicePct: {
-      label: 'Share of malicious use',
-      unit: '%',
-      hint: 'How readily people will turn available capability to harm. The main driver of the bottom rung.',
+      label: 'Misuse pressure',
+      unit: '/ 100',
+      hint: 'How readily people turn available capability to harm. A model input on an arbitrary scale, not a share of users, models or requests. Main driver of the bottom rung.',
     },
     alignFailPct: {
-      label: 'Probability of control failure',
-      unit: '%',
-      hint: 'The system does something other than what it was deployed for at a critical moment, and it cannot be rolled back. The main driver of the top rung.',
+      label: 'Control-failure pressure',
+      unit: '/ 100',
+      hint: 'How strongly loss-of-control scenarios feed the risk. A model input, not a probability that AI loses control: it is multiplied by rung weight, capability, wiring and mitigation before it means anything. Main driver of the top rung.',
     },
     mitigationPct: {
-      label: 'Mitigation effectiveness',
-      unit: '%',
-      hint: 'Regulation, audit, kill switches, treaties. Works worse on the top rung: you have to prevent something that has never happened.',
+      label: 'Mitigation strength',
+      unit: '/ 100',
+      hint: 'Regulation, audit, kill switches, treaties. Not a percentage of risk removed: every rung has its own ceiling, and the implied reduction is shown below.',
     },
     dep0Pct: {
       label: 'Current wiring into critical systems',
-      unit: '%',
+      unit: '/ 100',
       hint: 'What share of energy, finance, logistics, weapons and medicine is already handed to autonomous loops.',
     },
     tauYears: {
