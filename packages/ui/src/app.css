@@ -849,3 +849,60 @@ code {
   gap: 6px;
   color: var(--muted);
 }
+
+/* ---------- что это и чем это не является ---------- */
+.whatis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 34px;
+}
+.whatis-col {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px 8px;
+}
+/* Правая колонка отличается только рамкой: оговорки не должны выглядеть
+   мельче обещаний. */
+.whatis-not {
+  border-color: rgba(229, 106, 106, 0.3);
+}
+.whatis h2 {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+.whatis-not h2 {
+  color: var(--text-critical);
+}
+.whatis ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.whatis li {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.55;
+  padding: 0 0 12px 18px;
+  position: relative;
+}
+.whatis li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--muted);
+}
+.whatis-not li::before {
+  content: '×';
+  color: var(--text-critical);
+}
+@media (max-width: 820px) {
+  .whatis {
+    grid-template-columns: 1fr;
+  }
+}

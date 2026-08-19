@@ -1,14 +1,13 @@
 ---
-import Section from '../../../layouts/Section.astro';
-import { Compare } from '../../../components/Compare.tsx';
-import { MESSAGES } from '@sc/i18n';
+import Section from '../../layouts/Section.astro';
+import { Compare } from '../../components/Compare.tsx';
+import { DEFAULT_LOCALE, MESSAGES } from '@sc/i18n';
 
-const t = MESSAGES['en'];
+const t = MESSAGES[DEFAULT_LOCALE];
 const now = Date.now();
 ---
 
 <Section
-  locale="en"
   section="compare"
   title="Scenario comparison — how much the date depends on assumptions"
   description="Two sets of assumptions side by side: counters, expected value and risk curves. Differing assumptions are highlighted."

@@ -2,7 +2,7 @@
 import '@sc/ui/tokens.css';
 import '@sc/ui/app.css';
 import '../styles/base.css';
-import { MESSAGES, type Locale } from '@sc/i18n';
+import { DEFAULT_LOCALE, MESSAGES } from '@sc/i18n';
 import { MODEL_CONFIG } from '../model-config.ts';
 
 // Одной строкой: разбор фронтматтера Astro спотыкается на объединении типов
@@ -10,7 +10,6 @@ import { MODEL_CONFIG } from '../model-config.ts';
 export type SectionId = 'home' | 'singularity' | 'catastrophe' | 'triggers' | 'countries' | 'compare' | 'model';
 
 interface Props {
-  locale: Locale;
   section: SectionId;
   title: string;
   description: string;
@@ -18,9 +17,8 @@ interface Props {
   lede?: string | undefined;
 }
 
-const { locale, section, title, description, heading, lede } = Astro.props;
-const t = MESSAGES[locale];
-const other: Locale = locale === 'ru' ? 'en' : 'ru';
+const { section, title, description, heading, lede } = Astro.props;
+const t = MESSAGES[DEFAULT_LOCALE];
 
 const SECTIONS: { id: SectionId; path: string }[] = [
   { id: 'home', path: '' },
@@ -49,12 +47,12 @@ const abs = (href: string) => new URL(href, Astro.site).href;
 
 // Версия конфига в адресе картинки обязательна: без неё после правки констант
 // в мессенджерах навсегда застынет старый предпросмотр.
-const ogImage = abs(`/og?l=${locale}&v=${MODEL_CONFIG.version}`);
-const canonical = abs(`/${locale}/${path}`);
+const ogImage = abs(`/og?v=${MODEL_CONFIG.version}`);
+const canonical = abs(`/${path}`);
 ---
 
 <!doctype html>
-<html lang={locale} data-theme="dark">
+<html lang={DEFAULT_LOCALE} data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -66,7 +64,7 @@ const canonical = abs(`/${locale}/${path}`);
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={t.title} />
-    <meta property="og:locale" content={locale === 'ru' ? 'ru_RU' : 'en_GB'} />
+    <meta property="og:locale" content="en_GB" />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
@@ -74,21 +72,12 @@ const canonical = abs(`/${locale}/${path}`);
     <meta property="og:image:alt" content={title} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImage} />
-    <link rel="alternate" hreflang={locale} href={canonical} />
-    <link rel="alternate" hreflang={other} href={abs(`/${other}/${path}`)} />
-    <link rel="alternate" hreflang="x-default" href={abs(`/ru/${path}`)} />
+    {/* hreflang не выставляется: язык один, альтернатив нет. */}
   </head>
   <body>
     <div class="wrap">
       <header>
-        <p class="eyebrow">
-          {t.eyebrow} · v{MODEL_CONFIG.version}
-          {/* data-scenario обязателен и здесь: переключение языка — такой же
-              переход между страницами, и без него сценарий молча сбрасывался. */}
-          <a class="lang" href={`/${other}/${path}`} data-scenario>
-            {other === 'ru' ? 'Русский' : 'English'}
-          </a>
-        </p>
+        <p class="eyebrow">{t.eyebrow} · v{MODEL_CONFIG.version}</p>
         <h1>{heading}</h1>
         {lede ? <p class="lede" set:html={lede} /> : null}
       </header>
@@ -99,7 +88,7 @@ const canonical = abs(`/${locale}/${path}`);
             SECTIONS.map((item) => (
               <li>
                 <a
-                  href={`/${locale}/${item.path}`}
+                  href={`/${item.path}`}
                   data-scenario
                   aria-current={item.id === section ? 'page' : undefined}
                 >
@@ -117,15 +106,9 @@ const canonical = abs(`/${locale}/${path}`);
 
       <footer>
         <p>
-          {locale === 'ru' ? 'Опорная точка экстраполяции: 50%-горизонт' : 'Extrapolation anchor: a 50% horizon of'}
-          <b>{MODEL_CONFIG.anchor.horizonMinutes}</b>
-          {locale === 'ru' ? 'минут,' : 'minutes,'}
-          {MODEL_CONFIG.anchor.model}, {anchor.getUTCFullYear()} (METR, TH1.1).
-          {
-            locale === 'ru'
-              ? ' Коэффициенты сложности, лаги внедрения и веса ступеней — экспертное суждение, не измерение.'
-              : ' Difficulty coefficients, deployment lags and rung weights are expert judgement, not measurement.'
-          }
+          Extrapolation anchor: a 50% horizon of <b>{MODEL_CONFIG.anchor.horizonMinutes}</b> minutes,
+          {MODEL_CONFIG.anchor.model}, {anchor.getUTCFullYear()} (METR, TH1.1). Difficulty
+          coefficients, deployment lags and rung weights are expert judgement, not measurement.
         </p>
         <div class="srcs">
           <a href="https://metr.org/blog/2026-1-29-time-horizon-1-1/">METR · Time Horizon 1.1</a>
@@ -133,6 +116,7 @@ const canonical = abs(`/${locale}/${path}`);
           <a href="https://hai.stanford.edu/ai-index/2026-ai-index-report">Stanford HAI · AI Index 2026</a>
           <a href="https://incidentdatabase.ai/">AI Incident Database</a>
           <a href="https://www.tortoisemedia.com/data/global-ai">Tortoise · Global AI Index</a>
+          <a href="https://github.com/cro2012/singularity-clock">Source code</a>
         </div>
         <p class="scenario-kept">{t.scenarioKept}</p>
       </footer>

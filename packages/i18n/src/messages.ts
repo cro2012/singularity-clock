@@ -1,285 +1,16 @@
 /**
- * Словари интерфейса.
+ * Словарь интерфейса.
  *
- * Тип выводится из русского словаря, поэтому английский не скомпилируется,
- * пока в нём не окажется каждый ключ. Это единственная проверка, которую
- * может сделать машина; качество перевода — человеческая работа, машинный
- * перевод текстов триггеров и сценариев запрещён (ТЗ §12).
+ * Тип выводится отсюда: словарь второго языка, когда он появится, не
+ * скомпилируется, пока в нём не окажется каждый ключ. Это единственная
+ * проверка, которую может сделать машина; качество перевода — человеческая
+ * работа, машинный перевод текстов триггеров и сценариев запрещён.
  */
 
 import type { PluralForms } from './format.ts';
 import type { Locale } from './locales.ts';
 
-export const ru = {
-  eyebrow: 'Полушуточный прогнозный аппарат',
-  title: 'Часы Сингулярности и Лестница Катастроф',
-  lede:
-    'Два обратных отсчёта, посчитанных из одной экстраполяции: горизонта автономных задач METR. Всё, что вы видите ниже, — оформленное суждение, а не измерение будущего. Крутите ползунки: если дата легко сдвигается на двадцать лет, значит она никогда и не была прогнозом.',
-
-  presetLabel: 'Пресет',
-  presets: {
-    base: 'Базовый',
-    optimist: 'Оптимист',
-    skeptic: 'Скептик',
-    anxious: 'Тревожный',
-    doomsday: 'Судный день',
-  } as Record<string, string>,
-  customScenario: 'Свой сценарий',
-
-  singularityCard: 'До сингулярности',
-  catastropheCard: 'До первой катастрофы любого уровня',
-  neverInModel: 'за пределами модели',
-  neverInModelHint: 'вероятность не доходит до 50% к 2100 году',
-  alreadyHappened: 'уже наступило',
-
-  singularityNote: 'Момент, когда ИИ обгонит медианного профессионала в {pct} из {total} видов деятельности. Уже пройдено: {passed}.',
-  catastropheNote: 'Медианная дата первого события уровня «локальный» и выше. Это не конец света — это первая ступень лестницы.',
-  dateIs: 'Дата',
-
-  clockTitle: 'Часы судного дня, пересчитанные моделью',
-  clockNote:
-    'до полуночи. Шкала: 15 минут — глобальная катастрофа исключена, полночь — гарантирована. Сейчас модель даёт {p} на глобальный уровень до 2100 года.',
-  minutes: { one: 'минута', few: 'минуты', many: 'минут', other: 'минуты' } as PluralForms,
-  seconds: { one: 'секунда', few: 'секунды', many: 'секунд', other: 'секунды' } as PluralForms,
-  alert: {
-    calm: 'Спокойно',
-    watchful: 'Настороженно',
-    serious: 'Серьёзно',
-    critical: 'Критично',
-  },
-
-  controlsSingularity: 'Допущения о скорости',
-  controlsRisk: 'Допущения о риске',
-
-  chart: {
-    asChart: 'График',
-    asTable: 'Таблица',
-    year: 'Год',
-    horizon: 'Горизонт',
-    metrPoint: 'Точка METR',
-    minutes: 'мин',
-    today: 'сегодня',
-    by: 'к',
-    horizonTitle: 'Горизонт автономной задачи и его экстраполяция',
-    horizonSubtitle:
-      'Точки — оценки METR (до 2025 приблизительные, методика TH1/TH1.1). Линия закреплена в последней точке и построена по вашему времени удвоения — она не подогнана под историю, поэтому и расходится с ранними точками. Шкала логарифмическая: прямая = экспонента.',
-    horizonSummary:
-      'Опорная точка {anchor}, время удвоения {doubling} дней. Выбранный порог {target} достигается в {date}.',
-    horizonReadout: '{date}: горизонт {horizon}',
-    riskTitle: 'Накопленная вероятность события каждого уровня',
-    riskSubtitle:
-      'P(событие этого уровня или хуже произошло к году t), считая с сегодняшнего дня. Каждая кривая включает всё, что выше по лестнице, поэтому нижняя всегда лежит над верхней. Плато справа — следствие окна уязвимости: пережили переход — риск падает.',
-    riskSummaryPrefix: 'Накопленная вероятность к 2050 и 2100 годам:',
-  },
-  keyboardHint: 'График фокусируется с клавиатуры: стрелки двигают курсор, Shift — шаг в десять лет, Esc убирает.',
-
-  nav: {
-    home: 'Счётчики',
-    singularity: 'Сингулярность',
-    catastrophe: 'Лестница катастроф',
-    triggers: 'Триггеры',
-    countries: 'Страны',
-    compare: 'Сравнение',
-    model: 'Как это считается',
-  },
-  navLabel: 'Разделы',
-  scenarioKept: 'Сценарий сохраняется при переходе между разделами.',
-
-  items: {
-    functionColumn: 'Вид деятельности',
-    industryColumn: 'Отрасль',
-    progress: 'Прогресс',
-    overtaken: 'Обгон',
-    difficulty: 'Коэффициент сложности',
-    lag: 'Лаг внедрения',
-    years: 'лет',
-    progressValue: 'Полоса',
-    estimateNote:
-      'Оценка: {date}, {relative}. Коэффициент и лаг — экспертное суждение, а не измерение.',
-    inThePast: 'уже позади',
-    inTheFuture: 'ещё впереди',
-    functionsTitle: 'По видам мыслительной деятельности',
-    industriesTitle: 'По отраслям и профессиям',
-    howComputed: 'Как считается дата для каждой строки',
-    formulaNote:
-      'Горизонт METR измерен на задачах программной инженерии. Для остального задан коэффициент сложности относительно этой базы — во сколько раз более длинную цепочку рассуждений требует область, — и лаг внедрения в годах: время на железо, капитал, доверие и регуляторов после того, как способность технически появилась. Коэффициенты — экспертное суждение автора модели. Это самое слабое место всей конструкции, и оно ровно там, где вам, скорее всего, захочется спорить. Так и задумано.',
-  },
-
-  tiers: {
-    median: 'медиана',
-    noMedian: 'P < 50% до конца горизонта',
-    pBy: 'P к',
-    deaths: 'жертвы',
-    damage: 'ущерб',
-    nestedNote:
-      'Каждая ступень — вероятность события этого уровня или хуже, поэтому нижняя всегда выше верхней. 34% локального включают в себя 3% глобального, а не идут вместо них.',
-    formulaTitle: 'Формула интенсивности риска',
-    formulaNote:
-      'cᵢ(t) — способность: логистическая функция от логарифма горизонта относительно порога ступени. d(t) — подключённость, насыщающаяся экспонента. eᵢ — потолок эффективности митигации: 0,80 для локального, 0,60 для регионального, 0,45 для глобального. aᵢ(t) — затухание после насыщения способностей. Итог: P = 1 − exp(−∫λ dt), шаг интегрирования — год.',
-    formulaHonesty:
-      'Обратите внимание, что произведение четырёх множителей, каждый из которых вы задали на глаз, даёт величину с точностью в лучшем случае порядка. Все знаки после запятой в датах — вежливая ложь интерфейса.',
-  },
-
-  triggers: {
-    accelerating: 'Разгоняющие',
-    calming: 'Успокаивающие',
-    intro:
-      'Наблюдаемые события, каждое из которых сдвигает модель. Отмечайте то, что, по-вашему, уже произошло, — и смотрите, как прыгают даты. Это, пожалуй, единственная честная часть конструкции: не прогноз, а список того, за чем осмысленно следить. Автоматически здесь не включается ничего: отметка — ваше суждение.',
-  },
-
-  countries: {
-    intro:
-      'Семь компонентов, каждый нормирован в 0–100. Итог — взвешенная сумма, и веса задаёте вы. Это не украшение: вся содержательная разница между публичными индексами AI-лидерства сводится к весам, и прятать это было бы нечестно.',
-    provisionalTitle: 'Данные не выверены.',
-    provisional:
-      'Баллы в таблице — заготовка под структуру рейтинга, а не измерение. До сверки с AI Index, Tortoise и OECD ни числа, ни порядок мест ничего не значат. Связь с моделью риска по этой причине выключена по умолчанию.',
-    equalWeights: 'Равные веса',
-    tableCaption: 'Рейтинг стран по AI-лидерству',
-    country: 'Страна',
-    score: 'Балл',
-    breakdown: 'Доля от лидера',
-    raceTitle: 'Индекс гонки',
-    raceNote:
-      'Концентрация лидерства по Херфиндалю–Хиршману на топ-5. Единица — пятеро равных, ноль — один доминирующий игрок.',
-    geopoliticsToggle: 'Учитывать геополитику в модели риска',
-    geopoliticsNote:
-      'Допущение автора модели, а не установленный факт: чем ровнее гонка, тем труднее договориться. При включении потолок митигации умножается на (1 − {penalty} · индекс гонки), сейчас это −{effect}.',
-    components: {
-      research: 'Исследования',
-      patents: 'Патенты и ИС',
-      talent: 'Талант',
-      infrastructure: 'Инфраструктура',
-      investment: 'Инвестиции',
-      commercialization: 'Коммерциализация',
-      governance: 'Управление и регулирование',
-    },
-    componentHints: {
-      research: 'Публикации, цитируемость, доля на топ-конференциях.',
-      patents: 'Заявки, выданные патенты, доля в мировом объёме.',
-      talent: 'Численность исследователей, приток и отток.',
-      infrastructure: 'Доступный компьют, дата-центры, доступ к передовым чипам.',
-      investment: 'Частные и государственные вложения, число сделок.',
-      commercialization: 'Компании, выручка, проникновение в экономику.',
-      governance: 'Зрелость регулирования, институты оценки, участие в договорах.',
-    },
-    names: {
-      USA: 'США',
-      CHN: 'Китай',
-      GBR: 'Великобритания',
-      KOR: 'Южная Корея',
-      DEU: 'Германия',
-      FRA: 'Франция',
-      JPN: 'Япония',
-      CAN: 'Канада',
-      ISR: 'Израиль',
-      IND: 'Индия',
-      SGP: 'Сингапур',
-      NLD: 'Нидерланды',
-    } as Record<string, string>,
-  },
-
-  compare: {
-    intro:
-      'Две колонки с одинаковой структурой. Смысл не в том, чтобы узнать, какая дата «правильная», а в том, чтобы увидеть, насколько она зависит от того, во что вы верите. Отличающиеся допущения подсвечены.',
-    sideA: 'Слева',
-    sideB: 'Справа',
-    swap: 'Поменять местами',
-    assumption: 'Допущение',
-    chartTitle: 'Накопленная вероятность: два сценария наложены',
-    chartSubtitle:
-      'Цвет закреплён за ступенью, а не за колонкой: сплошная и пунктирная линии одного цвета — это одна и та же величина при разных допущениях. Разные цвета читались бы как разные величины.',
-    singularity: 'До сингулярности',
-    catastrophe: 'До первой катастрофы',
-    doomsday: 'Минут до полуночи',
-    deaths: 'Ожидаемые жертвы к {year}',
-    usd: 'Ожидаемый ущерб к {year}',
-    identical: 'Сценарии совпадают — выберите разные, иначе сравнивать нечего.',
-  },
-  singularityIntro:
-    'Определение здесь операциональное, а не мистическое: сингулярность наступила, когда ИИ выполняет самостоятельно, без человека в цикле, задачу заданной длины в заданной доле видов деятельности. Никакого «пробуждения сознания» — только момент, после которого прогнозировать экономику по человеческому труду становится бессмысленно.',
-  catastropheIntro:
-    '«Апокалипсис» — не событие, а шкала. Три порога, у каждого свой критерий, своя вероятность и свой доминирующий механизм: внизу лестницы правит злой умысел человека, наверху — отказ контроля. Модель считает не дату, а интенсивность риска λ(t), из неё — накопленную вероятность и медианную дату.',
-
-  expectedTitle: 'Математическое ожидание к {year} году',
-  expectedDeaths:
-    'ожидаемое число погибших: сумма по трём уровням, вероятность × геометрическое среднее диапазона',
-  expectedUsd: 'ожидаемый прямой ущерб в долларах 2026 года',
-
-  sliders: {
-    doublingDays: {
-      label: 'Время удвоения горизонта',
-      unit: 'дн.',
-      hint: 'METR: 196 дн. на всей выборке с 2019, 131 дн. если считать с 2023, 89 дн. если с 2024.',
-    },
-    friction: {
-      label: 'Трение реального мира',
-      unit: '',
-      hint: 'Во сколько раз бенчмарк оптимистичнее жизни: энергосети, чипы, данные, регуляторы, инерция людей. 1,0 — «график и есть реальность».',
-    },
-    singularityPct: {
-      label: 'Порог сингулярности',
-      unit: '%',
-      hint: 'Какая доля из 30 видов деятельности должна быть пройдена, чтобы объявить дату.',
-    },
-    malicePct: {
-      label: 'Доля злонамеренного применения',
-      unit: '%',
-      hint: 'Насколько охотно люди направят доступную мощность во вред. Главный драйвер нижней ступени.',
-    },
-    alignFailPct: {
-      label: 'Вероятность отказа контроля',
-      unit: '%',
-      hint: 'Что система в критический момент делает не то, для чего её ставили, и это не откатывается. Главный драйвер верхней ступени.',
-    },
-    mitigationPct: {
-      label: 'Эффективность митигации',
-      unit: '%',
-      hint: 'Регулирование, аудит, рубильники, договоры. На верхней ступени работает хуже: предотвращать нужно то, чего ещё не было.',
-    },
-    dep0Pct: {
-      label: 'Подключённость к критическим системам сейчас',
-      unit: '%',
-      hint: 'Какая доля энергетики, финансов, логистики, оружия и медицины уже отдана автономным контурам.',
-    },
-    tauYears: {
-      label: 'Время насыщения внедрения',
-      unit: 'лет',
-      hint: 'За сколько лет подключённость доходит до потолка.',
-    },
-    adaptWindowYears: {
-      label: 'Окно уязвимости',
-      unit: 'лет',
-      hint: 'После того как способности упёрлись в потолок, мир учится с ними жить, и риск затухает с этим периодом. Поставьте 100 — и он не затухает никогда.',
-    },
-  },
-
-  targetLabel: 'Порог задачи',
-  targetHint: 'Какой длины непрерывную работу человека ИИ должен закрывать сам, чтобы считалось. Считается рабочее время, не календарное.',
-  targets: { day: '1 день', week: '1 неделя', month: '1 месяц', year: '1 год' } as Record<string, string>,
-
-  reliabilityLabel: 'Требуемая надёжность',
-  reliabilityHint:
-    'METR меряет горизонт при 50% успеха. Планка 80% отодвигает дату примерно на 2,3 удвоения: считать надёжной систему с монеткой нельзя.',
-  reliability50: '50% успеха',
-  reliability80: '80% успеха',
-
-  reset: 'Сбросить к базовому',
-  copyLink: 'Скопировать ссылку на сценарий',
-  copied: 'Скопировано',
-  linkFromOtherVersion: 'Ссылка сделана в другой версии модели, сценарий не восстановлен. Показан базовый пресет.',
-
-  disclaimerTitle: 'Отдельно и без иронии.',
-  disclaimer:
-    'Этот аппарат не предсказывает будущее и не может. У события, которое не происходило ни разу, нет обучающей выборки, нет валидации и нет способа отличить хорошую модель от красивой. Всё, что тут делается, — это раскладывание допущений по полочкам так, чтобы стало видно, какое из них несёт всю нагрузку. Если ползунок «отказ контроля» двигает глобальную дату на сорок лет, а «удвоение горизонта» — на пять, то спорить надо про первое. В этом вся ценность; даты — побочный продукт.',
-
-  anchorNote: 'Опорная точка: 50%-горизонт {horizon} минут, {model}, {date}.',
-  estimateMark: 'оценка',
-  milestoneNote: 'Разбивка по видам деятельности, графики и панель триггеров появятся на следующем шаге.',
-};
-
-export type Messages = typeof ru;
-
-export const en: Messages = {
+export const en = {
   eyebrow: 'A half-joking forecasting apparatus',
   title: 'The Singularity Clock and the Ladder of Catastrophes',
   lede:
@@ -292,7 +23,7 @@ export const en: Messages = {
     skeptic: 'Sceptic',
     anxious: 'Anxious',
     doomsday: 'Doomsday',
-  },
+  } as Record<string, string>,
   customScenario: 'Custom scenario',
 
   singularityCard: 'To singularity',
@@ -310,8 +41,8 @@ export const en: Messages = {
   clockTitle: 'The Doomsday Clock, recomputed by the model',
   clockNote:
     'to midnight. Scale: 15 minutes means global catastrophe is ruled out, midnight means it is certain. The model currently gives {p} for the global level through 2100.',
-  minutes: { one: 'minute', other: 'minutes' },
-  seconds: { one: 'second', other: 'seconds' },
+  minutes: { one: 'minute', other: 'minutes' } as PluralForms,
+  seconds: { one: 'second', other: 'seconds' } as PluralForms,
   alert: { calm: 'Calm', watchful: 'Watchful', serious: 'Serious', critical: 'Critical' },
 
   controlsSingularity: 'Assumptions about speed',
@@ -441,7 +172,7 @@ export const en: Messages = {
       IND: 'India',
       SGP: 'Singapore',
       NLD: 'Netherlands',
-    },
+    } as Record<string, string>,
   },
 
   compare: {
@@ -460,6 +191,24 @@ export const en: Messages = {
     deaths: 'Expected deaths by {year}',
     usd: 'Expected damage by {year}',
     identical: 'The scenarios are identical — pick different ones, otherwise there is nothing to compare.',
+  },
+  what: {
+    isTitle: 'What this is',
+    isNotTitle: 'What this is not',
+    is: [
+      'A model, not a forecast. One extrapolation — METR\u2019s autonomous task horizon — turned into two countdowns and a three-rung ladder of catastrophe.',
+      'Probabilities by year. Other p(doom) calculators give a single number with no time axis; here every level has a curve from today to 2100.',
+      'Three scales, told apart. A thousand deaths and the end of the species are not the same event at different odds, and the model refuses to average them.',
+      'Recomputed from your assumptions. Every constant that carries weight is a slider, and each default says where it came from.',
+      'Open. Code under MIT, model constants under CC BY, every coefficient in one versioned file you can argue with through a pull request.',
+    ],
+    isNot: [
+      'Not a prediction. An event that has never happened has no training sample, no validation, and no way to tell a good model from a pretty one.',
+      'Not a position. The service does not argue that AI is dangerous or that it is safe. It hands you the apparatus and stays out of the conclusion.',
+      'Not a date. If a slider moves the answer by forty years, the date was never the answer \u2014 its sensitivity is.',
+      'Not a measurement. Difficulty coefficients, deployment lags and rung weights are expert judgement, and the weakest of them is labelled as such.',
+      'Not advice. No personal or geographic predictions, no survival guidance, and no named company, laboratory or country blamed for anything.',
+    ],
   },
   singularityIntro:
     'The definition here is operational, not mystical: singularity has arrived when AI completes, unaided and with no human in the loop, a task of a given length across a given share of activities. No "awakening of consciousness" — only the point past which forecasting the economy in terms of human labour stops making sense.',
@@ -522,7 +271,7 @@ export const en: Messages = {
   targetLabel: 'Task threshold',
   targetHint:
     'How long a stretch of human work AI must complete unaided for it to count. Working time, not calendar time.',
-  targets: { day: '1 day', week: '1 week', month: '1 month', year: '1 year' },
+  targets: { day: '1 day', week: '1 week', month: '1 month', year: '1 year' } as Record<string, string>,
 
   reliabilityLabel: 'Required reliability',
   reliabilityHint:
@@ -546,7 +295,9 @@ export const en: Messages = {
     'The activity breakdown, charts and trigger panel arrive in the next step.',
 };
 
-export const MESSAGES: Record<Locale, Messages> = { ru, en };
+export type Messages = typeof en;
+
+export const MESSAGES: Record<Locale, Messages> = { en };
 
 /** Подстановка `{ключ}` в строку. Форматирование чисел — до вызова. */
 export function interpolate(template: string, values: Record<string, string>): string {

@@ -1,14 +1,13 @@
 ---
-import Section from '../../../layouts/Section.astro';
-import { Countries } from '../../../components/Countries.tsx';
-import { MESSAGES } from '@sc/i18n';
+import Section from '../../layouts/Section.astro';
+import { Countries } from '../../components/Countries.tsx';
+import { DEFAULT_LOCALE, MESSAGES } from '@sc/i18n';
 
-const t = MESSAGES['en'];
+const t = MESSAGES[DEFAULT_LOCALE];
 const now = Date.now();
 ---
 
 <Section
-  locale="en"
   section="countries"
   title="Country ranking and race index"
   description="Seven components of AI leadership with adjustable weights, and a Herfindahl–Hirschman race index."

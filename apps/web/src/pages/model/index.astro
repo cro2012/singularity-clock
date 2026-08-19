@@ -1,13 +1,12 @@
 ---
-import Section from '../../../layouts/Section.astro';
-import { MODEL_CONFIG as config } from '../../../model-config.ts';
+import Section from '../../layouts/Section.astro';
+import { MODEL_CONFIG as config } from '../../model-config.ts';
 
 const anchor = new Date(config.anchor.at);
 const c = config.constants;
 ---
 
 <Section
-  locale="en"
   section="model"
   title="How it is computed — the model, its assumptions and its red lines"
   description="Formulas, coefficients and rationale behind the Singularity Clock. What is measured here, what is invented, and where the limits of decency run."

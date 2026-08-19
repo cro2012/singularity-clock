@@ -85,7 +85,6 @@ export function endSentence(text: string): string {
 }
 
 const HORIZON_UNITS: Record<Locale, { min: string; hour: string; day: string; month: string; year: string }> = {
-  ru: { min: 'мин', hour: 'ч', day: 'дн.', month: 'мес.', year: 'лет' },
   en: { min: 'min', hour: 'h', day: 'd', month: 'mo', year: 'yr' },
 };
 
@@ -117,12 +116,10 @@ export interface Countdown {
 }
 
 const YEARS: Record<Locale, PluralForms> = {
-  ru: { one: 'год', few: 'года', many: 'лет', other: 'года' },
   en: { one: 'year', other: 'years' },
 };
 
 const DAYS: Record<Locale, PluralForms> = {
-  ru: { one: 'день', few: 'дня', many: 'дней', other: 'дня' },
   en: { one: 'day', other: 'days' },
 };
 

@@ -31,6 +31,7 @@ import { CompareRiskChart } from './components/CompareRiskChart.tsx';
 import { ScenarioBar, SliderFor } from './components/ScenarioBar.tsx';
 import { TierCards } from './components/TierCards.tsx';
 import { TriggerPanel } from './components/TriggerPanel.tsx';
+import { WhatItIs } from './components/WhatItIs.tsx';
 import { ControlGroup, Segmented } from './components/controls.tsx';
 import { useCompare } from './useCompare.ts';
 import { useScenario } from './useScenario.ts';
@@ -146,6 +147,8 @@ export function HomeScreen({ config, locale, now }: ScreenProps) {
           <p className="datenote">{t.expectedUsd}</p>
         </div>
       </div>
+
+      <WhatItIs locale={locale} />
 
       <div className="disclaimer">
         <b>{t.disclaimerTitle}</b> {t.disclaimer}

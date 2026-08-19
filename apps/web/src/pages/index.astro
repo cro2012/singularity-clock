@@ -1,9 +1,18 @@
 ---
-// Корень редиректит на локаль по умолчанию: язык определяется префиксом пути,
-// а не заголовком браузера (ТЗ §12).
+import Section from '../layouts/Section.astro';
+import { Home } from '../components/Home.tsx';
+import { DEFAULT_LOCALE, MESSAGES } from '@sc/i18n';
+
+const t = MESSAGES[DEFAULT_LOCALE];
+const now = Date.now();
 ---
 
-<meta http-equiv="refresh" content="0; url=/ru/" />
-<link rel="canonical" href="/ru/" />
-<title>Часы Сингулярности</title>
-<p>Переход на <a href="/ru/">/ru/</a></p>
+<Section
+  section="home"
+  title="The Singularity Clock — countdown"
+  description="Two countdowns from a single extrapolation: to singularity and to catastrophe. The date is not the result — its sensitivity to assumptions is."
+  heading="The Singularity Clock and the Ladder of Catastrophes"
+  lede={t.lede}
+>
+  <Home client:load locale="en" now={now} />
+</Section>

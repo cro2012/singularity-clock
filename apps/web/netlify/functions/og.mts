@@ -23,6 +23,7 @@ import { computeModel, decodeScenario, matchPreset } from '@sc/core';
 import { parseModelConfig } from '@sc/data';
 import {
   CONTENT,
+  DEFAULT_LOCALE,
   formatCountdown,
   formatMonthYear,
   formatPercent,
@@ -57,19 +58,17 @@ const font = (name: string) => readFileSync(join(ASSETS, name));
 const MODEL_CONFIG = parseModelConfig(readFileSync(join(ASSETS, 'model.v1.yaml'), 'utf8'));
 
 /**
- * Кириллица и латиница — разные подмножества Inter, и имена у них разные
- * намеренно: Satori выбирает шрифт по имени и внутри одного имени между
- * файлами не переключается. Одинаковые имена дали бы «NO GLYPH» на всей
- * кириллице. Разные имена плюс список в fontFamily — и подстановка по глифам
- * работает.
+ * Одно семейство: сайт одноязычный, хватает латиницы.
+ *
+ * Добавляя второй алфавит, дайте ему ОТДЕЛЬНОЕ имя и перечислите оба в
+ * fontFamily. Satori выбирает шрифт по имени и внутри одного имени между
+ * файлами не переключается — одинаковые имена дают «NO GLYPH».
  */
-const FAMILY = 'Inter, InterCyrillic';
+const FAMILY = 'Inter';
 
 const FONTS = [
   { name: 'Inter', data: font('inter-latin-400.ttf'), weight: 400 as const, style: 'normal' as const },
   { name: 'Inter', data: font('inter-latin-600.ttf'), weight: 600 as const, style: 'normal' as const },
-  { name: 'InterCyrillic', data: font('inter-cyrillic-400.ttf'), weight: 400 as const, style: 'normal' as const },
-  { name: 'InterCyrillic', data: font('inter-cyrillic-600.ttf'), weight: 600 as const, style: 'normal' as const },
 ];
 
 const WIDTH = 1200;
@@ -130,8 +129,9 @@ function panel(label: string, value: string, note: string) {
 
 export default async (request: Request): Promise<Response> => {
   const url = new URL(request.url);
-  const localeParam = url.searchParams.get('l');
-  const locale: Locale = localeParam === 'en' ? 'en' : 'ru';
+  // Язык один; параметр l сохранён для обратной совместимости со ссылками,
+  // которые успели разойтись, и на случай второго языка.
+  const locale: Locale = DEFAULT_LOCALE;
   const t = MESSAGES[locale];
 
   const encoded = url.searchParams.get('s');

@@ -13,10 +13,5 @@ export default defineConfig({
   // сайта, то есть боевой домен; запасное значение для локальной сборки.
   site: process.env.URL ?? 'https://aiapocalypse.now',
   integrations: [react(), sitemap()],
-  i18n: {
-    locales: ['ru', 'en'],
-    defaultLocale: 'ru',
-    routing: { prefixDefaultLocale: true },
-  },
   build: { format: 'directory' },
 });

@@ -132,7 +132,7 @@ export function HorizonChart({ config, effective, targetMinutes, locale, now }: 
 
         {[1, 10, 100, 1000, 10000, 100000].map((v) => (
           <text key={v} x={L - 9} y={Y(v) + 4} fill="var(--muted)" fontSize={11} textAnchor="end">
-            {v >= 1000 ? `${v / 1000}${locale === 'ru' ? 'к' : 'k'}` : v}
+            {v >= 1000 ? `${v / 1000}k` : v}
           </text>
         ))}
         <text x={L - 9} y={T - 2} fill="var(--muted)" fontSize={10.5} textAnchor="end">

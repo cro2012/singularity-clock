@@ -50,11 +50,14 @@ describe('OG-картинка', () => {
     dump('doomsday', doomsday.bytes);
   });
 
-  it('английская локаль рендерится и отличается от русской', async () => {
-    const ru = await render('?l=ru');
-    const en = await render('?l=en');
-    expect(en.isPng).toBe(true);
-    expect(ru.bytes.equals(en.bytes)).toBe(false);
+  it('устаревший параметр локали не ломает картинку и ничего не меняет', () => {
+    // Сайт был двуязычным, ссылки с ?l= успели разойтись. Параметр теперь
+    // ничего не значит, но обязан молча игнорироваться, а не ронять функцию.
+    return Promise.all([render(''), render('?l=ru'), render('?l=en')]).then(([plain, ru, en]) => {
+      expect(plain.isPng && ru.isPng && en.isPng).toBe(true);
+      expect(ru.bytes.equals(plain.bytes)).toBe(true);
+      expect(en.bytes.equals(plain.bytes)).toBe(true);
+    });
   });
 
   it('битая строка сценария не роняет функцию, а даёт базовый пресет', async () => {
