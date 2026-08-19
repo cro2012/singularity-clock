@@ -18,6 +18,7 @@ function geometricMean([low, high]: readonly [number, number]): number {
   return Math.sqrt(low * high);
 }
 
+
 /**
  * Положение стрелки от 0 до 1.
  *
@@ -80,6 +81,9 @@ export function computeModel(args: ComputeArgs): ModelResult {
   // была бы посчитана трижды. Именно exactCurve, а не ownCurve: собственная
   // кривая ступени не знает про конкурирующий риск и переоценивает мелкие
   // уровни (см. TierResult.exactCurve).
+  //
+  // Число грубое и выводится только вместе с оговоркой: это Σ вероятность ×
+  // геометрическое среднее объявленного диапазона, а не прогноз смертей.
   let deaths = 0;
   let usd = 0;
   for (const [index, spec] of config.tiers.entries()) {

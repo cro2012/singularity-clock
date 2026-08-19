@@ -7,8 +7,8 @@ import { useState } from 'react';
  * страницами нет — его переносит параметр `s` в адресе (см. useScenario).
  */
 
-import type { Assumptions, ComponentId, ModelConfig, RangedAssumption } from '@sc/core';
-import { EQUAL_WEIGHTS, encodeScenario, matchPreset, raceIndex } from '@sc/core';
+import type { Assumptions, ComponentId, ModelConfig, RangedAssumption, TierId } from '@sc/core';
+import { EQUAL_WEIGHTS, encodeScenario, matchPreset, probabilityAt, raceIndex } from '@sc/core';
 import {
   CONTENT,
   endSentence,
@@ -80,6 +80,7 @@ export function HomeScreen({ config, locale, now }: ScreenProps) {
         locale={locale}
         store={store}
         linkRejected={state.linkRejected}
+        now={now}
       />
       <p className="datenote baseline-note">{t.baselineNote}</p>
 
@@ -172,6 +173,7 @@ export function SingularityScreen({ config, locale, now }: ScreenProps) {
         locale={locale}
         store={store}
         linkRejected={state.linkRejected}
+        now={now}
       />
 
       <AnchorPicker config={config} assumptions={assumptions} locale={locale} store={store} />
@@ -271,6 +273,7 @@ export function CatastropheScreen({ config, locale, now }: ScreenProps) {
         locale={locale}
         store={store}
         linkRejected={state.linkRejected}
+        now={now}
       />
 
       <ControlGroup title={t.controlsRisk}>
@@ -293,6 +296,25 @@ export function CatastropheScreen({ config, locale, now }: ScreenProps) {
 
       <RiskChart model={model} locale={locale} />
       <p className="datenote">{t.keyboardHint}</p>
+
+      <section className="card expected">
+        <p className="card-label">
+          {interpolate(t.expectedCardTitle, {
+            year: formatNumber(locale, model.expected.atYear, { useGrouping: false }),
+          })}
+        </p>
+        <div className="expected-pair">
+          <div>
+            <p className="bignum tabular">{formatCompact(locale, model.expected.deaths)}</p>
+            <p className="datenote">{t.expectedDeaths}</p>
+          </div>
+          <div>
+            <p className="bignum tabular">{formatUsd(locale, model.expected.usd)}</p>
+            <p className="datenote">{t.expectedUsd}</p>
+          </div>
+        </div>
+        <p className="datenote caveat">{t.expectedCaveat}</p>
+      </section>
 
       <section className="card severity">
         <p className="card-label">
@@ -382,6 +404,7 @@ export function TriggersScreen({ config, locale, now }: ScreenProps) {
         locale={locale}
         store={store}
         linkRejected={state.linkRejected}
+        now={now}
       />
 
       <p className="sub">{t.triggers.intro}</p>
@@ -446,6 +469,7 @@ export function CountriesScreen({
         locale={locale}
         store={store}
         linkRejected={state.linkRejected}
+        now={now}
       />
       <p className="sub">{t.countries.intro}</p>
 
@@ -486,6 +510,20 @@ export function CountriesScreen({
 
 /* =========================== сравнение =========================== */
 
+/**
+ * Строки риска в сравнении.
+ *
+ * Нижняя ступень к 2050 показывает, насколько скоро вообще что-то случается,
+ * верхняя к 2100 — во что упирается спор. Кривые вложенные, то есть каждая
+ * означает «событие этого уровня или хуже».
+ */
+const RISK_ROWS: readonly { tier: TierId; year: number }[] = [
+  { tier: 'local', year: 2050 },
+  { tier: 'regional', year: 2050 },
+  { tier: 'global', year: 2050 },
+  { tier: 'global', year: 2100 },
+];
+
 const COMPARED: readonly RangedAssumption[] = [
   'doublingDays',
   'friction',
@@ -522,6 +560,23 @@ export function CompareScreen({ config, locale, now }: ScreenProps) {
       a: number(Math.round(pair.a.model.doomsday.minutesToMidnight * 10) / 10),
       b: number(Math.round(pair.b.model.doomsday.minutesToMidnight * 10) / 10),
     },
+    // Раньше здесь стояли ожидаемые жертвы и ущерб. Их убрали со всех
+    // остальных страниц как псевдоточные, и оставлять чёрный ход через
+    // сравнение бессмысленно: человек всё равно получил бы то самое число.
+    // Сравнивать сценарии полезнее по риску, который и есть предмет спора.
+    ...RISK_ROWS.map(({ tier, year }) => {
+      const index = config.tiers.findIndex((spec) => spec.id === tier);
+      const at = (side: typeof pair.a) =>
+        formatPercent(locale, probabilityAt(side.model.tiers[index]!.curve, year));
+      return {
+        label: interpolate(t.compare.riskRow, {
+          tier: CONTENT[locale].tiers[tier]!.name,
+          year: formatNumber(locale, year, { useGrouping: false }),
+        }),
+        a: at(pair.a),
+        b: at(pair.b),
+      };
+    }),
     {
       label: interpolate(t.compare.deaths, {
         year: formatNumber(locale, pair.a.model.expected.atYear, { useGrouping: false }),

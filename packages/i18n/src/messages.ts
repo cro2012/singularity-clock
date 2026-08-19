@@ -16,9 +16,11 @@ export const en = {
   lede:
     "Two countdowns derived from a single extrapolation: METR's autonomous task horizon. Everything below is a formalised judgement, not a measurement of the future. Move the sliders: if a date shifts by twenty years that easily, it was never a forecast.",
 
+  presetRisk: 'Global catastrophe risk by {year} under this scenario: {p}',
   presetLabel: 'Preset',
   presets: {
     base: 'Author baseline',
+    survey: 'Survey-calibrated',
     optimist: 'Optimist',
     skeptic: 'Sceptic',
     anxious: 'Anxious',
@@ -33,7 +35,7 @@ export const en = {
   alreadyHappened: 'already happened',
 
   singularityNote:
-    'The moment AI overtakes the median professional in {pct} of {total} kinds of activity. Already passed: {passed}.',
+    'The model-implied date when AI crosses the selected autonomous-task threshold, unaided, across {pct} of {total} categories of activity. Not a claim about consciousness or general intelligence. Already crossed: {passed}.',
   catastropheNote:
     'Median date of the first event at the local level or worse. This is not the end of the world — it is the bottom rung of the ladder.',
   dateIs: 'Date',
@@ -195,6 +197,10 @@ export const en = {
     singularity: 'To singularity',
     catastrophe: 'To the first catastrophe',
     doomsday: 'Minutes to midnight',
+    // Строки риска добавлены к ожиданию, а не вместо него: сравнивать
+    // сценарии полезнее по самой вероятности, а число жертв грубое и живёт
+    // с оговоркой (expectedCaveat).
+    riskRow: '{tier} by {year}',
     deaths: 'Expected deaths by {year}',
     usd: 'Expected damage by {year}',
     identical: 'The scenarios are identical — pick different ones, otherwise there is nothing to compare.',
@@ -297,6 +303,24 @@ export const en = {
     source: 'Source',
   },
 
+  methodology: {
+    chainTitle: 'From one measurement to the outputs',
+    chainLead:
+      'The same four kinds of number used across the site, in the order they feed into each other. The chain is short on purpose: if it were long, nobody could check it.',
+    chainMeasured:
+      'METR\u2019s 50% time horizon: the length of task a frontier model finishes unaided, half the time. One number, with a source, a date and a confidence interval. Selectable on the singularity page.',
+    chainExtrapolated:
+      'The doubling time carries that measurement forward. It continues an observed trend and is therefore still tied to data \u2014 but a continuation is not an observation, and nothing guarantees the trend holds.',
+    chainAssumed:
+      'Everything else: transfer coefficients to other domains, deployment lags, rung weights, mitigation ceilings, trigger multipliers, misuse and control-failure pressure. Author\u2019s judgement, every one of them on a slider. This is the group that carries the load, which is why the sensitivity table on the front page exists.',
+    chainOutput:
+      'Dates, cumulative probability curves and the clock. Derived quantities \u2014 they inherit every weakness above and add none of their own.',
+    chainUnverified:
+      'One dataset does not belong to the chain: the country table is a prototype that has not been reconciled with any source. It is hidden behind a button, labelled, and affects nothing unless you switch it on.',
+    chainCarries:
+      'The load sits almost entirely in the third group. That is the argument for exposing it as sliders rather than burying it in code.',
+  },
+
   operationalNote:
     'Operational definition used by this model. Not consciousness, not recursive self-improvement, not AGI in any of its usual senses.',
 
@@ -313,6 +337,9 @@ export const en = {
     'Ranges, not an expected value. A single number would hide two things: the cumulative probability of an event is not a count of events, and every rung is defined with an OR \u2014 an event can clear the damage limb while killing nobody.',
   exactLevelNote:
     'Each row is the probability of an event at exactly this level and nothing worse, which is why the rows add up to the probability of an event at any level. It is the difference between two rungs of the cumulative table above: P(this level or worse) \u2212 P(the next level or worse). So "exactly local" is lower than "local or worse": the worlds where a regional or global event also happened are counted in those rows, not in this one.',
+  expectedCardTitle: 'Expected toll by {year}',
+  expectedCaveat:
+    'This is arithmetic, not a forecast, and it is not a claim that anybody will die. It is the probability of an event at each level \u00d7 the geometric mean of the casualty band that level is defined with, summed over the three levels \u2014 so it inherits every assumption on this page and adds a rounding of its own. A cumulative probability is not a count of events, and each rung is defined with an OR, so an event can clear the damage threshold while killing nobody. Read it as an order of magnitude produced by the sliders you set, and read the ranges below for what the model actually distinguishes.',
   expectedDeaths:
     'expected deaths: summed over three levels, probability × geometric mean of the range',
   expectedUsd: 'expected direct damage in 2026 dollars',

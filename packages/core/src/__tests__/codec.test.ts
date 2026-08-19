@@ -131,6 +131,7 @@ describe('закреплённые ссылки', () => {
         "doomsday": "AR0FAggySwoUBDcAAA",
         "optimist": "AYgZBggUBVAKEgoAAA",
         "skeptic": "Ab4eBggjAzwIFwcAAA",
+        "survey": "AUUNAggoAy0MChQAAA",
       }
     `);
   });

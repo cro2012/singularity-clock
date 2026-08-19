@@ -280,6 +280,15 @@ export interface ModelResult {
   readonly items: readonly ItemResult[];
   readonly tiers: readonly TierResult[];
   readonly anyLevel: { readonly curve: Curve; readonly medianDate: number | null };
+  /**
+   * Математическое ожидание жертв и ущерба к atYear.
+   *
+   * Σ P(ровно этот уровень) × геометрическое среднее объявленного диапазона.
+   * Величина заведомо грубая: накопленная вероятность события не является
+   * числом событий, а ступень задана через ИЛИ. Показывать её можно только
+   * вместе с оговоркой (messages.expectedCaveat) и рядом с диапазонами
+   * тяжести, из которых она собрана.
+   */
   readonly expected: { readonly deaths: number; readonly usd: number; readonly atYear: number };
   readonly doomsday: {
     readonly minutesToMidnight: number;

@@ -13,6 +13,7 @@ import type { Assumptions, ModelConfig } from '@sc/core';
 import { modelConfigSchema, type RawModelConfig } from './schema.ts';
 
 export { modelConfigSchema } from './schema.ts';
+export { CHANGELOG, type ChangelogEntry, type ChangeKind } from './changelog.ts';
 export type { RawModelConfig } from './schema.ts';
 
 /** Достраивает пресет до полного набора допущений. */

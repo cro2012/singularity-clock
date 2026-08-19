@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { CHANGELOG } from './changelog.ts';
 import { loadModelConfig } from './node.ts';
 
 const config = loadModelConfig();
 
 describe('model.v1.yaml проходит схему', () => {
   it('загружается', () => {
-    expect(config.version).toBe('1.0.0');
+    expect(config.version).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
   it('содержит 12 видов деятельности и 18 отраслей — ровно как в приложении А', () => {
@@ -18,8 +19,19 @@ describe('model.v1.yaml проходит схему', () => {
     expect(config.triggers.filter((t) => t.calming)).toHaveLength(2);
   });
 
-  it('содержит 5 пресетов', () => {
-    expect(Object.keys(config.presets)).toHaveLength(5);
+  it('содержит 6 пресетов', () => {
+    expect(Object.keys(config.presets)).toHaveLength(6);
+  });
+
+  it('пресет по опросам отличается от базового ровно одним ползунком', () => {
+    // В этом весь его смысл: он показывает, какое единственное допущение
+    // разводит позицию автора (20%) и медиану опросов (5–10%).
+    const base = config.presets.base!;
+    const survey = config.presets.survey!;
+    const differing = Object.keys(config.ranges).filter(
+      (key) => base[key as keyof typeof base] !== survey[key as keyof typeof survey],
+    );
+    expect(differing).toEqual(['alignFailPct']);
   });
 
   it('якорь по умолчанию — самая свежая точка METR внутри надёжного диапазона', () => {
@@ -71,6 +83,34 @@ describe('model.v1.yaml проходит схему', () => {
     for (const p of Object.values(config.presets)) {
       expect(p.triggers.size).toBe(0);
       expect(p.geopolitics).toBe(false);
+    }
+  });
+});
+
+describe('история версий', () => {
+  it('верхняя запись совпадает с версией конфига', () => {
+    // Иначе страница методологии рассказывает про одну модель, а считает
+    // другая: расхождение никак иначе не заметно.
+    expect(CHANGELOG[0]!.version).toBe(config.version);
+  });
+
+  it('версии идут по убыванию и не повторяются', () => {
+    const seen = new Set<string>();
+    for (const [i, entry] of CHANGELOG.entries()) {
+      expect(seen.has(entry.version), entry.version).toBe(false);
+      seen.add(entry.version);
+      const previous = CHANGELOG[i - 1];
+      if (previous) expect(entry.date <= previous.date, entry.version).toBe(true);
+    }
+  });
+
+  it('срез данных верхней записи совпадает с конфигом', () => {
+    expect(Date.parse(CHANGELOG[0]!.dataCutoff)).toBe(config.metrSource.dataCutoff);
+  });
+
+  it('у каждой записи есть хотя бы одно изменение', () => {
+    for (const entry of CHANGELOG) {
+      expect(entry.changes.length, entry.version).toBeGreaterThan(0);
     }
   });
 });

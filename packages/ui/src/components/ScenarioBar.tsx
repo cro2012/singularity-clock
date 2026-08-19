@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { matchPreset } from '@sc/core';
+import { useEffect, useMemo, useState } from 'react';
+import { computeModel, matchPreset, probabilityAt } from '@sc/core';
 import type { Assumptions, ModelConfig, RangedAssumption } from '@sc/core';
-import { formatNumber, MESSAGES } from '@sc/i18n';
+import { formatNumber, formatPercent, interpolate, MESSAGES } from '@sc/i18n';
 import type { Locale } from '@sc/i18n';
 import { Badge, type ProvenanceKind } from './Provenance.tsx';
 import { Slider } from './controls.tsx';
@@ -13,15 +13,37 @@ export interface ScenarioBarProps {
   readonly locale: Locale;
   readonly store: ScenarioStore;
   readonly linkRejected: boolean;
+  /** Время расчёта. Нужно, чтобы подписать кнопки риском каждого пресета. */
+  readonly now: number;
 }
 
 /**
  * Пресеты и кнопка ссылки. Одинаковы на всех страницах: сценарий здесь
  * общий, а не свой у каждого раздела.
  */
-export function ScenarioBar({ config, assumptions, locale, store, linkRejected }: ScenarioBarProps) {
+export function ScenarioBar({
+  config,
+  assumptions,
+  locale,
+  store,
+  linkRejected,
+  now,
+}: ScenarioBarProps) {
   const t = MESSAGES[locale];
   const active = matchPreset(assumptions, config);
+
+  // Название пресета — это темперамент, а темперамент не проверишь. Число
+  // рядом с ним проверить можно: это тот самый глобальный риск, ради спора о
+  // котором сюда и приходят. Считается один раз на конфиг, а не на рендер.
+  const risk = useMemo(() => {
+    const horizon = config.constants.doomsday.horizonYear;
+    return Object.fromEntries(
+      Object.entries(config.presets).map(([name, preset]) => {
+        const model = computeModel({ assumptions: preset, config, now });
+        return [name, probabilityAt(model.tiers[model.tiers.length - 1]!.ownCurve, horizon)];
+      }),
+    );
+  }, [config, now]);
 
   return (
     <>
@@ -39,8 +61,15 @@ export function ScenarioBar({ config, assumptions, locale, store, linkRejected }
             className="preset"
             aria-pressed={active === name}
             onClick={() => store.replace(config.presets[name]!)}
+            title={interpolate(t.presetRisk, {
+              p: formatPercent(locale, risk[name] ?? 0),
+              year: formatNumber(locale, config.constants.doomsday.horizonYear, {
+                useGrouping: false,
+              }),
+            })}
           >
             {t.presets[name] ?? name}
+            <span className="preset-risk tabular">{formatPercent(locale, risk[name] ?? 0)}</span>
           </button>
         ))}
         {active === null ? <span className="lbl">· {t.customScenario}</span> : null}

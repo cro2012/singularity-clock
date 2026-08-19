@@ -1,11 +1,20 @@
 ---
 import Section from '../../layouts/Section.astro';
+import { MESSAGES } from '@sc/i18n';
+import { CHANGELOG } from '@sc/data';
 import { MODEL_CONFIG as config } from '../../model-config.ts';
 
 const anchor = config.anchors[0]!;
 const anchorHours = (anchor.horizonMinutes / 60).toFixed(1);
 const cutoff = new Date(config.metrSource.dataCutoff).toISOString().slice(0, 10);
 const c = config.constants;
+const m = MESSAGES.en.methodology;
+const p = MESSAGES.en.provenance;
+const minutesPerDecade = c.doomsday.scaleMinutes / c.doomsday.decades;
+const floorPct = `${c.doomsday.probabilityFloor * 100}%`;
+const KIND_LABEL = { model: 'MODEL', data: 'DATA', fix: 'FIX', feature: 'FEATURE' } as const;
+const day = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 
 <Section
@@ -15,6 +24,25 @@ const c = config.constants;
   heading="How it is computed"
 >
   <div class="prose">
+    <dl class="anchor-facts release">
+      <div>
+        <dt>Model version</dt>
+        <dd class="tabular">{config.version}</dd>
+      </div>
+      <div>
+        <dt>Released</dt>
+        <dd class="tabular">{day(CHANGELOG[0]!.date)}</dd>
+      </div>
+      <div>
+        <dt>METR data cutoff</dt>
+        <dd class="tabular">{cutoff}</dd>
+      </div>
+      <div>
+        <dt>Default anchor</dt>
+        <dd>{anchor.model} · {anchorHours} h</dd>
+      </div>
+    </dl>
+
     <p>
       The short answer: from one number. Everything this service shows is derived from METR's
       autonomous task horizon — the length of work a model completes unaided. The default anchor is
@@ -23,25 +51,29 @@ const c = config.constants;
       change it — including to the frontier point METR considers unreliable.
     </p>
 
-    <h2>What is measured and what is invented</h2>
-    <p>
-      The distinction matters, and it is worth holding in mind the whole time you are moving
-      sliders.
-    </p>
-    <ul>
+    <h2>{m.chainTitle}</h2>
+    <p>{m.chainLead}</p>
+    <ol class="chain">
       <li>
-        <b>Measured:</b> the historical METR horizon points and the doubling time. External data
-        with a source.
+        <span class="prov prov-measured">{p.measured}</span>
+        <span>{m.chainMeasured}</span>
       </li>
       <li>
-        <b>Invented:</b> difficulty coefficients, deployment lags, rung weights, trigger
-        multipliers, mitigation ceilings. These are the author's expert judgement. None of these
-        numbers is measured, and none of them can be.
+        <span class="prov prov-extrapolated">{p.extrapolated}</span>
+        <span>{m.chainExtrapolated}</span>
       </li>
-    </ul>
+      <li>
+        <span class="prov prov-assumed">{p.assumed}</span>
+        <span>{m.chainAssumed}</span>
+      </li>
+      <li>
+        <span class="prov prov-output">OUTPUT</span>
+        <span>{m.chainOutput}</span>
+      </li>
+    </ol>
+    <p>{m.chainCarries}</p>
     <p>
-      The second group carries the load. That is exactly why every one of its values is exposed as
-      a slider rather than buried in the code: those are the things worth arguing about.
+      <span class="prov prov-unverified">{p.unverified}</span> {m.chainUnverified}
     </p>
 
     <h2>Extrapolation</h2>
@@ -50,7 +82,7 @@ const c = config.constants;
       <code>log₂H(t) = log₂H₀ + (t − t₀) / D_eff</code>
     </p>
     <p>
-      The line is anchored at the latest point, not fitted to history. Two consequences look like
+      The line is anchored at the METR point you selected, not fitted to history. Two consequences look like
       bugs and are not: the line diverges from the early METR points, and raising friction pushes
       future dates to the right while pushing already-passed ones further into the past.
     </p>
@@ -109,12 +141,24 @@ const c = config.constants;
 
     <h2>The Doomsday Clock</h2>
     <p>
-      <code>minutes to midnight = max({c.doomsday.floorMinutes}; {c.doomsday.scaleMinutes} × (1 − P(global) by {c.doomsday.horizonYear}))</code>
+      <code>position = min(1, log₁₀(P / {c.doomsday.probabilityFloor}) / {c.doomsday.decades}), P = P(global) by {c.doomsday.horizonYear}</code><br />
+      <code>minutes to midnight = max({c.doomsday.floorMinutes}; {c.doomsday.scaleMinutes} × (1 − position))</code>
     </p>
     <p>
-      Fifteen minutes means global catastrophe is ruled out; midnight means it is certain. The
-      scale is invented here and bears no relation to the real Doomsday Clock of the Bulletin of
-      the Atomic Scientists beyond the visual nod.
+      The dial is logarithmic: every tenfold increase in probability moves the hand
+      {minutesPerDecade} minutes closer to midnight. It used to be linear
+      (<code>{c.doomsday.scaleMinutes} × (1 − P)</code>), which put the entire range people
+      actually argue over — one per cent to fifty — inside three minutes of dial, so the main
+      visual on the site barely responded to changing your mind. Fifteen minutes now means
+      {floorPct} or less; midnight means certainty.
+    </p>
+    <p>
+      <b>The hand position is not the probability.</b> On the old linear scale the two coincided,
+      and a caption on the front page went on deriving one from the other after the switch — it
+      announced a 76.9% risk where the model computed 20.1%. The probability is now carried
+      explicitly from the model core and the interface never reconstructs it. The scale is invented
+      here and bears no relation to the real Doomsday Clock of the Bulletin of the Atomic
+      Scientists beyond the visual nod.
     </p>
 
     <h2>Red lines</h2>
@@ -141,6 +185,36 @@ const c = config.constants;
       doubling-time slider moves it by five, then the argument is about the first one. That is the
       entire value; the dates are a by-product.
     </p>
+
+    <h2 id="version-history">Version history</h2>
+    <p>
+      Only changes that move the numbers or change what they mean are listed here. Layout, wording
+      and infrastructure live in the commit log, not on this page. Each entry records the METR
+      cutoff and the default anchor it computed from, because a date on this site means nothing
+      without them.
+    </p>
+    {
+      CHANGELOG.map((entry) => (
+        <section class="release-entry">
+          <h3>
+            {entry.version}
+            <span class="lbl">
+              {day(entry.date)} · METR data through {entry.dataCutoff} · anchor {entry.anchor}
+            </span>
+          </h3>
+          <ul>
+            {entry.changes.map((change) => (
+              <li>
+                <span class={`prov prov-change prov-${change.kind}`}>
+                  {KIND_LABEL[change.kind]}
+                </span>
+                <span>{change.text}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
 
     <h2>Openness</h2>
     <p>

@@ -10,7 +10,9 @@
 # Файл валидируется zod-схемой на сборке и превращается в типизированный
 # ModelConfig. Пакет core не читает YAML — он принимает готовый объект.
 
-version: "1.0.0"
+# Версия модели. Обязана совпадать с верхней записью в src/changelog.ts —
+# это проверяется тестом. Меняется, когда меняются числа на экране.
+version: "1.2.0"
 
 # Семантика ступеней катастроф.
 #   nested — «событие не ниже этого уровня», кривые вложены арифметически
@@ -52,7 +54,10 @@ constants:
   reliability80Factor: 5
   # Потолок подключённости: полностью автономным мир не становится
   maxDependency: 0.95
-  # Год, на который считается математическое ожидание жертв и ущерба
+  # Год, на который считаются таблица тяжести и математическое ожидание
+  # жертв и ущерба. Ожидание — грубая величина и выводится только вместе с
+  # оговоркой: это Σ вероятность × геометрическое среднее диапазона, а не
+  # прогноз смертей.
   expectedAtYear: 2050
   # Часы судного дня: минут = max(floor, scale * (1 - P_глобальный(horizonYear)))
   doomsday:
@@ -208,6 +213,12 @@ triggers:
 # ---------------------------------------------------------------------------
 presets:
   base:      { doublingDays: 129, friction: 1.8, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 40, alignFailPct: 20, mitigationPct: 45, dep0Pct: 12, tauYears: 12, adaptWindowYears: 25 }
+  # Отличается от базового ровно одним ползунком: давление отказа контроля
+  # снижено до 3, и глобальный риск к 2100 падает с 20% до 7,4% —
+  # внутрь диапазона 5–10%, вокруг которого группируются опросы
+  # исследователей. Пресет существует ради этого сравнения: он показывает,
+  # какое именно допущение разделяет позицию автора и медиану опросов.
+  survey:    { doublingDays: 129, friction: 1.8, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 40, alignFailPct: 3,  mitigationPct: 45, dep0Pct: 12, tauYears: 12, adaptWindowYears: 25 }
   optimist:  { doublingDays: 196, friction: 3.0, targetMinutes: 9600, reliability: 80, singularityPct: 50, malicePct: 20, alignFailPct: 5,  mitigationPct: 80, dep0Pct: 10, tauYears: 20, adaptWindowYears: 15 }
   skeptic:   { doublingDays: 250, friction: 3.5, targetMinutes: 9600, reliability: 80, singularityPct: 50, malicePct: 35, alignFailPct: 3,  mitigationPct: 60, dep0Pct: 8,  tauYears: 25, adaptWindowYears: 12 }
   anxious:   { doublingDays: 110, friction: 1.3, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 50, alignFailPct: 40, mitigationPct: 30, dep0Pct: 20, tauYears: 8,  adaptWindowYears: 40 }

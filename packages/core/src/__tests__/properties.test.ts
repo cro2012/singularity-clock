@@ -38,6 +38,8 @@ function everyNumber(result: ModelResult): number[] {
     result.expected.deaths,
     result.expected.usd,
     result.doomsday.minutesToMidnight,
+    result.doomsday.pGlobal,
+    result.doomsday.position,
     ...Object.values(result.effective.tierMultipliers),
     ...Object.values(result.effective.groupMultipliers),
     result.effective.doublingDays,
