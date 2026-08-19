@@ -18,13 +18,26 @@ version: "1.0.0"
 # Принято в docs/adr/0002-model-semantics.md, разбор — docs/model-review.md §2.1
 tierSemantics: nested
 
-# Опорная точка. Читается отсюда, но переопределяется из БД, если появилась
-# точка METR с большим горизонтом (docs/architecture.md §2.3).
-anchor:
-  at: "2025-11-24T00:00:00Z"
-  horizonMinutes: 320
-  sourceId: metr-th11
-  model: "Claude Opus 4.5"
+# Единственное измерение во всей модели. Всё остальное — суждения.
+# Значения сняты из benchmark_results_1_1.yaml на metr.org, не переписаны от руки.
+metrSource:
+  dataCutoff: "2026-05-08"
+  url: "https://metr.org/time-horizons/"
+
+# Опорные точки, между которыми переключается пользователь.
+#
+# ПОРЯДОК ЗНАЧИМ. Индекс якоря едет в ссылке сценария (три бита во флагах),
+# поэтому новые якоря добавляются только в конец, а нулевой навсегда остаётся
+# значением по умолчанию. Разбор: docs/adr/0006-metr-anchor.md.
+#
+# ci — доверительный интервал METR по 50%-горизонту, минуты.
+# beyondReliable — центральная оценка выше 16 часов, где METR прямо пишет,
+# что нынешний набор задач замер не держит.
+anchors:
+  - { id: opus-4-6,       model: "Claude Opus 4.6",               at: "2026-02-05T00:00:00Z", horizonMinutes: 718.8,  ci: [316.7, 3633.8], beyondReliable: false }
+  - { id: mythos-preview, model: "Claude Mythos Preview (early)", at: "2026-04-07T00:00:00Z", horizonMinutes: 1044.8, ci: [508.9, 3304.3], beyondReliable: true  }
+  - { id: gpt-5-2,        model: "GPT-5.2",                       at: "2025-12-11T00:00:00Z", horizonMinutes: 352.2,  ci: [198.1, 815.2],  beyondReliable: false }
+  - { id: opus-4-5,       model: "Claude Opus 4.5",               at: "2025-11-24T00:00:00Z", horizonMinutes: 293.0,  ci: [161.7, 623.7],  beyondReliable: false }
 
 constants:
   # Логистика способности c_i(t): 1 / (1 + exp(-slope * (log2H - log2(порог))))
@@ -74,16 +87,25 @@ targets:
   - { minutes: 9600,   key: month }   # 4 рабочие недели
   - { minutes: 115200, key: year  }   # 48 рабочих недель
 
-# Исторические оценки METR. В проде загружаются из БД; здесь — фолбэк для
-# офлайна и для тестов. approx: точки до 2025 пересматривались при переходе
-# методики TH1 → TH1.1 (GPT-4 понижен на 35–57%).
+# Все точки, которые METR помечает как SOTA, начиная с GPT-4. Раньше здесь
+# лежала смесь методик TH1 и TH1.1 с округлениями от руки; теперь всё это —
+# один срез TH1.1 из benchmark_results_1_1.yaml, поэтому approx везде false.
 metrPoints:
-  - { at: "2023-03-15", model: "GPT-4",             horizonMinutes: 3,   methodology: TH1,   approx: true  }
-  - { at: "2024-06-20", model: "Claude 3.5 Sonnet", horizonMinutes: 18,  methodology: TH1,   approx: true  }
-  - { at: "2024-12-05", model: "o1",                horizonMinutes: 39,  methodology: TH1,   approx: true  }
-  - { at: "2025-04-16", model: "o3",                horizonMinutes: 121, methodology: TH1.1, approx: false }
-  - { at: "2025-08-07", model: "GPT-5",             horizonMinutes: 214, methodology: TH1.1, approx: false }
-  - { at: "2025-11-24", model: "Claude Opus 4.5",   horizonMinutes: 320, methodology: TH1.1, approx: false }
+  - { at: "2023-03-14", model: "GPT-4",                          horizonMinutes: 4.0,    methodology: TH1.1, approx: false }
+  - { at: "2023-11-06", model: "GPT-4 Turbo",                    horizonMinutes: 4.0,    methodology: TH1.1, approx: false }
+  - { at: "2024-05-13", model: "GPT-4o",                         horizonMinutes: 7.0,    methodology: TH1.1, approx: false }
+  - { at: "2024-06-20", model: "Claude 3.5 Sonnet",              horizonMinutes: 11.4,   methodology: TH1.1, approx: false }
+  - { at: "2024-09-12", model: "o1-preview",                     horizonMinutes: 20.3,   methodology: TH1.1, approx: false }
+  - { at: "2024-10-22", model: "Claude 3.5 Sonnet (new)",        horizonMinutes: 20.5,   methodology: TH1.1, approx: false }
+  - { at: "2024-12-05", model: "o1",                             horizonMinutes: 38.8,   methodology: TH1.1, approx: false }
+  - { at: "2025-02-24", model: "Claude 3.7 Sonnet",              horizonMinutes: 60.4,   methodology: TH1.1, approx: false }
+  - { at: "2025-04-16", model: "o3",                             horizonMinutes: 119.7,  methodology: TH1.1, approx: false }
+  - { at: "2025-08-07", model: "GPT-5",                          horizonMinutes: 203.0,  methodology: TH1.1, approx: false }
+  - { at: "2025-11-18", model: "Gemini 3 Pro",                   horizonMinutes: 224.3,  methodology: TH1.1, approx: false }
+  - { at: "2025-11-24", model: "Claude Opus 4.5",                horizonMinutes: 293.0,  methodology: TH1.1, approx: false }
+  - { at: "2025-12-11", model: "GPT-5.2",                        horizonMinutes: 352.2,  methodology: TH1.1, approx: false }
+  - { at: "2026-02-05", model: "Claude Opus 4.6",                horizonMinutes: 718.8,  methodology: TH1.1, approx: false }
+  - { at: "2026-04-07", model: "Claude Mythos Preview (early)",  horizonMinutes: 1044.8, methodology: TH1.1, approx: false }
 
 # ---------------------------------------------------------------------------
 # Виды мыслительной деятельности.
@@ -185,7 +207,7 @@ triggers:
 # тестах кодека, чтобы ссылки на них никогда не протухли.
 # ---------------------------------------------------------------------------
 presets:
-  base:      { doublingDays: 131, friction: 1.8, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 40, alignFailPct: 20, mitigationPct: 45, dep0Pct: 12, tauYears: 12, adaptWindowYears: 25 }
+  base:      { doublingDays: 129, friction: 1.8, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 40, alignFailPct: 20, mitigationPct: 45, dep0Pct: 12, tauYears: 12, adaptWindowYears: 25 }
   optimist:  { doublingDays: 196, friction: 3.0, targetMinutes: 9600, reliability: 80, singularityPct: 50, malicePct: 20, alignFailPct: 5,  mitigationPct: 80, dep0Pct: 10, tauYears: 20, adaptWindowYears: 15 }
   skeptic:   { doublingDays: 250, friction: 3.5, targetMinutes: 9600, reliability: 80, singularityPct: 50, malicePct: 35, alignFailPct: 3,  mitigationPct: 60, dep0Pct: 8,  tauYears: 25, adaptWindowYears: 12 }
   anxious:   { doublingDays: 110, friction: 1.3, targetMinutes: 9600, reliability: 50, singularityPct: 50, malicePct: 50, alignFailPct: 40, mitigationPct: 30, dep0Pct: 20, tauYears: 8,  adaptWindowYears: 40 }

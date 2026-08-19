@@ -13,6 +13,12 @@
  *      бесшумно подставить чужие допущения.
  *   3. Порядок триггеров берётся из конфига и закреплён тестом. Новые триггеры
  *      добавляются только в конец списка, иначе старые ссылки поменяют смысл.
+ *   4. Свободные биты байта флагов занимать можно без смены версии, но только
+ *      так, чтобы ноль означал прежнее поведение. Индекс якоря METR (биты
+ *      4–6) добавлен именно так: в ссылках, выпущенных до его появления,
+ *      там нули, и они читаются как якорь по умолчанию — ровно то, чем модель
+ *      пользовалась раньше. Отсюда же требование, чтобы нулевой якорь в
+ *      конфиге навсегда оставался значением по умолчанию.
  */
 
 import { base64UrlToBytes, bytesToBase64Url } from './base64url.ts';
@@ -62,10 +68,15 @@ export function encodeScenario(assumptions: Assumptions, config: ModelConfig): s
   const r = config.ranges;
   const targetIndex = config.targets.findIndex((t) => t.minutes === assumptions.targetMinutes);
 
+  // Неизвестный якорь кодируется нулём: у ссылки нет способа сослаться на
+  // то, чего нет в конфиге, а модель на нём же и считает (anchorOptionFor).
+  const anchorIndex = Math.max(0, config.anchors.findIndex((a) => a.id === assumptions.anchorId));
+
   const flags =
     (targetIndex < 0 ? 0 : targetIndex & 0b11) |
     (assumptions.reliability === 80 ? 0b100 : 0) |
-    (assumptions.geopolitics === false ? 0 : 0b1000);
+    (assumptions.geopolitics === false ? 0 : 0b1000) |
+    ((anchorIndex & 0b111) << 4);
 
   const triggerOrder = config.triggers.map((t) => t.id);
   let mask = 0;
@@ -109,6 +120,12 @@ export function decodeScenario(text: string, config: ModelConfig): Assumptions |
   const target = config.targets[flags & 0b11];
   if (!target) return null;
 
+  // Индекс за пределами списка — ссылка из сборки с бо́льшим набором якорей.
+  // Подставлять якорь по умолчанию нельзя: это молча подменит измерение,
+  // от которого считается вся модель.
+  const anchor = config.anchors[(flags >> 4) & 0b111];
+  if (!anchor) return null;
+
   const hasGeopolitics = (flags & 0b1000) !== 0;
   if (hasGeopolitics && bytes.length < BASE_LENGTH + COMPONENTS.length) return null;
 
@@ -130,6 +147,7 @@ export function decodeScenario(text: string, config: ModelConfig): Assumptions |
     dep0Pct: dequantize(bytes[8]!, r.dep0Pct),
     tauYears: dequantize(bytes[9]!, r.tauYears),
     adaptWindowYears: dequantize(bytes[10]!, r.adaptWindowYears),
+    anchorId: anchor.id,
     triggers,
     geopolitics: hasGeopolitics
       ? { weights: bytesToWeights(bytes, BASE_LENGTH) }

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { anchorFrom, dateForLog2Horizon, log2HorizonAt, YEAR_MS } from '@sc/core';
+import { anchorFrom, anchorOptionFor, dateForLog2Horizon, log2HorizonAt, YEAR_MS } from '@sc/core';
 import type { EffectiveParams, ModelConfig, TargetMinutes } from '@sc/core';
 import { formatHorizon, formatMonthYear, formatNumber, interpolate, MESSAGES } from '@sc/i18n';
 import type { Locale } from '@sc/i18n';
@@ -21,15 +21,25 @@ export interface HorizonChartProps {
   readonly config: ModelConfig;
   readonly effective: EffectiveParams;
   readonly targetMinutes: TargetMinutes;
+  /** Опорная точка METR, выбранная в сценарии. */
+  readonly anchorId: string;
   readonly locale: Locale;
   readonly now: number;
 }
 
-export function HorizonChart({ config, effective, targetMinutes, locale, now }: HorizonChartProps) {
+export function HorizonChart({
+  config,
+  effective,
+  targetMinutes,
+  anchorId,
+  locale,
+  now,
+}: HorizonChartProps) {
   const t = MESSAGES[locale];
+  const metrAnchor = anchorOptionFor(config, anchorId);
   const anchor = useMemo(
-    () => anchorFrom(config.anchor.at, config.anchor.horizonMinutes),
-    [config.anchor.at, config.anchor.horizonMinutes],
+    () => anchorFrom(metrAnchor.at, metrAnchor.horizonMinutes),
+    [metrAnchor.at, metrAnchor.horizonMinutes],
   );
   const D = effective.doublingDays;
   const factor = effective.reliabilityFactor;
@@ -81,7 +91,7 @@ export function HorizonChart({ config, effective, targetMinutes, locale, now }: 
     : '';
 
   const summary = interpolate(t.chart.horizonSummary, {
-    anchor: formatHorizon(locale, config.anchor.horizonMinutes),
+    anchor: formatHorizon(locale, metrAnchor.horizonMinutes),
     doubling: formatNumber(locale, Math.round(D)),
     target: formatHorizon(locale, targetMinutes * factor),
     date: formatMonthYear(locale, targetDate),
@@ -89,11 +99,15 @@ export function HorizonChart({ config, effective, targetMinutes, locale, now }: 
 
   const tableRows = gridYears.map((year) => {
     const time = Date.UTC(year, 6, 1);
-    const point = config.metrPoints.find((p) => new Date(p.at).getUTCFullYear() === year);
+    // В одном году точек METR бывает несколько; таблица обязана показать
+    // все, иначе она молча теряет замеры, которые видно на графике.
+    const points = config.metrPoints.filter((p) => new Date(p.at).getUTCFullYear() === year);
     return [
       formatNumber(locale, year, { useGrouping: false }),
       formatHorizon(locale, Math.pow(2, Math.min(log2HorizonAt(time, anchor, D), 1023))),
-      point ? `${point.model} · ${formatHorizon(locale, point.horizonMinutes)}` : '—',
+      points.length > 0
+        ? points.map((p) => `${p.model} · ${formatHorizon(locale, p.horizonMinutes)}`).join(', ')
+        : '—',
     ];
   });
 

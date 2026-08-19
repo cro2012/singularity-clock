@@ -58,6 +58,7 @@ describe('кодек сценария', () => {
         dep0Pct: fc.integer(CONFIG.ranges.dep0Pct),
         tauYears: fc.integer(CONFIG.ranges.tauYears),
         adaptWindowYears: fc.integer(CONFIG.ranges.adaptWindowYears),
+        anchorId: fc.constantFrom(...CONFIG.anchors.map((a) => a.id)),
         reliability: fc.constantFrom(50 as const, 80 as const),
         targetMinutes: fc.constantFrom(...CONFIG.targets.map((t) => t.minutes)),
         triggers: fc
@@ -126,12 +127,40 @@ describe('закреплённые ссылки', () => {
     expect(encoded).toMatchInlineSnapshot(`
       {
         "anxious": "ATIIAggyKB4UBiMAAA",
-        "base": "AUcNAggoFC0MChQAAA",
+        "base": "AUUNAggoFC0MChQAAA",
         "doomsday": "AR0FAggySwoUBDcAAA",
         "optimist": "AYgZBggUBVAKEgoAAA",
         "skeptic": "Ab4eBggjAzwIFwcAAA",
       }
     `);
+  });
+
+  it('ссылки, выпущенные до появления якорей, читаются как раньше', () => {
+    // Индекс якоря METR занял свободные биты байта флагов без смены версии
+    // кодека. Условие, при котором это законно ровно одно: в старых ссылках
+    // там нули, и нуль обязан означать прежнее поведение — якорь по
+    // умолчанию. Строка ниже настоящая, из ссылки на пресет «doomsday»,
+    // выпущенной до этой правки.
+    const before = decodeScenario('AR0FAggySwoUBDcAAA', CONFIG);
+    expect(before).not.toBeNull();
+    expect(before!.anchorId).toBe(CONFIG.anchors[0]!.id);
+    expect(before!.doublingDays).toBe(89);
+    expect(before!.alignFailPct).toBe(75);
+  });
+
+  it('каждый якорь переживает круговое преобразование', () => {
+    for (const anchor of CONFIG.anchors) {
+      const scenario = { ...CONFIG.presets.base!, anchorId: anchor.id };
+      expect(decodeScenario(encodeScenario(scenario, CONFIG), CONFIG)?.anchorId).toBe(anchor.id);
+    }
+  });
+
+  it('ссылка на несуществующий якорь отвергается целиком', () => {
+    // Ссылка из сборки, где якорей было больше. Подставить якорь по умолчанию
+    // значило бы молча подменить единственное измерение в модели.
+    const bytes = base64UrlToBytes(encodeScenario(CONFIG.presets.base!, CONFIG))!;
+    bytes[3] = (bytes[3]! & 0b1111) | (0b111 << 4);
+    expect(decodeScenario(bytesToBase64Url(bytes), CONFIG)).toBeNull();
   });
 
   it('порядок триггеров в конфиге закреплён: новые добавляются только в конец', () => {

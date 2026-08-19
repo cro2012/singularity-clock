@@ -40,7 +40,7 @@ export const en = {
 
   clockTitle: 'The totally unofficial AI Risk Clock',
   clockNote:
-    'to midnight. A playful mapping of the model’s {p} global-risk estimate onto a 15-minute dial — five minutes of hand per order of magnitude of probability, so the plausible range is actually visible. Not affiliated with the real Doomsday Clock of the Bulletin of the Atomic Scientists.',
+    'to midnight. The model puts global catastrophe by {year} at {p}. The dial is logarithmic: five minutes of hand per order of magnitude of probability, so the range people actually argue over is visible instead of bunched up against the top. The hand position is not the probability \u2014 read the percentage. Not affiliated with the real Doomsday Clock of the Bulletin of the Atomic Scientists.',
   minutes: { one: 'minute', other: 'minutes' } as PluralForms,
   seconds: { one: 'second', other: 'seconds' } as PluralForms,
   alert: { calm: 'Calm', watchful: 'Watchful', serious: 'Serious', critical: 'Critical' },
@@ -59,7 +59,7 @@ export const en = {
     by: 'by',
     horizonTitle: 'The autonomous task horizon and its extrapolation',
     horizonSubtitle:
-      'Points are METR estimates (pre-2025 approximate, methodology TH1/TH1.1). The line is anchored at the latest point and drawn from your doubling time — it is not fitted to history, which is why it diverges from the early points. The scale is logarithmic: a straight line is an exponential.',
+      'Points are METR 50% time-horizon estimates, all from the Time Horizon 1.1 measurement round. The line is anchored at the point you selected above and drawn from your doubling time — it is not fitted to history, which is why it diverges from the early points. The scale is logarithmic: a straight line is an exponential.',
     horizonSummary:
       'Anchor {anchor}, doubling time {doubling} days. The selected threshold of {target} is reached in {date}.',
     horizonReadout: '{date}: horizon {horizon}',
@@ -276,6 +276,27 @@ export const en = {
       'METR\u2019s task suite is primarily software engineering, machine learning and cybersecurity, with self-contained tasks and automatic success criteria. METR is explicit that a horizon of N hours does not mean AI can do every N-hour human job: real work carries prior context, human interaction and success criteria nobody can score automatically. Everything past software here \u2014 all thirty rows below \u2014 is reached through transfer coefficients and deployment lags defined by the author of this model, not by METR. METR also warns that measurements above 16 hours are unreliable on the current suite, which is well short of the month and year thresholds this page lets you select.',
   },
 
+  anchor: {
+    title: 'The measured anchor',
+    lead:
+      'Everything here is extrapolated from one measurement: how long a task a frontier model finishes on its own, half the time. Every other number on this site is a judgement, so this one gets a source, a date and a choice.',
+    cutoff: 'METR data cutoff',
+    anchorIs: 'Anchor',
+    ci: '95% CI',
+    released: 'measured on the model released {date}',
+    pick: 'Anchor point',
+    useLatest: 'Use latest METR frontier',
+    whyTitle: 'Why this anchor and not the highest one?',
+    whyBody:
+      'The default is the most recent measurement METR still stands behind. METR warns that anything above 16 hours is unreliable on its current task suite, and the frontier point sits above that line with a confidence interval spanning most of an order of magnitude. You can select it anyway \u2014 that is why this is a switch and not a constant buried in a config file.',
+    beyondReliable:
+      'Above METR\u2019s 16-hour reliability line. METR does not vouch for this measurement on the current task suite.',
+    shiftTitle: 'How much does the anchor matter?',
+    shiftBody:
+      'Less than you would think, and that is worth knowing. The measured horizon differs by a factor of 3.6 between the oldest and the newest anchor offered here, yet the singularity date moves by about nine months and global risk by a few tenths of a percentage point. A newer measurement is both higher up and later in time, and the two effects largely cancel. The doubling time and the risk assumptions move the answer by decades. Keeping the datum fresh is a matter of honesty, not of leverage.',
+    source: 'Source',
+  },
+
   operationalNote:
     'Operational definition used by this model. Not consciousness, not recursive self-improvement, not AGI in any of its usual senses.',
 
@@ -289,7 +310,9 @@ export const en = {
 
   expectedTitle: 'Illustrative severity by {year}',
   expectedRangeNote:
-    'Ranges, not an expected value. A single number would hide two things: the cumulative probability of an event is not a count of events, and every rung is defined with an OR \u2014 an event can clear the damage limb while killing nobody. Probability of an event at exactly this level, times the severity band the rung is defined with.',
+    'Ranges, not an expected value. A single number would hide two things: the cumulative probability of an event is not a count of events, and every rung is defined with an OR \u2014 an event can clear the damage limb while killing nobody.',
+  exactLevelNote:
+    'Each row is the probability of an event at exactly this level and nothing worse, which is why the rows add up to the probability of an event at any level. It is the difference between two rungs of the cumulative table above: P(this level or worse) \u2212 P(the next level or worse). So "exactly local" is lower than "local or worse": the worlds where a regional or global event also happened are counted in those rows, not in this one.',
   expectedDeaths:
     'expected deaths: summed over three levels, probability × geometric mean of the range',
   expectedUsd: 'expected direct damage in 2026 dollars',
@@ -298,7 +321,7 @@ export const en = {
     doublingDays: {
       label: 'Horizon doubling time',
       unit: 'd',
-      hint: 'METR: 196 days across the full sample since 2019, 131 days counting from 2023, 89 days from 2024.',
+      hint: 'METR fits 188 days across its full sample since 2019 and 129 days counting from 2023, with a confidence interval of 104\u2013158 days; that fit leaves out the points METR considers unreliable. This is the only slider continuing a measurement rather than stating an opinion, and it moves the date far more than the choice of anchor does.',
     },
     friction: {
       label: 'Real-world friction',

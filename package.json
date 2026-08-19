@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "gen:css": "pnpm --filter @sc/ui gen:css",
     "check:core-deps": "node scripts/check-core-deps.mjs",
-    "check:generated": "pnpm gen:css && git diff --exit-code -- packages/ui/src/tokens.generated.css",
+    "check:generated": "pnpm gen:css && pnpm --filter @sc/web run build:fonts && git diff --exit-code -- packages/ui/src/tokens.generated.css apps/web/netlify/assets",
     "check": "pnpm lint && pnpm check:core-deps && pnpm typecheck && pnpm test",
     "check:language": "node scripts/check-language.mjs"
   },

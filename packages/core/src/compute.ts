@@ -7,7 +7,7 @@
  */
 
 import { effectiveParams } from './effective.ts';
-import { anchorFrom } from './horizon.ts';
+import { anchorFrom, anchorOptionFor } from './horizon.ts';
 import { itemResult, type ItemContext } from './items.ts';
 import { medianCrossing, probabilityAt, tierCurves, type RiskContext } from './risk.ts';
 import { raceIndex } from './countries.ts';
@@ -51,7 +51,8 @@ export function computeModel(args: ComputeArgs): ModelResult {
       : raceIndex(countries, assumptions.geopolitics.weights, constants.geopolitics.topN);
 
   const effective = effectiveParams(assumptions, config, race);
-  const anchor = anchorFrom(config.anchor.at, config.anchor.horizonMinutes);
+  const metrAnchor = anchorOptionFor(config, assumptions.anchorId);
+  const anchor = anchorFrom(metrAnchor.at, metrAnchor.horizonMinutes);
 
   // --- строки разбивки ---
   const itemCtx: ItemContext = { anchor, assumptions, effective, constants, now };
@@ -75,12 +76,14 @@ export function computeModel(args: ComputeArgs): ModelResult {
   const { tiers, anyLevel } = tierCurves(riskCtx);
 
   // --- математическое ожидание ---
-  // Считается по вероятности события ровно этого уровня, иначе глобальная
-  // катастрофа была бы посчитана трижды.
+  // По вероятности события ровно этого уровня, иначе глобальная катастрофа
+  // была бы посчитана трижды. Именно exactCurve, а не ownCurve: собственная
+  // кривая ступени не знает про конкурирующий риск и переоценивает мелкие
+  // уровни (см. TierResult.exactCurve).
   let deaths = 0;
   let usd = 0;
   for (const [index, spec] of config.tiers.entries()) {
-    const p = probabilityAt(tiers[index]!.ownCurve, constants.expectedAtYear);
+    const p = probabilityAt(tiers[index]!.exactCurve, constants.expectedAtYear);
     deaths += p * geometricMean(spec.deaths);
     usd += p * geometricMean(spec.usd);
   }
@@ -88,9 +91,10 @@ export function computeModel(args: ComputeArgs): ModelResult {
   // --- часы судного дня ---
   const globalTier = tiers[tiers.length - 1]!;
   const pGlobal = probabilityAt(globalTier.ownCurve, constants.doomsday.horizonYear);
+  const position = clockPosition(pGlobal, constants);
   const minutesToMidnight = Math.max(
     constants.doomsday.floorMinutes,
-    constants.doomsday.scaleMinutes * (1 - clockPosition(pGlobal, constants)),
+    constants.doomsday.scaleMinutes * (1 - position),
   );
 
   return {
@@ -111,6 +115,8 @@ export function computeModel(args: ComputeArgs): ModelResult {
     expected: { deaths, usd, atYear: constants.expectedAtYear },
     doomsday: {
       minutesToMidnight,
+      pGlobal,
+      position,
       alertLevel: alertLevelFor(pGlobal, constants.alertThresholds),
     },
     raceIndex: race,

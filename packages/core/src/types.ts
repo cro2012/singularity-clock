@@ -41,6 +41,8 @@ export interface Assumptions {
   readonly tauYears: number;
   readonly adaptWindowYears: number;
   readonly triggers: ReadonlySet<string>;
+  /** Идентификатор опорной точки METR из config.anchors. */
+  readonly anchorId: string;
   /** false — геополитика не учитывается (значение по умолчанию, ТЗ §6.2). */
   readonly geopolitics: false | { readonly weights: ComponentWeights };
 }
@@ -165,15 +167,31 @@ export type RangedAssumption =
   | 'tauYears'
   | 'adaptWindowYears';
 
+/** Опорная точка METR: измерение, от которого модель отсчитывает горизонт. */
+export interface AnchorOption {
+  readonly id: string;
+  readonly model: string;
+  readonly at: number;
+  readonly horizonMinutes: number;
+  /** Доверительный интервал METR по 50%-горизонту, минуты. */
+  readonly ci: readonly [number, number];
+  /** true — центральная оценка выше 16 часов, где METR не ручается за замер. */
+  readonly beyondReliable: boolean;
+}
+
 export interface ModelConfig {
   readonly version: string;
   readonly tierSemantics: TierSemantics;
-  readonly anchor: {
-    readonly at: number;
-    readonly horizonMinutes: number;
-    readonly sourceId: string;
-    readonly model: string;
-  };
+  /**
+   * Опорные точки METR, между которыми можно переключаться.
+   *
+   * Порядок значим: индекс попадает в ссылку сценария, поэтому новые якоря
+   * добавляются только в конец, а нулевой навсегда остаётся значением по
+   * умолчанию (docs/adr/0006-metr-anchor.md).
+   */
+  readonly anchors: readonly AnchorOption[];
+  /** Дата, на которую сняты измерения METR, и ссылка на источник. */
+  readonly metrSource: { readonly dataCutoff: number; readonly url: string };
   readonly constants: ModelConstants;
   readonly targets: readonly { readonly minutes: TargetMinutes; readonly key: string }[];
   readonly metrPoints: readonly MetrPoint[];
@@ -233,6 +251,16 @@ export interface TierResult {
    * посчитана трижды. При 'exact' совпадает с curve.
    */
   readonly ownCurve: Curve;
+  /**
+   * Вероятность события ровно этого уровня и не хуже: P(≥ i) − P(≥ i+1).
+   *
+   * Именно она идёт в математическое ожидание и в таблицу тяжести. От
+   * ownCurve отличается тем, что учитывает конкурирующий риск: собственная
+   * кривая ступени считает и те миры, где заодно случилась катастрофа
+   * крупнее, поэтому суммировать её по ступеням нельзя. Сумма exactCurve
+   * по всем ступеням равна кривой «событие любого уровня».
+   */
+  readonly exactCurve: Curve;
   readonly medianDate: number | null;
 }
 
@@ -253,7 +281,18 @@ export interface ModelResult {
   readonly tiers: readonly TierResult[];
   readonly anyLevel: { readonly curve: Curve; readonly medianDate: number | null };
   readonly expected: { readonly deaths: number; readonly usd: number; readonly atYear: number };
-  readonly doomsday: { readonly minutesToMidnight: number; readonly alertLevel: AlertLevel };
+  readonly doomsday: {
+    readonly minutesToMidnight: number;
+    /**
+     * P(глобальная катастрофа к horizonYear). Хранится явно, потому что при
+     * логарифмической шкале обратно из минут её не достать: минуты выражают
+     * положение стрелки, а не вероятность.
+     */
+    readonly pGlobal: number;
+    /** Положение стрелки от 0 до 1 — то, во что шкала превращает pGlobal. */
+    readonly position: number;
+    readonly alertLevel: AlertLevel;
+  };
   readonly raceIndex: number | null;
 }
 

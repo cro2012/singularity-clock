@@ -11,6 +11,8 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { loadModelConfig } from '@sc/data/node';
 import { computeModel } from '../compute.ts';
+import { anchorOptionFor } from '../horizon.ts';
+import { probabilityAt } from '../risk.ts';
 import type { Assumptions, ModelConfig, ModelResult, RangedAssumption } from '../types.ts';
 
 const NOW = Date.UTC(2026, 7, 17);
@@ -119,6 +121,7 @@ describe('перебор крайних положений всех ползун
             reliability,
             targetMinutes: target.minutes,
             triggers,
+            anchorId: CONFIG.anchors[0]!.id,
           });
           assertSane(
             computeModel({ assumptions, config: CONFIG, now: NOW }),
@@ -142,6 +145,7 @@ const assumptionsArb = (): fc.Arbitrary<Assumptions> =>
       malicePct: fc.double({ ...CONFIG.ranges.malicePct, noNaN: true }),
       alignFailPct: fc.double({ ...CONFIG.ranges.alignFailPct, noNaN: true }),
       mitigationPct: fc.double({ ...CONFIG.ranges.mitigationPct, noNaN: true }),
+      anchorId: fc.constantFrom(...CONFIG.anchors.map((a) => a.id)),
       dep0Pct: fc.double({ ...CONFIG.ranges.dep0Pct, noNaN: true }),
       tauYears: fc.double({ ...CONFIG.ranges.tauYears, noNaN: true }),
       adaptWindowYears: fc.double({ ...CONFIG.ranges.adaptWindowYears, noNaN: true }),
@@ -221,7 +225,6 @@ describe('свойства', () => {
     // положе: будущие пересечения уезжают вправо, а уже пройденные — глубже
     // в прошлое. Это верное поведение, и подпись к графику обязана его
     // объяснять (ТЗ §3: «линия закреплена в последней точке»).
-    const anchorLog2 = Math.log2(CONFIG.anchor.horizonMinutes);
     const items = [...CONFIG.functions, ...CONFIG.industries];
 
     fc.assert(
@@ -229,6 +232,9 @@ describe('свойства', () => {
         const before = run(a);
         const after = run({ ...a, friction: a.friction * 1.5 });
         const factor = before.effective.reliabilityFactor;
+        // Закреплена именно та точка, которую выбрал сценарий: с другим
+        // якорем «уже пройдено» проходит по другой границе.
+        const anchorLog2 = Math.log2(anchorOptionFor(CONFIG, a.anchorId).horizonMinutes);
 
         for (const item of items) {
           const required = Math.log2(item.m * a.targetMinutes * factor);
@@ -334,5 +340,110 @@ describe('индекс гонки', () => {
       computeModel({ assumptions: CONFIG.presets.base!, config: CONFIG, now: NOW }).effective
         .mitigation,
     );
+  });
+});
+
+describe('вероятность события ровно этого уровня', () => {
+  // Собственная кривая ступени (1 − exp(−Λᵢ)) считает и те миры, где заодно
+  // случилась катастрофа крупнее, поэтому складывать её по ступеням нельзя.
+  // Отдельная exactCurve появилась после того, как таблица тяжести показала
+  // «ровно локальная — 53,9%» рядом с вложенными 67,7 и 29,9: разность
+  // 67,7 − 29,9 = 37,8, и числа на одной странице друг другу противоречили.
+
+  it('сумма по ступеням равна событию любого уровня', () => {
+    fc.assert(
+      fc.property(assumptionsArb(), (assumptions) => {
+        const { tiers, anyLevel } = run(assumptions);
+        for (let i = 0; i < anyLevel.curve.length; i++) {
+          const sum = tiers.reduce((acc, t) => acc + t.exactCurve[i]!.p, 0);
+          expect(Math.abs(sum - anyLevel.curve[i]!.p)).toBeLessThan(1e-12);
+        }
+      }),
+      { numRuns: 60 },
+    );
+  });
+
+  it('совпадает с разностью соседних вложенных кривых', () => {
+    fc.assert(
+      fc.property(assumptionsArb(), (assumptions) => {
+        const { tiers } = run(assumptions);
+        for (const [index, tier] of tiers.entries()) {
+          const above = tiers[index + 1];
+          for (let i = 0; i < tier.curve.length; i++) {
+            const difference = tier.curve[i]!.p - (above ? above.curve[i]!.p : 0);
+            expect(Math.abs(tier.exactCurve[i]!.p - difference)).toBeLessThan(1e-12);
+          }
+        }
+      }),
+      { numRuns: 60 },
+    );
+  });
+
+  it('никогда не превышает собственную кривую ступени', () => {
+    fc.assert(
+      fc.property(assumptionsArb(), (assumptions) => {
+        for (const tier of run(assumptions).tiers) {
+          for (let i = 0; i < tier.curve.length; i++) {
+            expect(tier.exactCurve[i]!.p).toBeGreaterThanOrEqual(0);
+            expect(tier.exactCurve[i]!.p).toBeLessThanOrEqual(tier.ownCurve[i]!.p + 1e-12);
+          }
+        }
+      }),
+      { numRuns: 60 },
+    );
+  });
+
+  it('при независимых ступенях совпадает с собственной кривой', () => {
+    const independent: ModelConfig = { ...CONFIG, tierSemantics: 'exact' };
+    for (const tier of computeModel({
+      assumptions: CONFIG.presets.base!,
+      config: independent,
+      now: NOW,
+    }).tiers) {
+      expect(tier.exactCurve).toEqual(tier.ownCurve);
+    }
+  });
+});
+
+describe('часы судного дня', () => {
+  // Минуты выражают положение стрелки, а не вероятность. При логарифмической
+  // шкале обратный пересчёт 1 − минуты/15 даёт совсем другое число — главная
+  // некоторое время показывала именно его и называла «оценкой риска».
+
+  it('pGlobal — это вероятность глобальной катастрофы к горизонту', () => {
+    fc.assert(
+      fc.property(assumptionsArb(), (assumptions) => {
+        const result = run(assumptions);
+        const expected = probabilityAt(
+          result.tiers[result.tiers.length - 1]!.ownCurve,
+          CONFIG.constants.doomsday.horizonYear,
+        );
+        expect(result.doomsday.pGlobal).toBe(expected);
+      }),
+      { numRuns: 60 },
+    );
+  });
+
+  it('на логарифмической шкале положение стрелки — не вероятность', () => {
+    const { doomsday } = computeModel({
+      assumptions: CONFIG.presets.base!,
+      config: CONFIG,
+      now: NOW,
+    });
+    const backDerived = 1 - doomsday.minutesToMidnight / CONFIG.constants.doomsday.scaleMinutes;
+    expect(backDerived).toBeCloseTo(doomsday.position, 12);
+    expect(Math.abs(backDerived - doomsday.pGlobal)).toBeGreaterThan(0.3);
+  });
+
+  it('на линейной шкале положение стрелки совпадает с вероятностью', () => {
+    const linear: ModelConfig = {
+      ...CONFIG,
+      constants: {
+        ...CONFIG.constants,
+        doomsday: { ...CONFIG.constants.doomsday, scale: 'linear' },
+      },
+    };
+    const { doomsday } = computeModel({ assumptions: CONFIG.presets.base!, config: linear, now: NOW });
+    expect(doomsday.position).toBeCloseTo(doomsday.pGlobal, 12);
   });
 });

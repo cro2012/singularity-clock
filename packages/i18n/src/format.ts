@@ -107,6 +107,18 @@ export function formatHorizon(locale: Locale, minutes: number): string {
   return one(minutes / 115200, u.year);
 }
 
+/**
+ * Горизонт в часах.
+ *
+ * METR публикует свои замеры в часах, и опорная точка — единственное место на
+ * сайте, где число обязано читаться ровно так же, как в источнике.
+ * formatHorizon перевёл бы 718,8 минуты в «1,5 рабочих дня»: верно по своей
+ * шкале, но со страницей METR уже не сверишь.
+ */
+export function formatHours(locale: Locale, minutes: number): string {
+  return `${formatNumber(locale, minutes / 60, { maximumFractionDigits: 1 })} ${HORIZON_UNITS[locale].hour}`;
+}
+
 export interface Countdown {
   readonly kind: 'future' | 'past' | 'never';
   /** Крупная строка: «14 лет 212 дней». */

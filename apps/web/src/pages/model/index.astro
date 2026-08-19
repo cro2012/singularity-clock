@@ -2,7 +2,9 @@
 import Section from '../../layouts/Section.astro';
 import { MODEL_CONFIG as config } from '../../model-config.ts';
 
-const anchor = new Date(config.anchor.at);
+const anchor = config.anchors[0]!;
+const anchorHours = (anchor.horizonMinutes / 60).toFixed(1);
+const cutoff = new Date(config.metrSource.dataCutoff).toISOString().slice(0, 10);
 const c = config.constants;
 ---
 
@@ -15,9 +17,10 @@ const c = config.constants;
   <div class="prose">
     <p>
       The short answer: from one number. Everything this service shows is derived from METR's
-      autonomous task horizon — the length of work a model completes unaided. As of
-      {anchor.getUTCFullYear()} the anchor is <b>{config.anchor.horizonMinutes} minutes</b> at
-      50% success ({config.anchor.model}).
+      autonomous task horizon — the length of work a model completes unaided. The default anchor is
+      <b>{anchorHours} hours</b> at 50% success ({anchor.model}), from METR data with a cutoff of
+      {cutoff}. Which measurement to anchor on is itself a choice, and the singularity page lets you
+      change it — including to the frontier point METR considers unreliable.
     </p>
 
     <h2>What is measured and what is invented</h2>

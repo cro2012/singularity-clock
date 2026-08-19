@@ -9,11 +9,23 @@
  */
 
 import { DAY_MS } from './time.ts';
+import type { AnchorOption, ModelConfig } from './types.ts';
 
 /** Опорная точка: момент времени и логарифм горизонта в этот момент. */
 export interface Anchor {
   readonly at: number;
   readonly log2Horizon: number;
+}
+
+/**
+ * Выбранная опорная точка METR.
+ *
+ * Неизвестный идентификатор — это не ошибка вызова, а старая ссылка или
+ * якорь, выбывший из набора при обновлении данных. Возвращаем нулевой:
+ * он по контракту всегда значение по умолчанию.
+ */
+export function anchorOptionFor(config: ModelConfig, id: string): AnchorOption {
+  return config.anchors.find((a) => a.id === id) ?? config.anchors[0]!;
 }
 
 export function anchorFrom(at: number, horizonMinutes: number): Anchor {

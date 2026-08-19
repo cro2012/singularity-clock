@@ -45,8 +45,9 @@ function prototypeMode(config: ModelConfig): ModelConfig {
 }
 
 const CONFIG = prototypeMode(BASE);
-const T0 = CONFIG.anchor.at;
-const H0 = CONFIG.anchor.horizonMinutes;
+const ANCHOR = CONFIG.anchors[0]!;
+const T0 = ANCHOR.at;
+const H0 = ANCHOR.horizonMinutes;
 const PRESETS = Object.entries(BASE.presets);
 
 /** Относительное расхождение. Абсолютный ноль сравнивается напрямую. */

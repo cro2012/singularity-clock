@@ -71,6 +71,7 @@ const preset = z.object({
   dep0Pct: z.number().min(0).max(100),
   tauYears: positive,
   adaptWindowYears: positive,
+  anchorId: z.string().min(1).optional(),
 });
 
 const range = z
@@ -81,12 +82,19 @@ export const modelConfigSchema = z
   .object({
     version: z.string().regex(/^\d+\.\d+\.\d+$/, 'Ожидалась семантическая версия'),
     tierSemantics: z.enum(['nested', 'exact']),
-    anchor: z.object({
-      at: isoDate,
-      horizonMinutes: positive,
-      sourceId: z.string().min(1),
-      model: z.string().min(1),
-    }),
+    metrSource: z.object({ dataCutoff: isoDate, url: z.string().url() }),
+    anchors: z
+      .array(
+        z.object({
+          id: z.string().min(1),
+          model: z.string().min(1),
+          at: isoDate,
+          horizonMinutes: positive,
+          ci: z.tuple([positive, positive]),
+          beyondReliable: z.boolean(),
+        }),
+      )
+      .min(1),
     constants: z.object({
       capabilitySlope: positive,
       saturationMultiple: positive,
@@ -175,6 +183,41 @@ export const modelConfigSchema = z
     dupIds(cfg.functions, 'functions');
     dupIds(cfg.industries, 'industries');
     dupIds(cfg.triggers, 'triggers');
+    dupIds(cfg.anchors, 'anchors');
+
+    // Якорь — единственное измерение в модели, поэтому он обязан совпадать с
+    // точкой METR: и по горизонту, и по дате. Иначе «measured» на плашке врёт.
+    for (const [i, a] of cfg.anchors.entries()) {
+      const point = cfg.metrPoints.find((p) => p.at === a.at && p.horizonMinutes === a.horizonMinutes);
+      if (!point) addIssue(`Якорь «${a.id}» не совпадает ни с одной точкой METR`, ['anchors', i]);
+      if (a.ci[0] > a.horizonMinutes || a.ci[1] < a.horizonMinutes) {
+        addIssue(`Якорь «${a.id}»: оценка вне собственного интервала`, ['anchors', i]);
+      }
+      // Шестнадцать часов — граница, за которой METR не ручается за замер.
+      if (a.beyondReliable !== a.horizonMinutes > 16 * 60) {
+        addIssue(`Якорь «${a.id}»: beyondReliable не соответствует горизонту`, ['anchors', i]);
+      }
+    }
+
+    // Нулевой якорь едет в старых ссылках как значение по умолчанию, поэтому
+    // он не может быть тем, за который METR не ручается.
+    if (cfg.anchors[0]!.beyondReliable) {
+      addIssue('Якорь по умолчанию не может быть за границей надёжности', ['anchors', 0]);
+    }
+
+    // Данные не могут быть свежее среза, на котором они сняты.
+    for (const [i, p] of cfg.metrPoints.entries()) {
+      if (p.at > cfg.metrSource.dataCutoff) {
+        addIssue(`Точка «${p.model}» новее среза данных`, ['metrPoints', i]);
+      }
+    }
+
+    const anchorIds = new Set(cfg.anchors.map((a) => a.id));
+    for (const [name, p] of Object.entries(cfg.presets)) {
+      if (p.anchorId !== undefined && !anchorIds.has(p.anchorId)) {
+        addIssue(`Пресет «${name}»: неизвестный якорь «${p.anchorId}»`, ['presets', name]);
+      }
+    }
 
     // Порог задачи в пресете должен быть одним из объявленных.
     const targets = new Set(cfg.targets.map((t) => t.minutes));

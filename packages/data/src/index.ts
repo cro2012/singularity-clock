@@ -16,9 +16,13 @@ export { modelConfigSchema } from './schema.ts';
 export type { RawModelConfig } from './schema.ts';
 
 /** Достраивает пресет до полного набора допущений. */
-function toAssumptions(preset: RawModelConfig['presets'][string]): Assumptions {
+function toAssumptions(
+  preset: RawModelConfig['presets'][string],
+  defaultAnchorId: string,
+): Assumptions {
   return {
     ...preset,
+    anchorId: preset.anchorId ?? defaultAnchorId,
     triggers: new Set<string>(),
     geopolitics: false,
   };
@@ -26,10 +30,11 @@ function toAssumptions(preset: RawModelConfig['presets'][string]): Assumptions {
 
 export function parseModelConfig(source: string): ModelConfig {
   const raw = modelConfigSchema.parse(parseYaml(source));
+  const defaultAnchorId = raw.anchors[0]!.id;
   return {
     ...raw,
     presets: Object.fromEntries(
-      Object.entries(raw.presets).map(([name, p]) => [name, toAssumptions(p)]),
+      Object.entries(raw.presets).map(([name, p]) => [name, toAssumptions(p, defaultAnchorId)]),
     ),
   };
 }

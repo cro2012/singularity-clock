@@ -22,12 +22,32 @@ describe('model.v1.yaml проходит схему', () => {
     expect(Object.keys(config.presets)).toHaveLength(5);
   });
 
-  it('якорь — точка METR с максимальным горизонтом', () => {
-    const best = config.metrPoints.reduce((a, b) =>
-      b.horizonMinutes >= a.horizonMinutes ? b : a,
-    );
-    expect(config.anchor.horizonMinutes).toBe(best.horizonMinutes);
-    expect(config.anchor.at).toBe(best.at);
+  it('якорь по умолчанию — самая свежая точка METR внутри надёжного диапазона', () => {
+    // Не «самая большая»: METR прямо пишет, что выше шестнадцати часов
+    // нынешний набор задач замер не держит, и брать такую точку за
+    // единственное измерение модели нельзя. Самая свежая из тех, за которые
+    // METR ручается, — да.
+    const reliable = config.metrPoints
+      .filter((p) => p.horizonMinutes <= 16 * 60)
+      .reduce((a, b) => (b.at >= a.at ? b : a));
+    const anchor = config.anchors[0]!;
+    expect(anchor.horizonMinutes).toBe(reliable.horizonMinutes);
+    expect(anchor.at).toBe(reliable.at);
+  });
+
+  it('каждый якорь ссылается на существующую точку METR', () => {
+    for (const anchor of config.anchors) {
+      const point = config.metrPoints.find(
+        (p) => p.at === anchor.at && p.horizonMinutes === anchor.horizonMinutes,
+      );
+      expect(point, anchor.id).toBeTruthy();
+    }
+  });
+
+  it('пресеты считаются от якоря по умолчанию', () => {
+    for (const [name, preset] of Object.entries(config.presets)) {
+      expect(preset.anchorId, name).toBe(config.anchors[0]!.id);
+    }
   });
 
   it('программная инженерия — базовая шкала с коэффициентом 1,0', () => {

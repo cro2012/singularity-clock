@@ -33,6 +33,7 @@ import { CompareRiskChart } from './components/CompareRiskChart.tsx';
 import { ScenarioBar, SliderFor } from './components/ScenarioBar.tsx';
 import { TierCards } from './components/TierCards.tsx';
 import { TriggerPanel } from './components/TriggerPanel.tsx';
+import { AnchorPicker } from './components/Anchor.tsx';
 import { Purpose } from './components/Purpose.tsx';
 import { ProvenanceLegend } from './components/Provenance.tsx';
 import { Sensitivity } from './components/Sensitivity.tsx';
@@ -68,7 +69,6 @@ export function HomeScreen({ config, locale, now }: ScreenProps) {
     minutes >= 1
       ? `${number(whole)} ${pluralize(locale, whole, t.minutes)} ${number(seconds)} ${pluralize(locale, seconds, t.seconds)}`
       : `${number(Math.round(minutes * 60))} ${pluralize(locale, Math.round(minutes * 60), t.seconds)}`;
-  const pGlobal = 1 - minutes / config.constants.doomsday.scaleMinutes;
 
   return (
     <>
@@ -125,7 +125,14 @@ export function HomeScreen({ config, locale, now }: ScreenProps) {
         <div>
           <p className="card-label">{t.clockTitle}</p>
           <p className="bignum tabular clock-min">{clockText}</p>
-          <p className="datenote">{interpolate(t.clockNote, { p: formatPercent(locale, pGlobal) })}</p>
+          <p className="datenote">
+            {interpolate(t.clockNote, {
+              p: formatPercent(locale, model.doomsday.pGlobal),
+              year: formatNumber(locale, config.constants.doomsday.horizonYear, {
+                useGrouping: false,
+              }),
+            })}
+          </p>
           <p>
             <span className={`badge alert-${model.doomsday.alertLevel}`}>
               <span className="ic" aria-hidden="true">
@@ -167,6 +174,8 @@ export function SingularityScreen({ config, locale, now }: ScreenProps) {
         linkRejected={state.linkRejected}
       />
 
+      <AnchorPicker config={config} assumptions={assumptions} locale={locale} store={store} />
+
       <ControlGroup title={t.controlsSingularity}>
         {(['doublingDays', 'friction', 'singularityPct'] as const).map((id) => (
           <SliderFor
@@ -206,6 +215,7 @@ export function SingularityScreen({ config, locale, now }: ScreenProps) {
         config={config}
         effective={model.effective}
         targetMinutes={assumptions.targetMinutes}
+        anchorId={assumptions.anchorId}
         locale={locale}
         now={clock}
       />
@@ -306,7 +316,7 @@ export function CatastropheScreen({ config, locale, now }: ScreenProps) {
               {model.tiers.map((tier, index) => {
                 const spec = config.tiers[index]!;
                 const p =
-                  tier.ownCurve.find((point) => point.year === model.expected.atYear)?.p ?? 0;
+                  tier.exactCurve.find((point) => point.year === model.expected.atYear)?.p ?? 0;
                 return (
                   <tr key={tier.id}>
                     <th scope="row">{CONTENT[locale].tiers[tier.id]!.name}</th>
@@ -324,6 +334,7 @@ export function CatastropheScreen({ config, locale, now }: ScreenProps) {
           </table>
         </div>
         <p className="datenote">{t.expectedRangeNote}</p>
+        <p className="datenote">{t.exactLevelNote}</p>
       </section>
 
       <section className="card implied">

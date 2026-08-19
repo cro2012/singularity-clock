@@ -130,15 +130,41 @@ export function tierCurves(ctx: RiskContext): {
   const suffixSum = (from: number): readonly number[] =>
     years.map((_, i) => hazards.slice(from).reduce((acc, h) => acc + h[i]!, 0));
 
+  /**
+   * Вероятность события ровно этого уровня — «этот уровень и ничего хуже».
+   *
+   * При вложенных ступенях это НЕ 1 − exp(−Λᵢ): собственная кривая ступени
+   * игнорирует конкурирующий риск, то есть считает и те миры, где заодно
+   * случилась катастрофа крупнее. Правильная величина — разность соседних
+   * вложенных кривых:
+   *
+   *   P(ровно i) = P(≥ i) − P(≥ i+1) = exp(−S_{i+1}) · (1 − exp(−Λᵢ))
+   *
+   * где S — суффиксная сумма интенсивностей. Правая форма и считается: она
+   * неотрицательна по построению и не страдает от вычитания близких чисел.
+   * Сумма по всем ступеням телескопируется ровно в «событие любого уровня».
+   *
+   * При 'exact' ступени независимы, конкуренции нет, и это просто своя кривая.
+   */
+  const exactCurveFor = (index: number): Curve => {
+    if (config.tierSemantics !== 'nested') return curveFrom(years, hazards[index]!);
+    const above = suffixSum(index + 1);
+    const own = hazards[index]!;
+    return years.map((year, i) => ({
+      year,
+      p: Math.exp(-above[i]!) * (1 - Math.exp(-own[i]!)),
+    }));
+  };
+
   const tiers: TierResult[] = config.tiers.map((tier, index) => {
     const own = curveFrom(years, hazards[index]!);
-    const curve =
-      config.tierSemantics === 'nested' ? curveFrom(years, suffixSum(index)) : own;
+    const nested = config.tierSemantics === 'nested' ? curveFrom(years, suffixSum(index)) : own;
     return {
       id: tier.id,
-      curve,
+      curve: nested,
       ownCurve: own,
-      medianDate: medianCrossing(curve, config),
+      exactCurve: exactCurveFor(index),
+      medianDate: medianCrossing(nested, config),
     };
   });
 
