@@ -68,7 +68,7 @@ export function ScenarioBar({
               }),
             })}
           >
-            {t.presets[name] ?? name}
+            {t.presets[name] ?? name}{' '}
             <span className="preset-risk tabular">{formatPercent(locale, risk[name] ?? 0)}</span>
           </button>
         ))}
@@ -119,6 +119,7 @@ function ShareButton({
  */
 const PROVENANCE: Record<RangedAssumption, ProvenanceKind> = {
   doublingDays: 'extrapolated',
+  bendPctPerYear: 'assumed',
   friction: 'assumed',
   singularityPct: 'assumed',
   malicePct: 'assumed',

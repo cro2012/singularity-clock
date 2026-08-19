@@ -61,6 +61,7 @@ const triggerEffects = z
 
 const preset = z.object({
   doublingDays: positive,
+  bendPctPerYear: z.number(),
   friction: positive,
   targetMinutes,
   reliability: z.union([z.literal(50), z.literal(80)]),
@@ -145,6 +146,7 @@ export const modelConfigSchema = z
     presets: z.record(z.string(), preset),
     ranges: z.object({
       doublingDays: range,
+      bendPctPerYear: range,
       friction: range,
       singularityPct: range,
       malicePct: range,

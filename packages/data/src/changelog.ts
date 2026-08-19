@@ -53,6 +53,10 @@ export const CHANGELOG: readonly ChangelogEntry[] = [
         text: 'Baseline horizon doubling time 131 → 129 days, matching METR’s point estimate for the trend since 2023.',
       },
       {
+        kind: 'model',
+        text: 'Trend bend: the doubling time can now change year on year, so a straight line on a log scale is a setting rather than an assumption baked into the code. A positive bend makes the horizon converge on a ceiling, and rows above it are never reached at all. It also shows something counter-intuitive — slowing the trend raises global risk by 2100, because the window of vulnerability stays open longer instead of closing.',
+      },
+      {
         kind: 'feature',
         text: 'A survey-calibrated preset that differs from the author’s baseline by exactly one slider, and each preset button now shows the global risk it produces.',
       },

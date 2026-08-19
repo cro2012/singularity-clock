@@ -14,6 +14,17 @@ interface LoadContext {
   addWatchFile(id: string): void;
 }
 
+interface HotUpdateContext {
+  readonly file: string;
+  readonly server: {
+    readonly moduleGraph: {
+      getModuleById(id: string): object | undefined;
+      invalidateModule(mod: object): void;
+    };
+    readonly ws?: { send(payload: { type: 'full-reload' }): void };
+  };
+}
+
 const CONFIG = 'virtual:model-config';
 const COUNTRIES = 'virtual:country-dataset';
 const RESOLVED_CONFIG = '\0' + CONFIG;
@@ -44,6 +55,22 @@ export function modelConfigPlugin() {
       if (id === CONFIG) return RESOLVED_CONFIG;
       if (id === COUNTRIES) return RESOLVED_COUNTRIES;
       return null;
+    },
+    /**
+     * Правка YAML обязана перерисовать страницу.
+     *
+     * Одного addWatchFile мало: Vite узнаёт про изменение файла, но
+     * виртуальный модуль, который его прочитал, остаётся в графе прежним.
+     * На практике это выглядит как свежий код поверх устаревшего конфига —
+     * например, новый ползунок падает на отсутствующем диапазоне. В сборке
+     * такого не бывает, поэтому ошибка живёт только в разработке и тем
+     * неприятнее.
+     */
+    handleHotUpdate(ctx: HotUpdateContext): void {
+      if (ctx.file !== yamlPath) return;
+      const mod = ctx.server.moduleGraph.getModuleById(RESOLVED_CONFIG);
+      if (mod) ctx.server.moduleGraph.invalidateModule(mod);
+      ctx.server.ws?.send({ type: 'full-reload' });
     },
     load(this: LoadContext, id: string) {
       // Страновой датасет — тот же случай: JSON проверяется схемой один раз

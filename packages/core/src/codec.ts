@@ -10,7 +10,10 @@
  *   1. Порядок полей внутри версии неизменен. Новое поле = новая версия.
  *   2. Неизвестная версия — отказ целиком (`null`). Молчаливого частичного
  *      разбора не бывает: лучше показать «ссылка из другой версии», чем
- *      бесшумно подставить чужие допущения.
+ *      бесшумно подставить чужие допущения. Известная предыдущая версия —
+ *      другое дело: она разбирается своим кодом, а поля, которых в ней не
+ *      было, получают значение, при котором модель ведёт себя ровно как
+ *      тогда. Ломать уже разошедшиеся ссылки без нужды нельзя.
  *   3. Порядок триггеров берётся из конфига и закреплён тестом. Новые триггеры
  *      добавляются только в конец списка, иначе старые ссылки поменяют смысл.
  *   4. Свободные биты байта флагов занимать можно без смены версии, но только
@@ -33,7 +36,15 @@ import type {
   TargetMinutes,
 } from './types.ts';
 
-export const SCENARIO_CODEC_VERSION = 1;
+export const SCENARIO_CODEC_VERSION = 2;
+
+/**
+ * Версия 1 — без изгиба тренда. Разбирается по-прежнему, изгиб получает ноль:
+ * при нуле формула вырождается в прямую, то есть ровно в то, что эта ссылка
+ * и означала.
+ */
+const LEGACY_VERSION = 1;
+const LEGACY_BASE_LENGTH = 13;
 
 /** Максимум триггеров, помещающихся в двухбайтовую маску. */
 export const MAX_TRIGGERS = 16;
@@ -98,6 +109,7 @@ export function encodeScenario(assumptions: Assumptions, config: ModelConfig): s
     quantize(assumptions.adaptWindowYears, r.adaptWindowYears),
     mask & 0xff,
     (mask >> 8) & 0xff,
+    quantize(assumptions.bendPctPerYear, r.bendPctPerYear),
   ];
 
   if (assumptions.geopolitics !== false) {
@@ -107,12 +119,17 @@ export function encodeScenario(assumptions: Assumptions, config: ModelConfig): s
   return bytesToBase64Url(new Uint8Array(bytes));
 }
 
-const BASE_LENGTH = 13;
+const BASE_LENGTH = 14;
 
 export function decodeScenario(text: string, config: ModelConfig): Assumptions | null {
   const bytes = base64UrlToBytes(text);
-  if (!bytes || bytes.length < BASE_LENGTH) return null;
-  if (bytes[0] !== SCENARIO_CODEC_VERSION) return null;
+  if (!bytes) return null;
+
+  const legacy = bytes[0] === LEGACY_VERSION;
+  if (!legacy && bytes[0] !== SCENARIO_CODEC_VERSION) return null;
+
+  const baseLength = legacy ? LEGACY_BASE_LENGTH : BASE_LENGTH;
+  if (bytes.length < baseLength) return null;
 
   const r = config.ranges;
   const flags = bytes[3]!;
@@ -127,7 +144,7 @@ export function decodeScenario(text: string, config: ModelConfig): Assumptions |
   if (!anchor) return null;
 
   const hasGeopolitics = (flags & 0b1000) !== 0;
-  if (hasGeopolitics && bytes.length < BASE_LENGTH + COMPONENTS.length) return null;
+  if (hasGeopolitics && bytes.length < baseLength + COMPONENTS.length) return null;
 
   const mask = bytes[11]! | (bytes[12]! << 8);
   const triggers = new Set<string>();
@@ -147,10 +164,13 @@ export function decodeScenario(text: string, config: ModelConfig): Assumptions |
     dep0Pct: dequantize(bytes[8]!, r.dep0Pct),
     tauYears: dequantize(bytes[9]!, r.tauYears),
     adaptWindowYears: dequantize(bytes[10]!, r.adaptWindowYears),
+    // В первой версии изгиба не было, и прямая — ровно то, что означали
+    // выпущенные тогда ссылки.
+    bendPctPerYear: legacy ? 0 : dequantize(bytes[13]!, r.bendPctPerYear),
     anchorId: anchor.id,
     triggers,
     geopolitics: hasGeopolitics
-      ? { weights: bytesToWeights(bytes, BASE_LENGTH) }
+      ? { weights: bytesToWeights(bytes, baseLength) }
       : false,
   };
 }

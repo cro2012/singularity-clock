@@ -9,7 +9,7 @@
  * после того, как способность технически появилась.
  */
 
-import { dateForLog2Horizon, log2HorizonAt, type Anchor } from './horizon.ts';
+import { dateForLog2Horizon, log2HorizonAt, type Trend } from './horizon.ts';
 import { clamp, YEAR_MS } from './time.ts';
 import type {
   Assumptions,
@@ -21,7 +21,7 @@ import type {
 } from './types.ts';
 
 export interface ItemContext {
-  readonly anchor: Anchor;
+  readonly trend: Trend;
   readonly assumptions: Assumptions;
   readonly effective: EffectiveParams;
   readonly constants: ModelConstants;
@@ -40,19 +40,21 @@ function lagMs(item: Item, ctx: ItemContext): number {
 }
 
 export function itemResult(item: Item, kind: ItemKind, ctx: ItemContext): ItemResult {
-  const { anchor, constants, now } = ctx;
-  const doublingDays = ctx.effective.doublingDays;
+  const { trend, constants, now } = ctx;
 
   const log2Required = requiredLog2(item, ctx);
-  const capabilityDate = dateForLog2Horizon(log2Required, anchor, doublingDays);
+  // При положительном изгибе горизонт упирается в плато, и часть строк не
+  // закрывается никогда. Это содержательный ответ, а не сбой: +Infinity
+  // доезжает до интерфейса и печатается как «never in this model».
+  const capabilityDate = dateForLog2Horizon(log2Required, trend);
   const lag = lagMs(item, ctx);
-  const date = capabilityDate + lag;
+  const date = Number.isFinite(capabilityDate) ? capabilityDate + lag : null;
 
   // Полоса прогресса: 12 удвоений «разбега» до требования, затем оставшийся
   // хвост съедает лаг внедрения. Иначе строка с большим лагом упиралась бы
   // в 100% задолго до того, как область реально закрыта.
   const window = constants.progressWindowDoublings;
-  let progress = (log2HorizonAt(now, anchor, doublingDays) - log2Required + window) / window;
+  let progress = (log2HorizonAt(now, trend) - log2Required + window) / window;
 
   if (progress >= 1 && lag > 0) {
     const passed = clamp((now - capabilityDate) / lag, 0, 1);
@@ -65,6 +67,6 @@ export function itemResult(item: Item, kind: ItemKind, ctx: ItemContext): ItemRe
     kind,
     date,
     progress: clamp(progress, 0, 1),
-    passed: date <= now,
+    passed: date !== null && date <= now,
   };
 }

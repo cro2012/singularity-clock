@@ -14,7 +14,7 @@
  * (ADR-0002). Сложение интенсивностей гарантирует вложенность арифметически.
  */
 
-import { dateForLog2Horizon, log2HorizonAt, type Anchor } from './horizon.ts';
+import { dateForLog2Horizon, log2HorizonAt, type Trend } from './horizon.ts';
 import { YEAR_MS, yearAnchor, yearOf } from './time.ts';
 import type {
   Assumptions,
@@ -27,7 +27,7 @@ import type {
 } from './types.ts';
 
 export interface RiskContext {
-  readonly anchor: Anchor;
+  readonly trend: Trend;
   readonly assumptions: Assumptions;
   readonly effective: EffectiveParams;
   readonly config: ModelConfig;
@@ -61,19 +61,20 @@ export function cumulativeHazard(
   years: readonly number[],
   ctx: RiskContext,
 ): readonly number[] {
-  const { anchor, assumptions, effective, config, now } = ctx;
+  const { trend, assumptions, effective, config, now } = ctx;
   const { constants } = config;
-  const doublingDays = effective.doublingDays;
 
   const log2Threshold = Math.log2(tier.capabilityThresholdMinutes);
 
   // Насыщение способности: момент, когда горизонт превысит порог в
   // saturationMultiple раз, то есть c ≈ 0,92. После него мир начинает
   // приспосабливаться и риск затухает с периодом «окна уязвимости».
+  // На плато насыщение не наступает никогда, и дата уходит в +Infinity.
+  // Затухание тогда тождественно равно единице — мир не начинает
+  // приспосабливаться к способности, которой не появилось.
   const saturationDate = dateForLog2Horizon(
     log2Threshold + Math.log2(constants.saturationMultiple),
-    anchor,
-    doublingDays,
+    trend,
   );
 
   const intent = tier.maliceWeight * effective.malice + tier.controlFailWeight * effective.alignFail;
@@ -89,7 +90,7 @@ export function cumulativeHazard(
     // Способность: логистика от логарифма горизонта относительно порога.
     // На краях даёт ровно 0 или 1 без NaN — экспонента насыщается.
     const capability =
-      1 / (1 + Math.exp(-constants.capabilitySlope * (log2HorizonAt(t, anchor, doublingDays) - log2Threshold)));
+      1 / (1 + Math.exp(-constants.capabilitySlope * (log2HorizonAt(t, trend) - log2Threshold)));
 
     // Подключённость к критическим системам: насыщающаяся экспонента от сегодня.
     const elapsedYears = Math.max(0, (t - now) / YEAR_MS);

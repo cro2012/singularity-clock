@@ -79,7 +79,16 @@ const day = (iso: string) =>
     <h2>Extrapolation</h2>
     <p>
       <code>D_eff = doubling time × friction × Π(trigger multipliers)</code><br />
-      <code>log₂H(t) = log₂H₀ + (t − t₀) / D_eff</code>
+      <code>D(u) = D_eff × r^(u / Y), r = 1 + bend/100, Y = days in a year</code><br />
+      <code>log₂H(t) = log₂H₀ + Y × (1 − r^(−τ/Y)) / (D_eff × ln r), τ = t − t₀ in days</code>
+    </p>
+    <p>
+      At bend zero the second expression collapses to the first divided by D_eff — a straight
+      line on a log scale, which is what this page assumed until version 1.2.0. A positive bend
+      makes the sum converge: the horizon approaches a ceiling of Y / (D_eff × ln r) doublings
+      above the anchor, and any threshold above that ceiling is never reached in any year. Try it
+      and watch the global risk go <i>up</i> — a slower trend keeps the window of vulnerability
+      open longer rather than closing it.
     </p>
     <p>
       The line is anchored at the METR point you selected, not fitted to history. Two consequences look like

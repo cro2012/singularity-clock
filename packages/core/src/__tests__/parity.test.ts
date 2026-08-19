@@ -48,7 +48,13 @@ const CONFIG = prototypeMode(BASE);
 const ANCHOR = CONFIG.anchors[0]!;
 const T0 = ANCHOR.at;
 const H0 = ANCHOR.horizonMinutes;
-const PRESETS = Object.entries(BASE.presets);
+// В прототипе изгиба тренда не было, поэтому паритет проверяется на прямой:
+// ненулевой изгиб — сознательная правка (ADR-0007) ровно того же рода, что
+// вложенные ступени и логарифмические часы, и доказательство верности
+// переноса не должно от неё ломаться.
+const PRESETS = Object.entries(BASE.presets).map(
+  ([name, preset]) => [name, { ...preset, bendPctPerYear: 0 }] as const,
+);
 
 /** Относительное расхождение. Абсолютный ноль сравнивается напрямую. */
 function relativeDiff(a: number, b: number): number {

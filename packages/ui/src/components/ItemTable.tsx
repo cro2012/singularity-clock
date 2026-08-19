@@ -62,7 +62,11 @@ function ItemRow({
   const t = MESSAGES[locale];
   const [open, setOpen] = useState(false);
   const name = copy?.name ?? row.id;
-  const year = new Date(row.date).getUTCFullYear();
+  // При изгибе тренда часть строк не закрывается никогда: горизонт упирается
+  // в плато ниже их порога. Это содержательный ответ, и таблица обязана уметь
+  // его показать, а не сломаться на форматировании.
+  const eta = row.date === null ? t.neverInModel : formatMonthYear(locale, row.date);
+  const year = row.date === null ? null : new Date(row.date).getUTCFullYear();
 
   return (
     <div className={`row-wrap${open ? ' open' : ''}`}>
@@ -85,9 +89,9 @@ function ItemRow({
           />
         </span>
         <span className={`eta${row.passed ? ' done' : ''}`}>
-          {row.passed
+          {row.passed && year !== null
             ? `✓ ${formatNumber(locale, year, { useGrouping: false })}`
-            : formatMonthYear(locale, row.date)}
+            : eta}
         </span>
       </button>
 
@@ -111,11 +115,12 @@ function ItemRow({
           </dl>
           <p>{copy?.rationale}</p>
           <p className="estimate">
-            {interpolate(t.items.estimateNote, {
-              date: formatMonthYear(locale, row.date),
-              relative:
-                row.date <= now ? t.items.inThePast : t.items.inTheFuture,
-            })}
+            {row.date === null
+              ? t.items.neverNote
+              : interpolate(t.items.estimateNote, {
+                  date: formatMonthYear(locale, row.date),
+                  relative: row.date <= now ? t.items.inThePast : t.items.inTheFuture,
+                })}
           </p>
         </div>
       ) : null}

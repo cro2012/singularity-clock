@@ -95,6 +95,8 @@ export const en = {
     progressValue: 'Bar',
     estimateNote:
       'Estimate: {date}, {relative}. The coefficient and the lag are expert judgement, not measurement.',
+    neverNote:
+      'Not reached in this scenario at all. With a positive trend bend the horizon converges on a ceiling, and this row sits above it, so no amount of waiting gets there.',
     inThePast: 'already behind us',
     inTheFuture: 'still ahead',
     functionsTitle: 'By kind of cognitive activity',
@@ -349,6 +351,11 @@ export const en = {
       label: 'Horizon doubling time',
       unit: 'd',
       hint: 'METR fits 188 days across its full sample since 2019 and 129 days counting from 2023, with a confidence interval of 104\u2013158 days; that fit leaves out the points METR considers unreliable. This is the only slider continuing a measurement rather than stating an opinion, and it moves the date far more than the choice of anchor does.',
+    },
+    bendPctPerYear: {
+      label: 'Trend bend',
+      unit: '%/yr',
+      hint: 'How much the doubling time itself changes each year. Zero is a straight line on a log scale, which is what every extrapolation here assumed until now. Positive means progress runs out of road: the horizon converges on a ceiling and rows above it are never reached. Worth trying and watching what happens — slowing the trend pushes the dates out but pushes global risk to 2100 UP, because the window of vulnerability stays open longer instead of closing. METR fits a straight line and takes no position on this.',
     },
     friction: {
       label: 'Real-world friction',

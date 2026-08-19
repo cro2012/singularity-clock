@@ -179,7 +179,7 @@ export function SingularityScreen({ config, locale, now }: ScreenProps) {
       <AnchorPicker config={config} assumptions={assumptions} locale={locale} store={store} />
 
       <ControlGroup title={t.controlsSingularity}>
-        {(['doublingDays', 'friction', 'singularityPct'] as const).map((id) => (
+        {(['doublingDays', 'bendPctPerYear', 'friction', 'singularityPct'] as const).map((id) => (
           <SliderFor
             key={id}
             id={id}
@@ -218,6 +218,7 @@ export function SingularityScreen({ config, locale, now }: ScreenProps) {
         effective={model.effective}
         targetMinutes={assumptions.targetMinutes}
         anchorId={assumptions.anchorId}
+        bendPctPerYear={assumptions.bendPctPerYear}
         locale={locale}
         now={clock}
       />
@@ -526,6 +527,7 @@ const RISK_ROWS: readonly { tier: TierId; year: number }[] = [
 
 const COMPARED: readonly RangedAssumption[] = [
   'doublingDays',
+  'bendPctPerYear',
   'friction',
   'singularityPct',
   'malicePct',

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { anchorFrom, anchorOptionFor, dateForLog2Horizon, log2HorizonAt, YEAR_MS } from '@sc/core';
+import type { Trend } from '@sc/core';
 import type { EffectiveParams, ModelConfig, TargetMinutes } from '@sc/core';
 import { formatHorizon, formatMonthYear, formatNumber, interpolate, MESSAGES } from '@sc/i18n';
 import type { Locale } from '@sc/i18n';
@@ -23,6 +24,8 @@ export interface HorizonChartProps {
   readonly targetMinutes: TargetMinutes;
   /** Опорная точка METR, выбранная в сценарии. */
   readonly anchorId: string;
+  /** Изгиб тренда: на сколько процентов время удвоения меняется за год. */
+  readonly bendPctPerYear: number;
   readonly locale: Locale;
   readonly now: number;
 }
@@ -32,23 +35,34 @@ export function HorizonChart({
   effective,
   targetMinutes,
   anchorId,
+  bendPctPerYear,
   locale,
   now,
 }: HorizonChartProps) {
   const t = MESSAGES[locale];
   const metrAnchor = anchorOptionFor(config, anchorId);
-  const anchor = useMemo(
-    () => anchorFrom(metrAnchor.at, metrAnchor.horizonMinutes),
-    [metrAnchor.at, metrAnchor.horizonMinutes],
-  );
   const D = effective.doublingDays;
+  const trend: Trend = useMemo(
+    () => ({
+      anchor: anchorFrom(metrAnchor.at, metrAnchor.horizonMinutes),
+      doublingDays: D,
+      bendPctPerYear,
+    }),
+    [metrAnchor.at, metrAnchor.horizonMinutes, D, bendPctPerYear],
+  );
   const factor = effective.reliabilityFactor;
 
   const x0 = Date.UTC(2023, 0, 1);
   const longest = config.targets[config.targets.length - 1]!.minutes * factor;
+  // На плато дата самого длинного порога уходит в бесконечность, и правая
+  // граница окна должна остаться конечной.
+  const longestDate = dateForLog2Horizon(Math.log2(longest), trend);
   const x1 = Math.min(
     Date.UTC(2060, 0, 1),
-    Math.max(now + 2 * YEAR_MS, dateForLog2Horizon(Math.log2(longest), anchor, D) + 1.2 * YEAR_MS),
+    Math.max(
+      now + 2 * YEAR_MS,
+      Number.isFinite(longestDate) ? longestDate + 1.2 * YEAR_MS : 0,
+    ),
   );
 
   const X = (time: number) => L + ((time - x0) / (x1 - x0)) * (W - L - R);
@@ -61,9 +75,9 @@ export function HorizonChart({
     () =>
       Array.from({ length: SAMPLES }, (_, i) => {
         const time = x0 + ((x1 - x0) * i) / (SAMPLES - 1);
-        return { time, log2: log2HorizonAt(time, anchor, D) };
+        return { time, log2: log2HorizonAt(time, trend) };
       }),
-    [anchor, D, x0, x1],
+    [trend, x0, x1],
   );
 
   const crosshair = useCrosshair({ count: SAMPLES, plot: { left: L, right: W - R, width: W } });
@@ -75,7 +89,7 @@ export function HorizonChart({
       .map((s, i) => `${i === 0 ? 'M' : 'L'} ${X(s.time).toFixed(1)} ${yLog2(s.log2).toFixed(1)}`)
       .join(' ');
 
-  const targetDate = dateForLog2Horizon(Math.log2(targetMinutes * factor), anchor, D);
+  const targetDate = dateForLog2Horizon(Math.log2(targetMinutes * factor), trend);
   const yearStep = (x1 - x0) / YEAR_MS > 22 ? 5 : (x1 - x0) / YEAR_MS > 11 ? 2 : 1;
   const gridYears: number[] = [];
   for (let y = 2024; y <= 2060; y += yearStep) {
@@ -104,7 +118,7 @@ export function HorizonChart({
     const points = config.metrPoints.filter((p) => new Date(p.at).getUTCFullYear() === year);
     return [
       formatNumber(locale, year, { useGrouping: false }),
-      formatHorizon(locale, Math.pow(2, Math.min(log2HorizonAt(time, anchor, D), 1023))),
+      formatHorizon(locale, Math.pow(2, Math.min(log2HorizonAt(time, trend), 1023))),
       points.length > 0
         ? points.map((p) => `${p.model} · ${formatHorizon(locale, p.horizonMinutes)}`).join(', ')
         : '—',

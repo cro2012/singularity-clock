@@ -30,6 +30,11 @@ export type ComponentWeights = Readonly<Record<ComponentId, number>>;
 /** Всё, что двигает пользователь. */
 export interface Assumptions {
   readonly doublingDays: number;
+  /**
+   * На сколько процентов время удвоения меняется за год.
+   * Ноль — прямая в логарифме; больше нуля — замедление вплоть до плато.
+   */
+  readonly bendPctPerYear: number;
   readonly friction: number;
   readonly targetMinutes: TargetMinutes;
   readonly reliability: Reliability;
@@ -158,6 +163,7 @@ export interface Range {
 /** Числовые допущения, у которых есть ползунок. */
 export type RangedAssumption =
   | 'doublingDays'
+  | 'bendPctPerYear'
   | 'friction'
   | 'singularityPct'
   | 'malicePct'
@@ -226,7 +232,15 @@ export interface ItemResult {
    * отраслей: по одному id строку не отличить, а тексты у них разные.
    */
   readonly kind: ItemKind;
-  readonly date: number;
+  /**
+   * Дата обгона или `null`, если в этом сценарии она не наступает никогда.
+   *
+   * Null, а не +Infinity: при изгибе тренда горизонт упирается в плато, и
+   * недостижимость — обычный исход, а не край диапазона. Тип обязан заставить
+   * каждого потребителя её обработать, иначе `new Date(Infinity)` роняет
+   * форматирование в первом же месте, где о ней забыли.
+   */
+  readonly date: number | null;
   readonly progress: number;
   readonly passed: boolean;
 }

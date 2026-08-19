@@ -7,7 +7,7 @@
  */
 
 import { effectiveParams } from './effective.ts';
-import { anchorFrom, anchorOptionFor } from './horizon.ts';
+import { anchorFrom, anchorOptionFor, type Trend } from './horizon.ts';
 import { itemResult, type ItemContext } from './items.ts';
 import { medianCrossing, probabilityAt, tierCurves, type RiskContext } from './risk.ts';
 import { raceIndex } from './countries.ts';
@@ -53,14 +53,19 @@ export function computeModel(args: ComputeArgs): ModelResult {
 
   const effective = effectiveParams(assumptions, config, race);
   const metrAnchor = anchorOptionFor(config, assumptions.anchorId);
-  const anchor = anchorFrom(metrAnchor.at, metrAnchor.horizonMinutes);
+  const trend: Trend = {
+    anchor: anchorFrom(metrAnchor.at, metrAnchor.horizonMinutes),
+    doublingDays: effective.doublingDays,
+    bendPctPerYear: assumptions.bendPctPerYear,
+  };
 
   // --- строки разбивки ---
-  const itemCtx: ItemContext = { anchor, assumptions, effective, constants, now };
+  const itemCtx: ItemContext = { trend, assumptions, effective, constants, now };
   const items: readonly ItemResult[] = [
     ...config.functions.map((item) => itemResult(item, 'function', itemCtx)),
     ...config.industries.map((item) => itemResult(item, 'industry', itemCtx)),
-  ].sort((a, b) => a.date - b.date);
+    // Недостижимые строки уходят в конец: «никогда» — это позже всего.
+  ].sort((a, b) => (a.date ?? Infinity) - (b.date ?? Infinity));
 
   // --- сингулярность: перцентиль по датам, а не отдельная формула ---
   // Головной счётчик выводится из разбивки, поэтому в него всегда можно ткнуть
@@ -73,7 +78,7 @@ export function computeModel(args: ComputeArgs): ModelResult {
   const passedShare = items.length > 0 ? items.filter((i) => i.passed).length / items.length : 0;
 
   // --- лестница катастроф ---
-  const riskCtx: RiskContext = { anchor, assumptions, effective, config, now };
+  const riskCtx: RiskContext = { trend, assumptions, effective, config, now };
   const { tiers, anyLevel } = tierCurves(riskCtx);
 
   // --- математическое ожидание ---

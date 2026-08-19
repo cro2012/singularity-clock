@@ -50,7 +50,12 @@ function everyNumber(result: ModelResult): number[] {
   ];
   if (result.singularity.date !== null) out.push(result.singularity.date);
   if (result.anyLevel.medianDate !== null) out.push(result.anyLevel.medianDate);
-  for (const item of result.items) out.push(item.date, item.progress);
+  for (const item of result.items) {
+    // Недостижимая дата — это null, и её отсутствие в списке не поблажка:
+    // проверяется, что число не превратилось в NaN, а null числом и не был.
+    if (item.date !== null) out.push(item.date);
+    out.push(item.progress);
+  }
   for (const tier of result.tiers) {
     if (tier.medianDate !== null) out.push(tier.medianDate);
     for (const p of tier.curve) out.push(p.p);
@@ -142,6 +147,7 @@ const assumptionsArb = (): fc.Arbitrary<Assumptions> =>
   fc
     .record({
       doublingDays: fc.double({ ...CONFIG.ranges.doublingDays, noNaN: true }),
+      bendPctPerYear: fc.double({ ...CONFIG.ranges.bendPctPerYear, noNaN: true }),
       friction: fc.double({ ...CONFIG.ranges.friction, noNaN: true }),
       singularityPct: fc.double({ ...CONFIG.ranges.singularityPct, noNaN: true }),
       malicePct: fc.double({ ...CONFIG.ranges.malicePct, noNaN: true }),
@@ -242,8 +248,10 @@ describe('свойства', () => {
           const required = Math.log2(item.m * a.targetMinutes * factor);
           if (required <= anchorLog2) continue;
 
+          // Недостижимая дата участвует в сравнении как «позже всего»:
+          // если строка перестала закрываться, она точно не уехала раньше.
           const dateOf = (r: ModelResult, id: string) =>
-            r.items.filter((x) => x.id === id).map((x) => x.date);
+            r.items.filter((x) => x.id === id).map((x) => x.date ?? Infinity);
           const wasDates = dateOf(before, item.id);
           const nowDates = dateOf(after, item.id);
           for (let i = 0; i < wasDates.length; i++) {
@@ -447,5 +455,64 @@ describe('часы судного дня', () => {
     };
     const { doomsday } = computeModel({ assumptions: CONFIG.presets.base!, config: linear, now: NOW });
     expect(doomsday.position).toBeCloseTo(doomsday.pGlobal, 12);
+  });
+});
+
+describe('изгиб тренда (ADR-0007)', () => {
+  const bend = (value: number, extra: Partial<Assumptions> = {}): ModelResult =>
+    computeModel({
+      assumptions: { ...CONFIG.presets.base!, bendPctPerYear: value, ...extra },
+      config: CONFIG,
+      now: NOW,
+    });
+
+  it('нулевой изгиб не меняет ни одного числа', () => {
+    // Единственная гарантия, которая позволяет держать пресеты на нуле и не
+    // пересчитывать все зафиксированные выходы при каждой правке формулы.
+    expect(everyNumber(bend(0))).toEqual(
+      everyNumber(computeModel({ assumptions: CONFIG.presets.base!, config: CONFIG, now: NOW })),
+    );
+  });
+
+  it('замедление отодвигает даты, ускорение приближает', () => {
+    const dates = (result: ModelResult) => result.items.map((i) => i.date ?? Infinity).sort();
+    const fast = dates(bend(-8));
+    const flat = dates(bend(0));
+    const slow = dates(bend(8));
+    for (let i = 0; i < flat.length; i++) {
+      expect(fast[i]!).toBeLessThanOrEqual(flat[i]! + SECOND);
+      expect(slow[i]!).toBeGreaterThanOrEqual(flat[i]! - SECOND);
+    }
+  });
+
+  it('на большом замедлении часть строк не закрывается никогда, и это не NaN', () => {
+    const result = bend(CONFIG.ranges.bendPctPerYear.max);
+    const unreachable = result.items.filter((i) => i.date === null);
+    expect(unreachable.length).toBeGreaterThan(0);
+    for (const value of everyNumber(result)) expect(Number.isNaN(value)).toBe(false);
+    // Недостижимая строка не может считаться пройденной, а её полоса
+    // прогресса обязана остаться в пределах шкалы.
+    for (const item of unreachable) {
+      expect(item.passed).toBe(false);
+      expect(item.progress).toBeGreaterThanOrEqual(0);
+      expect(item.progress).toBeLessThan(1);
+    }
+  });
+
+  it('недостижимые строки стоят в конце списка', () => {
+    const items = bend(CONFIG.ranges.bendPctPerYear.max).items;
+    const firstNull = items.findIndex((i) => i.date === null);
+    expect(firstNull).toBeGreaterThan(0);
+    expect(items.slice(firstNull).every((i) => i.date === null)).toBe(true);
+  });
+
+  it('замедление растягивает окно уязвимости, а не закрывает его', () => {
+    // Контринтуитивно и потому проверяется явно: пока порог остаётся
+    // достижимым, более медленный тренд даёт БОЛЬШИЙ накопленный риск к 2100,
+    // потому что затухание начинается позже. Если это свойство однажды
+    // изменится, подпись к ползунку станет враньём.
+    const flat = probabilityAt(bend(0).tiers[2]!.ownCurve, 2100);
+    const slow = probabilityAt(bend(8).tiers[2]!.ownCurve, 2100);
+    expect(slow).toBeGreaterThan(flat);
   });
 });

@@ -34,9 +34,12 @@ describe('base64url', () => {
 });
 
 describe('кодек сценария', () => {
-  it('базовый сценарий укладывается в 18 символов', () => {
+  it('базовый сценарий укладывается в 19 символов', () => {
+    // Было 18; изгиб тренда добавил байт, и base64url вырос на символ.
+    // Порог существует ради того, чтобы ссылка не переносилась в мессенджере,
+    // и запас до этого ещё огромный — но расти молча она не должна.
     const encoded = encodeScenario(CONFIG.presets.base!, CONFIG);
-    expect(encoded.length).toBeLessThanOrEqual(18);
+    expect(encoded.length).toBeLessThanOrEqual(19);
   });
 
   it('круговое преобразование сохраняет все пресеты в точности', () => {
@@ -50,6 +53,7 @@ describe('кодек сценария', () => {
     const arb: fc.Arbitrary<Assumptions> = fc
       .record({
         doublingDays: fc.integer(CONFIG.ranges.doublingDays),
+        bendPctPerYear: fc.integer(CONFIG.ranges.bendPctPerYear),
         friction: fc.integer({ min: 0, max: 35 }).map((n) => Number((0.5 + n * 0.1).toFixed(1))),
         singularityPct: fc.integer({ min: 2, max: 19 }).map((n) => n * 5),
         malicePct: fc.integer(CONFIG.ranges.malicePct),
@@ -126,12 +130,12 @@ describe('закреплённые ссылки', () => {
     );
     expect(encoded).toMatchInlineSnapshot(`
       {
-        "anxious": "ATIIAggyKB4UBiMAAA",
-        "base": "AUUNAggoFC0MChQAAA",
-        "doomsday": "AR0FAggySwoUBDcAAA",
-        "optimist": "AYgZBggUBVAKEgoAAA",
-        "skeptic": "Ab4eBggjAzwIFwcAAA",
-        "survey": "AUUNAggoAy0MChQAAA",
+        "anxious": "AjIIAggyKB4UBiMAAAo",
+        "base": "AkUNAggoFC0MChQAAAo",
+        "doomsday": "Ah0FAggySwoUBDcAAAo",
+        "optimist": "AogZBggUBVAKEgoAAAo",
+        "skeptic": "Ar4eBggjAzwIFwcAAAo",
+        "survey": "AkUNAggoAy0MChQAAAo",
       }
     `);
   });
