@@ -18,7 +18,8 @@
     "gen:css": "pnpm --filter @sc/ui gen:css",
     "check:core-deps": "node scripts/check-core-deps.mjs",
     "check:generated": "pnpm gen:css && git diff --exit-code -- packages/ui/src/tokens.generated.css",
-    "check": "pnpm lint && pnpm check:core-deps && pnpm typecheck && pnpm test"
+    "check": "pnpm lint && pnpm check:core-deps && pnpm typecheck && pnpm test",
+    "check:language": "node scripts/check-language.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",

@@ -1,7 +1,7 @@
 {
   "provisional": true,
   "checkedAt": null,
-  "note": "ЧЕРНОВИК. Баллы расставлены как правдоподобная заготовка под структуру рейтинга и НЕ выверены по источникам. До сверки раздел обязан показывать предупреждение, а связь с моделью риска остаётся выключенной по умолчанию. Заменить цифрами из отчётов и проставить checkedAt.",
+  "note": "DRAFT. These scores are a plausible placeholder for the structure of the ranking and have NOT been reconciled with the sources. Until they are, the section must show a warning and the link to the risk model must stay off by default. Replace with figures from the reports and set checkedAt.",
   "sources": [
     { "id": "hai", "title": "Stanford HAI · AI Index 2026", "url": "https://hai.stanford.edu/ai-index/2026-ai-index-report" },
     { "id": "tortoise", "title": "Tortoise · Global AI Index", "url": "https://www.tortoisemedia.com/data/global-ai" },

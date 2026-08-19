@@ -10,7 +10,8 @@
 import { CountriesScreen } from '@sc/ui';
 import type { Locale } from '@sc/i18n';
 import { MODEL_CONFIG } from '../model-config.ts';
-import { COUNTRY_DATASET } from '@sc/data/countries';
+// @ts-expect-error — виртуальный модуль, его создаёт плагин Vite на сборке.
+import { COUNTRY_DATASET } from 'virtual:country-dataset';
 
 export function Countries({ locale, now }: { locale: Locale; now: number }) {
   return <CountriesScreen config={MODEL_CONFIG} locale={locale} now={now} countries={COUNTRY_DATASET.countries} provisional={COUNTRY_DATASET.provisional} />;

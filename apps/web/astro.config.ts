@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import { modelConfigPlugin } from './model-config-plugin.ts';
 
 /**
  * Полностью статическая сборка. Модель считается на этапе сборки и попадает
@@ -13,5 +14,6 @@ export default defineConfig({
   // сайта, то есть боевой домен; запасное значение для локальной сборки.
   site: process.env.URL ?? 'https://aiapocalypse.now',
   integrations: [react(), sitemap()],
+  vite: { plugins: [modelConfigPlugin()] },
   build: { format: 'directory' },
 });

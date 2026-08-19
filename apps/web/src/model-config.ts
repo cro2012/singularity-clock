@@ -1,12 +1,13 @@
 /**
  * Конфиг модели для страниц.
  *
- * YAML инлайнится сборщиком как текст и разбирается на этапе сборки: если он
- * не пройдёт схему, упадёт сборка, а не страница у пользователя. Файловой
- * системы в рантайме нет — сайт статический.
+ * Разбирается и валидируется на сборке плагином model-config-plugin.ts:
+ * если YAML не пройдёт схему, упадёт сборка, а не страница у пользователя.
+ * В бандл попадает готовый объект, а не парсер YAML вместе с исходником.
  */
 
-import { parseModelConfig } from '@sc/data';
-import source from '@sc/data/config/model.v1.yaml?raw';
+// @ts-expect-error — виртуальный модуль, его создаёт плагин Vite на сборке.
+import { MODEL_CONFIG as VIRTUAL_CONFIG } from 'virtual:model-config';
+import type { ModelConfig } from '@sc/core';
 
-export const MODEL_CONFIG = parseModelConfig(source);
+export const MODEL_CONFIG: ModelConfig = VIRTUAL_CONFIG;

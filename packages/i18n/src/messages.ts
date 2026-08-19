@@ -98,6 +98,7 @@ export const en = {
     functionsTitle: 'By kind of cognitive activity',
     industriesTitle: 'By industry and profession',
     howComputed: 'How each row gets its date',
+    formula: 'date = t₀ + D · log₂(coefficient · threshold · reliability / H₀) + lag',
     formulaNote:
       "METR's horizon is measured on software engineering tasks. Everything else gets a difficulty coefficient relative to that base — how many times longer a chain of reasoning the domain demands — and a deployment lag in years: the time for hardware, capital, trust and regulators after the capability technically exists. The coefficients are the author's expert judgement. This is the weakest point of the whole construction, and it is exactly where you will most likely want to argue. That is the intent.",
   },
@@ -111,6 +112,8 @@ export const en = {
     nestedNote:
       'Each rung is the probability of an event at that level or worse, so the bottom rung always sits above the top one. 34% local includes the 3% global, it does not replace it.',
     formulaTitle: 'The risk intensity formula',
+    formula:
+      'λᵢ(t) = (malice·wᵢ + control failure·uᵢ) · cᵢ(t) · d(t) · (1 − mitigation·eᵢ) · aᵢ(t)',
     formulaNote:
       'cᵢ(t) is capability: a logistic function of the log horizon relative to the rung threshold. d(t) is wiring, a saturating exponential. eᵢ is the mitigation ceiling: 0.80 local, 0.60 regional, 0.45 global. aᵢ(t) is decay after capability saturation. Result: P = 1 − exp(−∫λ dt), integrated in yearly steps.',
     formulaHonesty:

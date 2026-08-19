@@ -238,7 +238,7 @@ export function SingularityScreen({ config, locale, now }: ScreenProps) {
         <summary>{t.items.howComputed}</summary>
         <div className="body">
           <p>
-            <code>дата = t₀ + D · log₂(коэф · порог · надёжность / H₀) + лаг</code>
+            <code>{t.items.formula}</code>
           </p>
           <p>{t.items.formulaNote}</p>
         </div>
@@ -308,9 +308,7 @@ export function CatastropheScreen({ config, locale, now }: ScreenProps) {
         <summary>{t.tiers.formulaTitle}</summary>
         <div className="body">
           <p>
-            <code>
-              λᵢ(t) = (умысел·wᵢ + отказ контроля·uᵢ) · cᵢ(t) · d(t) · (1 − митигация·eᵢ) · aᵢ(t)
-            </code>
+            <code>{t.tiers.formula}</code>
           </p>
           <p>{t.tiers.formulaNote}</p>
           <p>{t.tiers.formulaHonesty}</p>
